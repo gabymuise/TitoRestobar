@@ -28,6 +28,13 @@ public class VistaProducto extends javax.swing.JPanel {
                txtCantidadProducto.setEnabled(false);
     }
 
+   
+     public void cargarProductos() {
+    try {
+        // Conecta a la base de datos (asegúrate de tener el controlador JDBC cargado)
+        Connection conn = DriverManager.getConnection("jdbc:mysql://localhost:3306/titorestobar", "root", "123456");
+
+
     public void cargarProductos() {
         try {
             // Conecta a la base de datos (asegúrate de tener el controlador JDBC cargado)
@@ -348,6 +355,7 @@ public class VistaProducto extends javax.swing.JPanel {
                 return; // Salir del método si hay campos vacíos
             }
 
+
             String nombre = txtNombreProducto.getText();
             String descripcion = txtDescripcionProducto.getText();
             float precio = Float.parseFloat(txtCostoProducto.getText());
@@ -360,6 +368,12 @@ public class VistaProducto extends javax.swing.JPanel {
             } catch (SQLException ex) {
                 Logger.getLogger(VistaProducto.class.getName()).log(Level.SEVERE, null, ex);
             }
+
+        if (!nombre.isEmpty()) {
+            ControladoraProducto controladoraProducto = new ControladoraProducto(); 
+            Producto producto = controladoraProducto.CrearProducto(nombre, descripcion, precio, costo, elaboracion);
+        }
+
 
             txtNombreProducto.setText("");
             txtDescripcionProducto.setText("");

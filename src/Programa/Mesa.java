@@ -1,7 +1,6 @@
 package Programa;
 
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
 public class Mesa {
@@ -11,47 +10,40 @@ public class Mesa {
 
     public Mesa(String nombre) {
         this.nombre = nombre;
+        this.pedidos = new ArrayList<>();
     }
 
     public int getId() {
         return id;
     }
 
-    public String getNombre() {
-        return nombre;
-    }
-
     public void setId(int id) {
         this.id = id;
+    }
+
+    public String getNombre() {
+        return nombre;
     }
 
     public void setNombre(String nombre) {
         this.nombre = nombre;
     }
 
-    public void setPedidos(List<Pedido> pedidos) {
-        this.pedidos = pedidos;
-    }
-    
-
     public List<Pedido> getPedidos() {
         return pedidos;
     }
 
-    public Pedido CrearPedido(Date fechaHoraApertura, List<Item> items) {
-        Pedido nuevoPedido = new Pedido(fechaHoraApertura, items);
-        pedidos.add(nuevoPedido);
-        return nuevoPedido;
+    public void AbrirPedido(Pedido pedido) {
+        pedidos.add(pedido);
     }
 
     public Pedido VerPedido() {
-        // Implementa la lógica para obtener el pedido activo o seleccionado
-        return null;
+        return pedidos.isEmpty() ? null : pedidos.get(pedidos.size() - 1);
     }
 
-    public void EliminarPedido(Pedido pedido) {
+    public void CerrarPedido() {
+        if (!pedidos.isEmpty()) {
+            pedidos.remove(pedidos.size() - 1);
+        }
     }
-
-    
-
 }

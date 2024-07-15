@@ -10,33 +10,31 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class DAOMesa {
+    private static final String SERVIDOR = "localhost";
+    private static final String PUERTO = "3306"; // Puerto predeterminado de MySQL
+    private static final String USUARIO = "root";
+    private static final String PASSWORD = "123456";
+    private static final String BASE_DE_DATOS = "titorestobar";
+    private static final String CADENA_CONEXION = "jdbc:mysql://" + SERVIDOR + ":" + PUERTO + "/" + BASE_DE_DATOS;
+
     private Connection conexion;
 
     public DAOMesa() {
         try {
-            conexion = Conectar();
+            this.conexion = Conectar();
         } catch (SQLException e) {
             e.printStackTrace();
         }
     }
 
-    public Connection Conectar() throws SQLException {
-        String servidor = "localhost";
-        String puerto = "3306"; // Puerto predeterminado de MySQL
-        String usuario = "root";
-        String password = "123456";
-        String baseDeDatos = "titorestobar";
-
-        String cadenaConexion = "jdbc:mysql://" + servidor + ":" + puerto + "/" + baseDeDatos;
-        Connection conexionDb = DriverManager.getConnection(cadenaConexion, usuario, password);
-
-        return conexionDb;
+    private Connection Conectar() throws SQLException {
+        return DriverManager.getConnection(CADENA_CONEXION, USUARIO, PASSWORD);
     }
 
     public List<Mesa> listarMesas() throws SQLException {
         List<Mesa> lista = new ArrayList<>();
-
         String consulta = "SELECT * FROM mesas";
+
         try (PreparedStatement comando = conexion.prepareStatement(consulta);
              ResultSet lectura = comando.executeQuery()) {
 
@@ -57,7 +55,7 @@ public class DAOMesa {
         String consulta = "INSERT INTO mesas (nombre) VALUES (?)";
         try (PreparedStatement comando = conexion.prepareStatement(consulta)) {
             comando.setString(1, mesa.getNombre());
-            comando.executeUpdate(); // Ejecuta la consulta
+            comando.executeUpdate();
         }
     }
 
@@ -65,13 +63,15 @@ public class DAOMesa {
         String consulta = "DELETE FROM mesas WHERE nombre = ?";
         try (PreparedStatement comando = conexion.prepareStatement(consulta)) {
             comando.setString(1, nombre);
-            comando.executeUpdate(); // Ejecuta la consulta
+            comando.executeUpdate();
         }
     }
 
     public void cerrarConexion() {
         try {
-            conexion.close();
+            if (conexion != null && !conexion.isClosed()) {
+                conexion.close();
+            }
         } catch (SQLException e) {
             e.printStackTrace();
         }

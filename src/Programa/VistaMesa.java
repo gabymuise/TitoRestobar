@@ -178,11 +178,7 @@ public class VistaMesa extends javax.swing.JPanel {
         String nombre = txtNombreMesa.getText();
 
         if (!nombre.isEmpty()) {
-            try {
-                controladoraMesa.CrearMesa(nombre); 
-            } catch (SQLException ex) {
-                Logger.getLogger(VistaMesa.class.getName()).log(Level.SEVERE, null, ex);
-            }
+            controladoraMesa.CrearMesa(nombre);
             txtNombreMesa.setText("");
             CargarListaMesa();
         }
@@ -196,15 +192,10 @@ public class VistaMesa extends javax.swing.JPanel {
 
         ControladoraMesa controladoraMesa = new ControladoraMesa();
 
-        try {
-            controladoraMesa.EliminarMesa(nombreMesa);
-
-            DefaultListModel<String> modelo = (DefaultListModel<String>) ListMesa.getModel();
-            modelo.remove(indiceSeleccionado);
-            JOptionPane.showMessageDialog(this, "Mesa eliminada correctamente.");
-        } catch (SQLException e) {
-            JOptionPane.showMessageDialog(this, "Error al eliminar la mesa.", "Error", JOptionPane.ERROR_MESSAGE);
-        }
+        controladoraMesa.EliminarMesa(nombreMesa);
+        DefaultListModel<String> modelo = (DefaultListModel<String>) ListMesa.getModel();
+        modelo.remove(indiceSeleccionado);
+        JOptionPane.showMessageDialog(this, "Mesa eliminada correctamente.");
     } else {
         JOptionPane.showMessageDialog(this, "Selecciona una mesa de la lista antes de eliminarla.", "Error", JOptionPane.WARNING_MESSAGE);
     }
