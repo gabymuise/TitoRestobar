@@ -5,40 +5,53 @@ import Programa.Producto;
 import java.sql.SQLException;
 
 public class ControladoraProducto {
-    public Producto CrearProducto(String nombre, String descripcion, float precio, float costo, boolean elaboracion) throws SQLException {
-        Producto producto = new Producto(nombre, descripcion, precio, costo, elaboracion);
-        DAOProducto daoProducto = new DAOProducto(); 
-        daoProducto.Guardar(producto);
+    private DAOProducto daoProducto;
 
-        return producto;
+    public ControladoraProducto() {
+        this.daoProducto = new DAOProducto();
     }
-      
-    public Producto EliminarProducto(String nombre, String descripcion, float precio, float costo, boolean elaboracion) throws SQLException {
-        Producto producto = new Producto(nombre, descripcion, precio, costo, elaboracion);
-        DAOProducto daoProducto = new DAOProducto(); 
-        daoProducto.EliminarProductoPorNombre(nombre);
-        return producto;
+
+    public Producto CrearProducto(String nombre, String descripcion, float precio, float costo, boolean elaboracion) {
+        try {
+            Producto producto = new Producto(nombre, descripcion, precio, costo, elaboracion);
+            daoProducto.Guardar(producto);
+            return producto;
+        } catch (SQLException e) {
+            System.err.println("Error al crear el producto: " + e.getMessage());
+            return null;
+        }
     }
+
     public boolean EliminarProductoPorNombre(String nombre) {
-    
-        DAOProducto daoProducto = new DAOProducto();
         try {
             return daoProducto.EliminarProductoPorNombre(nombre);
         } catch (SQLException e) {
-            return false; 
+            System.err.println("Error al eliminar el producto: " + e.getMessage());
+            return false;
         }
     }
-    public Producto VerProducto(String nombre, String descripcion, float precio, float costo, boolean elaboracion) throws SQLException {
-        Producto producto = new Producto(nombre, descripcion, precio, costo, elaboracion);
-        DAOProducto daoProducto = new DAOProducto(); 
-        daoProducto.Ver(producto);
-        return producto;
+
+    public Producto VerProducto(String nombre) {
+        try {
+            Producto producto = new Producto();
+            producto.setNombre(nombre);
+            daoProducto.Ver(producto);
+            return producto;
+        } catch (SQLException e) {
+            System.err.println("Error al ver el producto: " + e.getMessage());
+            return null;
+        }
     }
-    public Producto ActualizarProducto(String nombre, String descripcion, float precio, float costo, boolean elaboracion) throws SQLException{
-       Producto producto = new Producto(nombre, descripcion, precio, costo, elaboracion);
-        DAOProducto daoProducto = new DAOProducto(); 
-        daoProducto.UpDate(producto);
-        return producto; 
+
+    public Producto ActualizarProducto(String nombre, String descripcion, float precio, float costo, boolean elaboracion) {
+        try {
+            Producto producto = new Producto(nombre, descripcion, precio, costo, elaboracion);
+            daoProducto.Actualizar(producto);
+            return producto;
+        } 
+        catch (SQLException e) {
+            System.err.println("Error al actualizar el producto: " + e.getMessage());
+            return null;
+        }
     }
 }
-

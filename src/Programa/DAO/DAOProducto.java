@@ -10,24 +10,23 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class DAOProducto {
-    public Connection Conectar() throws SQLException {
-        String servidor = "localhost";
-        String usuario = "root";
-        String password = "123456";
-        String baseDeDatos = "titorestobar";
+    private static final String SERVIDOR = "localhost";
+    private static final String PUERTO = "3306"; // Puerto predeterminado de MySQL
+    private static final String USUARIO = "root";
+    private static final String PASSWORD = "123456";
+    private static final String BASE_DE_DATOS = "titorestobar";
+    private static final String CADENA_CONEXION = "jdbc:mysql://" + SERVIDOR + ":" + PUERTO + "/" + BASE_DE_DATOS;
 
-        String cadenaConexion = "jdbc:mysql://" + servidor + ":" + "/" + baseDeDatos;
-        Connection conexionDb = DriverManager.getConnection(cadenaConexion, usuario, password);
-
-        return conexionDb;
+    private Connection Conectar() throws SQLException {
+        return DriverManager.getConnection(CADENA_CONEXION, USUARIO, PASSWORD);
     }
 
     public List<Producto> listadoDeProductos() throws SQLException {
         List<Producto> lista = new ArrayList<>();
-
         String consulta = "SELECT * FROM productos";
-        Connection conexion = Conectar();
-        try (PreparedStatement comando = conexion.prepareStatement(consulta);
+
+        try (Connection conexion = Conectar();
+             PreparedStatement comando = conexion.prepareStatement(consulta);
              ResultSet lectura = comando.executeQuery()) {
 
             while (lectura.next()) {
@@ -43,8 +42,6 @@ public class DAOProducto {
                 lista.add(producto);
             }
         }
-
-        conexion.close();
         return lista;
     }
 
@@ -61,7 +58,7 @@ public class DAOProducto {
         }
     }
 
-    public void UpDate(Producto producto) throws SQLException {
+    public void Actualizar(Producto producto) throws SQLException {
         String consulta = "UPDATE productos SET nombre = ?, descripcion = ?, precio = ?, costo = ?, elaborado = ? WHERE id = ?";
         try (Connection conexion = Conectar();
              PreparedStatement comando = conexion.prepareStatement(consulta)) {
@@ -76,14 +73,12 @@ public class DAOProducto {
     }
 
     public boolean EliminarProductoPorNombre(String nombre) throws SQLException {
-        Connection conexion = Conectar();
         String consulta = "DELETE FROM productos WHERE nombre = ?";
-        try (PreparedStatement comando = conexion.prepareStatement(consulta)) {
+        try (Connection conexion = Conectar();
+             PreparedStatement comando = conexion.prepareStatement(consulta)) {
             comando.setString(1, nombre);
             int filasAfectadas = comando.executeUpdate();
             return filasAfectadas > 0;
-        } finally {
-            conexion.close();
         }
     }
 

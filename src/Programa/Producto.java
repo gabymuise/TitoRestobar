@@ -1,14 +1,17 @@
 package Programa;
 
 public class Producto {
-   private int id;
+    private int id;
     private String nombre;
     private String descripcion;
     private float precio;
     private float costo;
     private boolean elaboracion;
 
-    public Producto(String nombre, String descripcion, float precio, float costo, java.lang.Boolean elaboracion) {
+    public Producto() {
+    }
+
+    public Producto(String nombre, String descripcion, float precio, float costo, boolean elaboracion) {
         this.nombre = nombre;
         this.descripcion = descripcion;
         this.precio = precio;
@@ -63,6 +66,4 @@ public class Producto {
     public void setElaboracion(boolean elaboracion) {
         this.elaboracion = elaboracion;
     }
-
-    
 }

@@ -45,25 +45,23 @@ public class DAOPedido {
             ps.executeUpdate();
         }
     }*/
-/*
+
     public List<Pedido> listarPedidosDeMesa(Mesa mesa) throws SQLException {
         List<Pedido> pedidos = new ArrayList<>();
-
         String consulta = "SELECT * FROM pedidos WHERE mesa_id = ?";
+
         try (PreparedStatement ps = conexion.prepareStatement(consulta)) {
             ps.setInt(1, mesa.getId());
             try (ResultSet rs = ps.executeQuery()) {
                 while (rs.next()) {
                     int pedidoId = rs.getInt("id");
                     java.util.Date fechaHoraApertura = new java.util.Date(rs.getTimestamp("fecha_hora_apertura").getTime());
-                    Pedido pedido = new Pedido(mesa, fechaHoraApertura);
+                    Pedido pedido = new Pedido(fechaHoraApertura, null, 0, null); // Modificar constructor según sea necesario
                     pedido.setId(pedidoId);
-                    // Agrega el pedido a la lista de pedidos
                     pedidos.add(pedido);
                 }
             }
         }
         return pedidos;
-    }*/
+    }
 }
-

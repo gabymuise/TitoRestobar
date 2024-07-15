@@ -25,7 +25,7 @@ public class VistaProducto extends javax.swing.JPanel {
      public void cargarProductos() {
     try {
         // Conecta a la base de datos (asegúrate de tener el controlador JDBC cargado)
-        Connection conn = DriverManager.getConnection("jdbc:mysql://localhost:3306/titorestobar", "root", "");
+        Connection conn = DriverManager.getConnection("jdbc:mysql://localhost:3306/titorestobar", "root", "123456");
 
         // Consulta SQL para seleccionar todos los productos
         String sql = "SELECT * FROM producto";
@@ -325,11 +325,7 @@ public class VistaProducto extends javax.swing.JPanel {
 
         if (!nombre.isEmpty()) {
             ControladoraProducto controladoraProducto = new ControladoraProducto(); 
-            try {
-                Producto producto = controladoraProducto.CrearProducto(nombre, descripcion, precio, costo, elaboracion);
-            } catch (SQLException ex) {
-                Logger.getLogger(VistaProducto.class.getName()).log(Level.SEVERE, null, ex);
-            }
+            Producto producto = controladoraProducto.CrearProducto(nombre, descripcion, precio, costo, elaboracion);
         }
 
         txtNombreProducto.setText("");

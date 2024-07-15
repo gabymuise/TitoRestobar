@@ -1,19 +1,21 @@
 package Programa;
 
-import java.util.Date;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 public class Pedido {
     private int id;
     private Date fechaHoraApertura;
     private Date fechaHoraCierre;
-    public List<Item> items;
+    private List<Item> items;
     private float descuento;
 
-    public Pedido(Date fechaHoraApertura, List<Item> items) {
+    public Pedido(Date fechaHoraApertura, List<Item> items, float descuento, Date fechaHoraCierre) {
         this.fechaHoraApertura = fechaHoraApertura;
-        this.items = new ArrayList<>(items);
+        this.items = items != null ? items : new ArrayList<>();
+        this.descuento = descuento;
+        this.fechaHoraCierre = fechaHoraCierre;
     }
 
     public int getId() {
@@ -67,18 +69,12 @@ public class Pedido {
     public float Subtotal() {
         float total = 0;
         for (Item item : items) {
-            total += item.getPrecio();
+            total += item.getPrecio() * item.getCantidad();
         }
         return total;
     }
-    
-    public float AplicarDescuentoPedido(float descuento) {
-        float total = Subtotal();
-        total -= descuento;
-        return total;
-    }
 
-    public String TotalPedido() {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+    public float TotalPedido() {
+        return Subtotal() - descuento;
     }
 }
