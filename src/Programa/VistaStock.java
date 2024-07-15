@@ -60,7 +60,7 @@ public class VistaStock extends javax.swing.JPanel {
         });
         jScrollPane1.setViewportView(jTable1);
 
-        jLabel1.setText("PRODUCTO ELABORADO");
+        jLabel1.setText("PRODUCTO NO ELABORADO");
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);
         this.setLayout(layout);

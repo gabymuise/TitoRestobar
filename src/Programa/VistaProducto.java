@@ -18,47 +18,53 @@ public class VistaProducto extends javax.swing.JPanel {
 
     public VistaProducto() {
         initComponents();
-        
-        
+        chkElaboracion.setSelected(true);
+        // Agrega el listener para chkElaboracion
+        chkElaboracion.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                chkElaboracionActionPerformed(evt);
+            }
+        });
+               txtCantidadProducto.setEnabled(false);
     }
-   
-     public void cargarProductos() {
-    try {
-        // Conecta a la base de datos (asegúrate de tener el controlador JDBC cargado)
-        Connection conn = DriverManager.getConnection("jdbc:mysql://localhost:3306/titorestobar", "root", "");
 
-        // Consulta SQL para seleccionar todos los productos
-        String sql = "SELECT * FROM producto";
+    public void cargarProductos() {
+        try {
+            // Conecta a la base de datos (asegúrate de tener el controlador JDBC cargado)
+            Connection conn = DriverManager.getConnection("jdbc:mysql://localhost:3306/titorestobar", "root", "123456");
 
-        // Crea una declaración preparada
-        PreparedStatement statement = conn.prepareStatement(sql);
+            // Consulta SQL para seleccionar todos los productos
+            String sql = "SELECT * FROM producto";
 
-        // Ejecuta la consulta
-        ResultSet resultSet = statement.executeQuery();
+            // Crea una declaración preparada
+            PreparedStatement statement = conn.prepareStatement(sql);
 
-        // Borra todos los registros existentes en la tabla
-        DefaultTableModel model = (DefaultTableModel) tableProductos.getModel();
-        model.setRowCount(0);
+            // Ejecuta la consulta
+            ResultSet resultSet = statement.executeQuery();
 
-        // Itera a través de los resultados y agrega cada producto a la tabla
-        while (resultSet.next()) {
-            int id = resultSet.getInt("Id");
-            String nombre = resultSet.getString("Nombre");
-            String descripcion = resultSet.getString("Descripcion");
-            float precio = resultSet.getFloat("Precio");
-            float costo = resultSet.getFloat("Costo");
-            boolean elaboracion = resultSet.getBoolean("elaborado");
+            // Borra todos los registros existentes en la tabla
+            DefaultTableModel model = (DefaultTableModel) tableProductos.getModel();
+            model.setRowCount(0);
 
-            // Agrega el producto a la tabla
-            model.addRow(new Object[]{id, nombre, descripcion, precio, costo, elaboracion});
+            // Itera a través de los resultados y agrega cada producto a la tabla
+            while (resultSet.next()) {
+                int id = resultSet.getInt("Id");
+                String nombre = resultSet.getString("Nombre");
+                String descripcion = resultSet.getString("Descripcion");
+                float precio = resultSet.getFloat("Precio");
+                float costo = resultSet.getFloat("Costo");
+                boolean elaboracion = resultSet.getBoolean("elaborado");
+
+                // Agrega el producto a la tabla
+                model.addRow(new Object[]{id, nombre, descripcion, precio, costo, elaboracion});
+            }
+
+            // Cierra la conexión a la base de datos
+            conn.close();
+        } catch (SQLException e) {
+            e.printStackTrace();
         }
-
-        // Cierra la conexión a la base de datos
-        conn.close();
-    } catch (SQLException e) {
-        e.printStackTrace();
     }
-}
 
     @SuppressWarnings("unchecked")
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
@@ -80,6 +86,8 @@ public class VistaProducto extends javax.swing.JPanel {
         tableProductos = new javax.swing.JTable();
         lblElaboracionProducto = new javax.swing.JLabel();
         chkElaboracion = new javax.swing.JCheckBox();
+        jLabel1 = new javax.swing.JLabel();
+        txtCantidadProducto = new javax.swing.JTextField();
 
         setName(""); // NOI18N
         setPreferredSize(new java.awt.Dimension(800, 500));
@@ -205,6 +213,14 @@ public class VistaProducto extends javax.swing.JPanel {
             }
         });
 
+        jLabel1.setText("Cantidad:");
+
+        txtCantidadProducto.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                txtCantidadProductoActionPerformed(evt);
+            }
+        });
+
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);
         this.setLayout(layout);
         layout.setHorizontalGroup(
@@ -225,13 +241,17 @@ public class VistaProducto extends javax.swing.JPanel {
                                 .addComponent(lblPrecioProducto, javax.swing.GroupLayout.DEFAULT_SIZE, 68, Short.MAX_VALUE)
                                 .addComponent(lblElaboracionProducto, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                             .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                            .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                                    .addComponent(txtDescripcionProducto, javax.swing.GroupLayout.DEFAULT_SIZE, 147, Short.MAX_VALUE)
-                                    .addComponent(txtNombreProducto)
-                                    .addComponent(txtPrecioProducto)
-                                    .addComponent(txtCostoProducto))
-                                .addComponent(chkElaboracion)))
+                            .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                                .addComponent(txtDescripcionProducto, javax.swing.GroupLayout.DEFAULT_SIZE, 147, Short.MAX_VALUE)
+                                .addComponent(txtNombreProducto)
+                                .addComponent(txtPrecioProducto)
+                                .addComponent(txtCostoProducto)
+                                .addGroup(layout.createSequentialGroup()
+                                    .addComponent(chkElaboracion)
+                                    .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                    .addComponent(jLabel1)
+                                    .addGap(3, 3, 3)
+                                    .addComponent(txtCantidadProducto))))
                         .addComponent(btnEliminarProducto, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                         .addComponent(btnLimpiarTexto, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                     .addGroup(layout.createSequentialGroup()
@@ -267,9 +287,13 @@ public class VistaProducto extends javax.swing.JPanel {
                             .addComponent(txtPrecioProducto, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                             .addComponent(lblPrecioProducto))
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                            .addComponent(lblElaboracionProducto, javax.swing.GroupLayout.PREFERRED_SIZE, 19, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addComponent(chkElaboracion))
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                                .addComponent(lblElaboracionProducto, javax.swing.GroupLayout.PREFERRED_SIZE, 19, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addComponent(chkElaboracion))
+                            .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                                .addComponent(jLabel1)
+                                .addComponent(txtCantidadProducto, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(btnGuardarProducto)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
@@ -317,28 +341,34 @@ public class VistaProducto extends javax.swing.JPanel {
 
     private void btnGuardarProductoActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnGuardarProductoActionPerformed
    if (btnGuardarProducto.isEnabled()) {
-        String nombre = txtNombreProducto.getText();
-        String descripcion = txtDescripcionProducto.getText();
-        float precio = Float.parseFloat(txtCostoProducto.getText());
-        float costo = Float.parseFloat(txtPrecioProducto.getText());
-        boolean elaboracion = chkElaboracion.isSelected();
+            // Validar que los campos no estén vacíos
+            if (txtNombreProducto.getText().isEmpty() || txtDescripcionProducto.getText().isEmpty() || 
+                txtCostoProducto.getText().isEmpty() || txtPrecioProducto.getText().isEmpty()) {
+                JOptionPane.showMessageDialog(this, "Por favor, complete todos los campos.", "Error", JOptionPane.ERROR_MESSAGE);
+                return; // Salir del método si hay campos vacíos
+            }
 
-        if (!nombre.isEmpty()) {
-            ControladoraProducto controladoraProducto = new ControladoraProducto(); 
+            String nombre = txtNombreProducto.getText();
+            String descripcion = txtDescripcionProducto.getText();
+            float precio = Float.parseFloat(txtCostoProducto.getText());
+            float costo = Float.parseFloat(txtPrecioProducto.getText());
+            boolean elaboracion = chkElaboracion.isSelected();
+
+            ControladoraProducto controladoraProducto = new ControladoraProducto();
             try {
                 Producto producto = controladoraProducto.CrearProducto(nombre, descripcion, precio, costo, elaboracion);
             } catch (SQLException ex) {
                 Logger.getLogger(VistaProducto.class.getName()).log(Level.SEVERE, null, ex);
             }
-        }
 
-        txtNombreProducto.setText("");
-        txtDescripcionProducto.setText("");
-        txtCostoProducto.setText("");
-        txtPrecioProducto.setText("");
-        chkElaboracion.setSelected(false);
-    }
-           cargarProductos();
+            txtNombreProducto.setText("");
+            txtDescripcionProducto.setText("");
+            txtCostoProducto.setText("");
+            txtPrecioProducto.setText("");
+            chkElaboracion.setSelected(true);
+
+            cargarProductos();
+        }
     }//GEN-LAST:event_btnGuardarProductoActionPerformed
    
     private void btnLimpiarTextoActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnLimpiarTextoActionPerformed
@@ -347,7 +377,7 @@ public class VistaProducto extends javax.swing.JPanel {
             txtDescripcionProducto.setText("");
             txtCostoProducto.setText("");
             txtPrecioProducto.setText("");
-            chkElaboracion.setSelected(false);
+            chkElaboracion.setSelected(true);
        }
     }//GEN-LAST:event_btnLimpiarTextoActionPerformed
 
@@ -356,8 +386,17 @@ public class VistaProducto extends javax.swing.JPanel {
     }//GEN-LAST:event_txtPrecioProductoActionPerformed
 
     private void chkElaboracionActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_chkElaboracionActionPerformed
-//
+// Habilitar o deshabilitar el campo txtCantidadProducto según el estado del checkbox chkElaboracion
+        if (chkElaboracion.isSelected()) {
+            txtCantidadProducto.setEnabled(false);
+        } else {
+            txtCantidadProducto.setEnabled(true);
+        }
     }//GEN-LAST:event_chkElaboracionActionPerformed
+
+    private void txtCantidadProductoActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_txtCantidadProductoActionPerformed
+
+    }//GEN-LAST:event_txtCantidadProductoActionPerformed
 
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
@@ -366,6 +405,7 @@ public class VistaProducto extends javax.swing.JPanel {
     private javax.swing.JButton btnGuardarProducto;
     private javax.swing.JButton btnLimpiarTexto;
     private javax.swing.JCheckBox chkElaboracion;
+    private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel lblCostoProducto;
     private javax.swing.JLabel lblDescripcionProducto;
     private javax.swing.JLabel lblElaboracionProducto;
@@ -373,6 +413,7 @@ public class VistaProducto extends javax.swing.JPanel {
     private javax.swing.JLabel lblPrecioProducto;
     private javax.swing.JLabel lblTitulo;
     public javax.swing.JTable tableProductos;
+    private javax.swing.JTextField txtCantidadProducto;
     private javax.swing.JTextField txtCostoProducto;
     private javax.swing.JTextField txtDescripcionProducto;
     private javax.swing.JTextField txtNombreProducto;
