@@ -1,6 +1,7 @@
 package Programa.DAO;
 
 import Programa.Producto;
+
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
@@ -10,25 +11,32 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class DAOProducto {
-    private static final String SERVIDOR = "localhost";
-    private static final String PUERTO = "3306"; // Puerto predeterminado de MySQL
-    private static final String USUARIO = "root";
-    private static final String PASSWORD = "123456";
-    private static final String BASE_DE_DATOS = "titorestobar";
-    private static final String CADENA_CONEXION = "jdbc:mysql://" + SERVIDOR + ":" + PUERTO + "/" + BASE_DE_DATOS;
+    private Connection conexion;
+
+    public DAOProducto() {
+        try {
+            conexion = Conectar();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
 
     private Connection Conectar() throws SQLException {
-        return DriverManager.getConnection(CADENA_CONEXION, USUARIO, PASSWORD);
+        String servidor = "localhost";
+        String puerto = "3306";
+        String usuario = "root";
+        String password = "ViYu21040407";
+        String baseDeDatos = "titorestobar";
+
+        String cadenaConexion = "jdbc:mysql://" + servidor + ":" + puerto + "/" + baseDeDatos;
+        return DriverManager.getConnection(cadenaConexion, usuario, password);
     }
 
     public List<Producto> listadoDeProductos() throws SQLException {
         List<Producto> lista = new ArrayList<>();
         String consulta = "SELECT * FROM productos";
-
-        try (Connection conexion = Conectar();
-             PreparedStatement comando = conexion.prepareStatement(consulta);
+        try (PreparedStatement comando = conexion.prepareStatement(consulta);
              ResultSet lectura = comando.executeQuery()) {
-
             while (lectura.next()) {
                 int id = lectura.getInt("id");
                 String nombre = lectura.getString("nombre");
@@ -47,8 +55,7 @@ public class DAOProducto {
 
     public void Guardar(Producto producto) throws SQLException {
         String consulta = "INSERT INTO productos (nombre, descripcion, precio, costo, elaborado) VALUES (?, ?, ?, ?, ?)";
-        try (Connection conexion = Conectar();
-             PreparedStatement comando = conexion.prepareStatement(consulta)) {
+        try (PreparedStatement comando = conexion.prepareStatement(consulta)) {
             comando.setString(1, producto.getNombre());
             comando.setString(2, producto.getDescripcion());
             comando.setFloat(3, producto.getPrecio());
@@ -58,10 +65,9 @@ public class DAOProducto {
         }
     }
 
-    public void Actualizar(Producto producto) throws SQLException {
+    public void UpDate(Producto producto) throws SQLException {
         String consulta = "UPDATE productos SET nombre = ?, descripcion = ?, precio = ?, costo = ?, elaborado = ? WHERE id = ?";
-        try (Connection conexion = Conectar();
-             PreparedStatement comando = conexion.prepareStatement(consulta)) {
+        try (PreparedStatement comando = conexion.prepareStatement(consulta)) {
             comando.setString(1, producto.getNombre());
             comando.setString(2, producto.getDescripcion());
             comando.setFloat(3, producto.getPrecio());
@@ -74,8 +80,7 @@ public class DAOProducto {
 
     public boolean EliminarProductoPorNombre(String nombre) throws SQLException {
         String consulta = "DELETE FROM productos WHERE nombre = ?";
-        try (Connection conexion = Conectar();
-             PreparedStatement comando = conexion.prepareStatement(consulta)) {
+        try (PreparedStatement comando = conexion.prepareStatement(consulta)) {
             comando.setString(1, nombre);
             int filasAfectadas = comando.executeUpdate();
             return filasAfectadas > 0;
@@ -84,8 +89,7 @@ public class DAOProducto {
 
     public void Ver(Producto producto) throws SQLException {
         String consulta = "SELECT * FROM productos WHERE nombre = ?";
-        try (Connection conexion = Conectar();
-             PreparedStatement comando = conexion.prepareStatement(consulta)) {
+        try (PreparedStatement comando = conexion.prepareStatement(consulta)) {
             comando.setString(1, producto.getNombre());
             try (ResultSet resultado = comando.executeQuery()) {
                 if (resultado.next()) {

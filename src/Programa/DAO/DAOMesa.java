@@ -1,43 +1,42 @@
 package Programa.DAO;
 
 import Programa.Mesa;
+
 import java.sql.Connection;
+import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
-import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
 public class DAOMesa {
-    private static final String SERVIDOR = "localhost";
-    private static final String PUERTO = "3306"; // Puerto predeterminado de MySQL
-    private static final String USUARIO = "root";
-    private static final String PASSWORD = "123456";
-    private static final String BASE_DE_DATOS = "titorestobar";
-    private static final String CADENA_CONEXION = "jdbc:mysql://" + SERVIDOR + ":" + PUERTO + "/" + BASE_DE_DATOS;
-
     private Connection conexion;
 
     public DAOMesa() {
         try {
-            this.conexion = Conectar();
+            conexion = Conectar();
         } catch (SQLException e) {
             e.printStackTrace();
         }
     }
 
     private Connection Conectar() throws SQLException {
-        return DriverManager.getConnection(CADENA_CONEXION, USUARIO, PASSWORD);
+        String servidor = "localhost";
+        String puerto = "3306"; // Puerto predeterminado de MySQL
+        String usuario = "root";
+        String password = "ViYu21040407";
+        String baseDeDatos = "titorestobar";
+
+        String cadenaConexion = "jdbc:mysql://" + servidor + ":" + puerto + "/" + baseDeDatos;
+        return DriverManager.getConnection(cadenaConexion, usuario, password);
     }
 
     public List<Mesa> listarMesas() throws SQLException {
         List<Mesa> lista = new ArrayList<>();
         String consulta = "SELECT * FROM mesas";
-
         try (PreparedStatement comando = conexion.prepareStatement(consulta);
              ResultSet lectura = comando.executeQuery()) {
-
             while (lectura.next()) {
                 int id = lectura.getInt("id");
                 String nombre = lectura.getString("nombre");
@@ -47,7 +46,6 @@ public class DAOMesa {
                 lista.add(mesa);
             }
         }
-
         return lista;
     }
 

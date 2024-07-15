@@ -8,9 +8,6 @@ public class Producto {
     private float costo;
     private boolean elaboracion;
 
-    public Producto() {
-    }
-
     public Producto(String nombre, String descripcion, float precio, float costo, boolean elaboracion) {
         this.nombre = nombre;
         this.descripcion = descripcion;

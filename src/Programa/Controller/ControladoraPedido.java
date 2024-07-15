@@ -1,29 +1,33 @@
 package Programa.Controller;
 
+import Programa.DAO.DAOPedido;
+import Programa.Item;
 import Programa.Mesa;
 import Programa.Pedido;
+import java.sql.Connection;
+import java.sql.SQLException;
 import java.util.List;
 
 public class ControladoraPedido {
+    private DAOPedido daoPedido;
 
-    // Implementa la lógica necesaria en los métodos comentados cuando sea necesario.
-    // Por ahora, solo descomentamos el método mostrarPedidosMayoresA y manejamos posibles excepciones.
+    public ControladoraPedido(Connection conexion) {
+        daoPedido = new DAOPedido(conexion);
+    }
 
-    public void mostrarPedidosMayoresA(Mesa mesa, float totalMinimo) {
-        try {
-            System.out.println("Pedidos en la mesa " + mesa.getId() + " con un total mayor a " + totalMinimo + ":");
+    public void crearPedido(Pedido pedido) throws SQLException {
+        daoPedido.crearPedido(pedido);
+    }
 
-            // Accede a la lista de pedidos de la mesa
-            List<Pedido> pedidos = mesa.getPedidos();
+    public void agregarItem(Pedido pedido, Item item) throws SQLException {
+        daoPedido.agregarItem(pedido, item);
+    }
 
-            for (Pedido pedido : pedidos) {
-                if (pedido.Subtotal() > totalMinimo) {
-                    System.out.println("ID del Pedido: " + pedido.getId());
-                    System.out.println("Total del Pedido: " + pedido.Subtotal());
-                }
-            }
-        } catch (Exception e) {
-            System.err.println("Error al mostrar los pedidos: " + e.getMessage());
-        }
+    public void eliminarItem(Pedido pedido, Item item) throws SQLException {
+        daoPedido.eliminarItem(pedido, item);
+    }
+
+    public List<Pedido> listarPedidosDeMesa(Mesa mesa) throws SQLException {
+        return daoPedido.listarPedidosDeMesa(mesa);
     }
 }
