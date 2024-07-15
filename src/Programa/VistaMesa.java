@@ -177,28 +177,38 @@ public class VistaMesa extends javax.swing.JPanel {
     private void btnCrearMesaActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnCrearMesaActionPerformed
         String nombre = txtNombreMesa.getText();
 
-        if (!nombre.isEmpty()) {
-            controladoraMesa.CrearMesa(nombre);
+    if (!nombre.isEmpty()) {
+        try {
+            Mesa nuevaMesa = new Mesa(nombre);
+            controladoraMesa.crearMesa(nuevaMesa);
             txtNombreMesa.setText("");
             CargarListaMesa();
+            JOptionPane.showMessageDialog(this, "Mesa creada correctamente.");
+        } catch (SQLException e) {
+            JOptionPane.showMessageDialog(this, "Error al crear la mesa: " + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
         }
+    } else {
+        JOptionPane.showMessageDialog(this, "El nombre de la mesa no puede estar vacío.", "Error", JOptionPane.WARNING_MESSAGE);
+    }
     }//GEN-LAST:event_btnCrearMesaActionPerformed
 
     private void btnEliminarMesaActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnEliminarMesaActionPerformed
         int indiceSeleccionado = ListMesa.getSelectedIndex();
 
-    if (indiceSeleccionado >= 0) {
-        String nombreMesa = (String) ListMesa.getModel().getElementAt(indiceSeleccionado); // Nombre de la mesa
+        if (indiceSeleccionado >= 0) {
+            String nombreMesa = (String) ListMesa.getModel().getElementAt(indiceSeleccionado); // Nombre de la mesa
 
-        ControladoraMesa controladoraMesa = new ControladoraMesa();
-
-        controladoraMesa.EliminarMesa(nombreMesa);
-        DefaultListModel<String> modelo = (DefaultListModel<String>) ListMesa.getModel();
-        modelo.remove(indiceSeleccionado);
-        JOptionPane.showMessageDialog(this, "Mesa eliminada correctamente.");
-    } else {
-        JOptionPane.showMessageDialog(this, "Selecciona una mesa de la lista antes de eliminarla.", "Error", JOptionPane.WARNING_MESSAGE);
-    }
+            try {
+                controladoraMesa.eliminarMesa(nombreMesa);
+                DefaultListModel<String> modelo = (DefaultListModel<String>) ListMesa.getModel();
+                modelo.remove(indiceSeleccionado);
+                JOptionPane.showMessageDialog(this, "Mesa eliminada correctamente.");
+            } catch (SQLException e) {
+                JOptionPane.showMessageDialog(this, "Error al eliminar la mesa: " + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+            }
+        } else {
+            JOptionPane.showMessageDialog(this, "Selecciona una mesa de la lista antes de eliminarla.", "Error", JOptionPane.WARNING_MESSAGE);
+        }
     }//GEN-LAST:event_btnEliminarMesaActionPerformed
 
 

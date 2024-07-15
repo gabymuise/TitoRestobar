@@ -311,33 +311,28 @@ public class VistaProducto extends javax.swing.JPanel {
 
     private void btnEliminarProductoActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnEliminarProductoActionPerformed
   
-        if (btnEliminarProducto.isEnabled()) {
-        // Obtén la fila seleccionada de la tabla
-        int filaSeleccionada = tableProductos.getSelectedRow();
- 
-   
-        if (filaSeleccionada >= 0) {
-            // Obtiene el nombre del producto de la fila seleccionada
-            String nombreProducto = (String) tableProductos.getValueAt(filaSeleccionada, 1); // Nombre
-
-            // Llama a la ControladoraProducto para eliminar el producto por nombre
-            ControladoraProducto cp = new ControladoraProducto();
-            boolean eliminado = cp.EliminarProductoPorNombre(nombreProducto);
-
-            if (eliminado) {
-                // Elimina la fila de la tabla
-                DefaultTableModel modelo = (DefaultTableModel) tableProductos.getModel();
-                modelo.removeRow(filaSeleccionada);
-                JOptionPane.showMessageDialog(this, "Producto eliminado correctamente.");
+            if (btnEliminarProducto.isEnabled()) {
+            int filaSeleccionada = tableProductos.getSelectedRow();
+            ControladoraProducto controladoraProducto = new ControladoraProducto();
+            if (filaSeleccionada >= 0) {
+                try {
+                    String nombreProducto = (String) tableProductos.getValueAt(filaSeleccionada, 1); // Nombre
+                    boolean eliminado = controladoraProducto.EliminarProductoPorNombre(nombreProducto);
+                    if (eliminado) {
+                        DefaultTableModel modelo = (DefaultTableModel) tableProductos.getModel();
+                        modelo.removeRow(filaSeleccionada);
+                        JOptionPane.showMessageDialog(this, "Producto eliminado correctamente.");
+                    } else {
+                        JOptionPane.showMessageDialog(this, "Error al eliminar el producto.", "Error", JOptionPane.ERROR_MESSAGE);
+                    }
+                } catch (SQLException ex) {
+                    Logger.getLogger(VistaProducto.class.getName()).log(Level.SEVERE, null, ex);
+                }
             } else {
-                JOptionPane.showMessageDialog(this, "Error al eliminar el producto.", "Error", JOptionPane.ERROR_MESSAGE);
+                JOptionPane.showMessageDialog(this, "Selecciona un producto de la tabla antes de eliminarlo.", "Error", JOptionPane.WARNING_MESSAGE);
             }
-        } else {
-            JOptionPane.showMessageDialog(this, "Selecciona un producto de la tabla antes de eliminarlo.", "Error", JOptionPane.WARNING_MESSAGE);
+            cargarProductos();
         }
-             
-    }
-                cargarProductos();
     }//GEN-LAST:event_btnEliminarProductoActionPerformed
 
     private void btnGuardarProductoActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnGuardarProductoActionPerformed
