@@ -22,11 +22,12 @@ public class DAOMesa {
 
     public Connection Conectar() throws SQLException {
         String servidor = "localhost";
+        String puerto = "3306"; // Puerto predeterminado de MySQL
         String usuario = "root";
-        String password = "";
+        String password = "123456";
         String baseDeDatos = "titorestobar";
 
-        String cadenaConexion = "jdbc:mysql://" + servidor + "/" + baseDeDatos;
+        String cadenaConexion = "jdbc:mysql://" + servidor + ":" + puerto + "/" + baseDeDatos;
         Connection conexionDb = DriverManager.getConnection(cadenaConexion, usuario, password);
 
         return conexionDb;
@@ -52,25 +53,21 @@ public class DAOMesa {
         return lista;
     }
 
-   public void crearMesa(Mesa mesa) throws SQLException {
-        String consulta = "INSERT INTO `mesas` (nombre) VALUES (?)";
-        Connection conexion = Conectar();
-        PreparedStatement comando = conexion.prepareStatement(consulta);
-        comando.setString(1, mesa.getNombre());
-        comando.executeUpdate(); // Ejecuta la consulta
-        conexion.close(); // No olvides cerrar la conexión
+    public void crearMesa(Mesa mesa) throws SQLException {
+        String consulta = "INSERT INTO mesas (nombre) VALUES (?)";
+        try (PreparedStatement comando = conexion.prepareStatement(consulta)) {
+            comando.setString(1, mesa.getNombre());
+            comando.executeUpdate(); // Ejecuta la consulta
+        }
     }
-
 
     public void eliminarMesa(String nombre) throws SQLException {
-        Connection conexion = Conectar();
-        String consulta = "DELETE FROM `mesas` WHERE `nombre` = ?";
-        PreparedStatement comando = conexion.prepareStatement(consulta);
-        comando.setString(1, nombre);
-        comando.executeUpdate(); // Ejecuta la consulta
-        conexion.close(); // No olvides cerrar la conexión
+        String consulta = "DELETE FROM mesas WHERE nombre = ?";
+        try (PreparedStatement comando = conexion.prepareStatement(consulta)) {
+            comando.setString(1, nombre);
+            comando.executeUpdate(); // Ejecuta la consulta
+        }
     }
-
 
     public void cerrarConexion() {
         try {

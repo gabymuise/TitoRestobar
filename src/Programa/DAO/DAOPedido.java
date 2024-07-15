@@ -1,8 +1,9 @@
 package Programa.DAO;
 
-import Programa.Mesa;
 import Programa.Pedido;
 import Programa.Item;
+import Programa.Mesa;
+
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -11,31 +12,43 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class DAOPedido {
-    private final Connection conexion; 
+    private final Connection conexion;
 
     public DAOPedido(Connection conexion) {
         this.conexion = conexion;
     }
 
-    public void crearPedido(Pedido pedido) throws SQLException {
+    /*public void crearPedido(Pedido pedido) throws SQLException {
         String consulta = "INSERT INTO pedidos (mesa_id, fecha_hora_apertura) VALUES (?, ?)";
         try (PreparedStatement ps = conexion.prepareStatement(consulta)) {
+            ps.setInt(1, pedido.getMesa().getId());
             ps.setTimestamp(2, new java.sql.Timestamp(pedido.getFechaHoraApertura().getTime()));
             ps.executeUpdate();
         }
     }
 
     public void agregarItem(Pedido pedido, Item item) throws SQLException {
-        // Implementa la lógica para agregar un elemento de pedido a la base de datos
+        String consulta = "INSERT INTO items_pedido (pedido_id, nombre, precio) VALUES (?, ?, ?)";
+        try (PreparedStatement ps = conexion.prepareStatement(consulta)) {
+            ps.setInt(1, pedido.getId());
+            ps.setString(2, item.getNombre());
+            ps.setDouble(3, item.getPrecio());
+            ps.executeUpdate();
+        }
     }
 
     public void eliminarItem(Pedido pedido, Item item) throws SQLException {
-        // Implementa la lógica para eliminar un elemento de pedido de la base de datos
-    }
-
-    /*public List<Pedido> listarPedidosDeMesa(Mesa mesa) throws SQLException {
+        String consulta = "DELETE FROM items_pedido WHERE pedido_id = ? AND nombre = ?";
+        try (PreparedStatement ps = conexion.prepareStatement(consulta)) {
+            ps.setInt(1, pedido.getId());
+            ps.setString(2, item.getNombre());
+            ps.executeUpdate();
+        }
+    }*/
+/*
+    public List<Pedido> listarPedidosDeMesa(Mesa mesa) throws SQLException {
         List<Pedido> pedidos = new ArrayList<>();
-        
+
         String consulta = "SELECT * FROM pedidos WHERE mesa_id = ?";
         try (PreparedStatement ps = conexion.prepareStatement(consulta)) {
             ps.setInt(1, mesa.getId());
@@ -43,7 +56,8 @@ public class DAOPedido {
                 while (rs.next()) {
                     int pedidoId = rs.getInt("id");
                     java.util.Date fechaHoraApertura = new java.util.Date(rs.getTimestamp("fecha_hora_apertura").getTime());
-                    Pedido pedido = new Pedido(fechaHoraApertura, items);
+                    Pedido pedido = new Pedido(mesa, fechaHoraApertura);
+                    pedido.setId(pedidoId);
                     // Agrega el pedido a la lista de pedidos
                     pedidos.add(pedido);
                 }
