@@ -30,47 +30,41 @@ public class VistaProducto extends javax.swing.JPanel {
 
    
      public void cargarProductos() {
-    try {
+      try {
         // Conecta a la base de datos (asegúrate de tener el controlador JDBC cargado)
         Connection conn = DriverManager.getConnection("jdbc:mysql://localhost:3306/titorestobar", "root", "123456");
 
+        // Consulta SQL para seleccionar todos los productos
+        String sql = "SELECT * FROM producto";
 
-    public void cargarProductos() {
-        try {
-            // Conecta a la base de datos (asegúrate de tener el controlador JDBC cargado)
-            Connection conn = DriverManager.getConnection("jdbc:mysql://localhost:3306/titorestobar", "root", "123456");
+        // Crea una declaración preparada
+        PreparedStatement statement = conn.prepareStatement(sql);
 
-            // Consulta SQL para seleccionar todos los productos
-            String sql = "SELECT * FROM producto";
+        // Ejecuta la consulta
+        ResultSet resultSet = statement.executeQuery();
 
-            // Crea una declaración preparada
-            PreparedStatement statement = conn.prepareStatement(sql);
+        // Borra todos los registros existentes en la tabla
+        DefaultTableModel model = (DefaultTableModel) tableProductos.getModel();
+        model.setRowCount(0);
 
-            // Ejecuta la consulta
-            ResultSet resultSet = statement.executeQuery();
+        // Itera a través de los resultados y agrega cada producto a la tabla
+        while (resultSet.next()) {
+            int id = resultSet.getInt("Id");
+            String nombre = resultSet.getString("Nombre");
+            String descripcion = resultSet.getString("Descripcion");
+            float precio = resultSet.getFloat("Precio");
+            float costo = resultSet.getFloat("Costo");
+            boolean elaboracion = resultSet.getBoolean("elaborado");
 
-            // Borra todos los registros existentes en la tabla
-            DefaultTableModel model = (DefaultTableModel) tableProductos.getModel();
-            model.setRowCount(0);
-
-            // Itera a través de los resultados y agrega cada producto a la tabla
-            while (resultSet.next()) {
-                int id = resultSet.getInt("Id");
-                String nombre = resultSet.getString("Nombre");
-                String descripcion = resultSet.getString("Descripcion");
-                float precio = resultSet.getFloat("Precio");
-                float costo = resultSet.getFloat("Costo");
-                boolean elaboracion = resultSet.getBoolean("elaborado");
-
-                // Agrega el producto a la tabla
-                model.addRow(new Object[]{id, nombre, descripcion, precio, costo, elaboracion});
-            }
-
-            // Cierra la conexión a la base de datos
-            conn.close();
-        } catch (SQLException e) {
-            e.printStackTrace();
+            // Agrega el producto a la tabla
+            model.addRow(new Object[]{id, nombre, descripcion, precio, costo, elaboracion});
         }
+
+        // Cierra la conexión a la base de datos
+        conn.close();
+    } catch (SQLException e) {
+        e.printStackTrace();
+    }
     }
 
     @SuppressWarnings("unchecked")
@@ -347,42 +341,31 @@ public class VistaProducto extends javax.swing.JPanel {
     }//GEN-LAST:event_btnEliminarProductoActionPerformed
 
     private void btnGuardarProductoActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnGuardarProductoActionPerformed
-   if (btnGuardarProducto.isEnabled()) {
-            // Validar que los campos no estén vacíos
-            if (txtNombreProducto.getText().isEmpty() || txtDescripcionProducto.getText().isEmpty() || 
-                txtCostoProducto.getText().isEmpty() || txtPrecioProducto.getText().isEmpty()) {
-                JOptionPane.showMessageDialog(this, "Por favor, complete todos los campos.", "Error", JOptionPane.ERROR_MESSAGE);
-                return; // Salir del método si hay campos vacíos
-            }
-
-
-            String nombre = txtNombreProducto.getText();
-            String descripcion = txtDescripcionProducto.getText();
-            float precio = Float.parseFloat(txtCostoProducto.getText());
-            float costo = Float.parseFloat(txtPrecioProducto.getText());
-            boolean elaboracion = chkElaboracion.isSelected();
-
-            ControladoraProducto controladoraProducto = new ControladoraProducto();
-            try {
-                Producto producto = controladoraProducto.CrearProducto(nombre, descripcion, precio, costo, elaboracion);
-            } catch (SQLException ex) {
-                Logger.getLogger(VistaProducto.class.getName()).log(Level.SEVERE, null, ex);
-            }
-
-        if (!nombre.isEmpty()) {
-            ControladoraProducto controladoraProducto = new ControladoraProducto(); 
-            Producto producto = controladoraProducto.CrearProducto(nombre, descripcion, precio, costo, elaboracion);
+  if (btnGuardarProducto.isEnabled()) {
+        // Validar que los campos no estén vacíos
+        if (txtNombreProducto.getText().isEmpty() || txtDescripcionProducto.getText().isEmpty() || 
+            txtCostoProducto.getText().isEmpty() || txtPrecioProducto.getText().isEmpty()) {
+            JOptionPane.showMessageDialog(this, "Por favor, complete todos los campos.", "Error", JOptionPane.ERROR_MESSAGE);
+            return; // Salir del método si hay campos vacíos
         }
 
+        String nombre = txtNombreProducto.getText();
+        String descripcion = txtDescripcionProducto.getText();
+        float precio = Float.parseFloat(txtPrecioProducto.getText());
+        float costo = Float.parseFloat(txtCostoProducto.getText());
+        boolean elaboracion = chkElaboracion.isSelected();
 
-            txtNombreProducto.setText("");
-            txtDescripcionProducto.setText("");
-            txtCostoProducto.setText("");
-            txtPrecioProducto.setText("");
-            chkElaboracion.setSelected(true);
+        ControladoraProducto controladoraProducto = new ControladoraProducto();
+        Producto producto = controladoraProducto.CrearProducto(nombre, descripcion, precio, costo, elaboracion);
 
-            cargarProductos();
-        }
+        txtNombreProducto.setText("");
+        txtDescripcionProducto.setText("");
+        txtCostoProducto.setText("");
+        txtPrecioProducto.setText("");
+        chkElaboracion.setSelected(true);
+
+        cargarProductos();
+    }
     }//GEN-LAST:event_btnGuardarProductoActionPerformed
    
     private void btnLimpiarTextoActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnLimpiarTextoActionPerformed
