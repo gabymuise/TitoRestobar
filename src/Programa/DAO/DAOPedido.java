@@ -1,5 +1,6 @@
 package Programa.DAO;
 
+import Programa.Conexion;
 import Programa.Pedido;
 import Programa.Item;
 import Programa.Mesa;
@@ -12,10 +13,14 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class DAOPedido {
-    private final Connection conexion;
+    private Connection conexion;
 
-    public DAOPedido(Connection conexion) {
-        this.conexion = conexion;
+    public DAOPedido() {
+        try {
+            conexion = Conexion.Conectar();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
     }
 
     public void crearPedido(Pedido pedido) throws SQLException {
@@ -63,5 +68,15 @@ public class DAOPedido {
             }
         }
         return pedidos;
+    }
+
+    public void cerrarConexion() {
+        try {
+            if (conexion != null && !conexion.isClosed()) {
+                conexion.close();
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
     }
 }

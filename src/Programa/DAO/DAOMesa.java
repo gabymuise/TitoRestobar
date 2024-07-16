@@ -1,9 +1,9 @@
 package Programa.DAO;
 
+import Programa.Conexion;
 import Programa.Mesa;
 
 import java.sql.Connection;
-import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -15,21 +15,10 @@ public class DAOMesa {
 
     public DAOMesa() {
         try {
-            conexion = Conectar();
+            conexion = Conexion.Conectar();
         } catch (SQLException e) {
             e.printStackTrace();
         }
-    }
-
-    private Connection Conectar() throws SQLException {
-        String servidor = "localhost";
-        String puerto = "3306"; // Puerto predeterminado de MySQL
-        String usuario = "root";
-        String password = "ViYu21040407";
-        String baseDeDatos = "titorestobar";
-
-        String cadenaConexion = "jdbc:mysql://" + servidor + ":" + puerto + "/" + baseDeDatos;
-        return DriverManager.getConnection(cadenaConexion, usuario, password);
     }
 
     public List<Mesa> listarMesas() throws SQLException {

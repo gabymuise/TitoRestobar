@@ -2,6 +2,7 @@ package Programa.Controller;
 
 import Programa.DAO.DAOProducto;
 import Programa.Producto;
+import Programa.Stock;
 import java.sql.SQLException;
 import java.util.List;
 
@@ -31,8 +32,8 @@ public class ControladoraProducto {
     public void Ver(Producto producto) throws SQLException {
         daoProducto.Ver(producto);
     }
-
-    public Producto CrearProducto(String nombre, String descripcion, float precio, float costo, boolean elaboracion) {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+    
+    public void GuardarStock(Stock stock) throws SQLException {
+        daoProducto.guardarStock(stock);
     }
 }

@@ -1,4 +1,3 @@
-
 package Programa;
 
 import javax.swing.JPanel;

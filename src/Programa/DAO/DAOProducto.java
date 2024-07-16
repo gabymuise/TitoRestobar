@@ -1,9 +1,10 @@
 package Programa.DAO;
 
+import Programa.Conexion;
 import Programa.Producto;
+import Programa.Stock;
 
 import java.sql.Connection;
-import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -15,21 +16,10 @@ public class DAOProducto {
 
     public DAOProducto() {
         try {
-            conexion = Conectar();
+            conexion = Conexion.Conectar();
         } catch (SQLException e) {
             e.printStackTrace();
         }
-    }
-
-    private Connection Conectar() throws SQLException {
-        String servidor = "localhost";
-        String puerto = "3306";
-        String usuario = "root";
-        String password = "ViYu21040407";
-        String baseDeDatos = "titorestobar";
-
-        String cadenaConexion = "jdbc:mysql://" + servidor + ":" + puerto + "/" + baseDeDatos;
-        return DriverManager.getConnection(cadenaConexion, usuario, password);
     }
 
     public List<Producto> listadoDeProductos() throws SQLException {
@@ -100,6 +90,27 @@ public class DAOProducto {
                     producto.setElaboracion(resultado.getBoolean("elaborado"));
                 }
             }
+        }
+    }
+
+    public void guardarStock(Stock stock) throws SQLException {
+        String consulta = "INSERT INTO stock (cantidad, producto_id) VALUES (?, ?)";
+        try (PreparedStatement comando = conexion.prepareStatement(consulta)) {
+            comando.setInt(1, stock.getCantidad());
+            comando.setInt(2, stock.getProducto().getId());
+            comando.setString(3, stock.getProducto().getNombre());
+
+            comando.executeUpdate();
+        }
+    }
+
+    public void cerrarConexion() {
+        try {
+            if (conexion != null && !conexion.isClosed()) {
+                conexion.close();
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
         }
     }
 }

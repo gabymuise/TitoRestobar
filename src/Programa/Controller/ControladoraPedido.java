@@ -12,7 +12,7 @@ public class ControladoraPedido {
     private DAOPedido daoPedido;
 
     public ControladoraPedido(Connection conexion) {
-        daoPedido = new DAOPedido(conexion);
+        daoPedido = new DAOPedido();
     }
 
     public void crearPedido(Pedido pedido) throws SQLException {
@@ -29,5 +29,9 @@ public class ControladoraPedido {
 
     public List<Pedido> listarPedidosDeMesa(Mesa mesa) throws SQLException {
         return daoPedido.listarPedidosDeMesa(mesa);
+    }
+    
+    public void cerrarConexion() {
+        daoPedido.cerrarConexion();
     }
 }
