@@ -45,13 +45,19 @@ public class DAOProducto {
 
     public void Guardar(Producto producto) throws SQLException {
         String consulta = "INSERT INTO productos (nombre, descripcion, precio, costo, elaborado) VALUES (?, ?, ?, ?, ?)";
-        try (PreparedStatement comando = conexion.prepareStatement(consulta)) {
+        try (PreparedStatement comando = conexion.prepareStatement(consulta, PreparedStatement.RETURN_GENERATED_KEYS)) {
             comando.setString(1, producto.getNombre());
             comando.setString(2, producto.getDescripcion());
             comando.setFloat(3, producto.getPrecio());
             comando.setFloat(4, producto.getCosto());
             comando.setBoolean(5, producto.isElaboracion());
             comando.executeUpdate();
+
+            try (ResultSet generatedKeys = comando.getGeneratedKeys()) {
+                if (generatedKeys.next()) {
+                    producto.setId(generatedKeys.getInt(1));
+                }
+            }
         }
     }
 
@@ -94,12 +100,10 @@ public class DAOProducto {
     }
 
     public void guardarStock(Stock stock) throws SQLException {
-        String consulta = "INSERT INTO stock (cantidad, producto_id) VALUES (?, ?)";
+        String consulta = "INSERT INTO stock (cantidad, id_producto) VALUES (?, ?)";
         try (PreparedStatement comando = conexion.prepareStatement(consulta)) {
             comando.setInt(1, stock.getCantidad());
             comando.setInt(2, stock.getProducto().getId());
-            comando.setString(3, stock.getProducto().getNombre());
-
             comando.executeUpdate();
         }
     }

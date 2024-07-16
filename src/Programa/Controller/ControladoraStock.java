@@ -27,10 +27,6 @@ public class ControladoraStock {
         daoStock.eliminarStock(productoId);
     }
 
-    public Stock buscarStock(int productoId) throws SQLException {
-        return daoStock.buscarStock(productoId);
-    }
-
     public void cerrarConexion() {
         daoStock.cerrarConexion();
     }

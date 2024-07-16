@@ -53,22 +53,6 @@ public class DAOStock {
         }
     }
 
-    public Stock buscarStock(int productoId) throws SQLException {
-        String consulta = "SELECT * FROM stock WHERE producto_id = ?";
-        try (PreparedStatement ps = conexion.prepareStatement(consulta)) {
-            ps.setInt(1, productoId);
-            try (ResultSet rs = ps.executeQuery()) {
-                if (rs.next()) {
-                    int id = rs.getInt("id");
-                    int cantidad = rs.getInt("cantidad");
-                    int productoIdRs = rs.getInt("producto_id");
-                    return new Stock(id, cantidad, productoIdRs);
-                }
-            }
-        }
-        return null;
-    }
-
     public void cerrarConexion() {
         try {
             if (conexion != null && !conexion.isClosed()) {

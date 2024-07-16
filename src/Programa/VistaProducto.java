@@ -336,37 +336,49 @@ public class VistaProducto extends javax.swing.JPanel {
     }//GEN-LAST:event_btnEliminarProductoActionPerformed
 
     private void btnGuardarProductoActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnGuardarProductoActionPerformed
-    if (btnGuardarProducto.isEnabled()) {
-          // Validar que los campos no estén vacíos
-          if (txtNombreProducto.getText().isEmpty() || txtDescripcionProducto.getText().isEmpty() || 
-              txtCostoProducto.getText().isEmpty() || txtPrecioProducto.getText().isEmpty()) {
-              JOptionPane.showMessageDialog(this, "Por favor, complete todos los campos.", "Error", JOptionPane.ERROR_MESSAGE);
-              return; // Salir del método si hay campos vacíos
-          }
+        if (btnGuardarProducto.isEnabled()) {
+              // Validar que los campos no estén vacíos
+            if (txtNombreProducto.getText().isEmpty() || txtDescripcionProducto.getText().isEmpty() || 
+                txtCostoProducto.getText().isEmpty() || txtPrecioProducto.getText().isEmpty() || 
+                (!chkElaboracion.isSelected() && txtCantidadProducto.getText().isEmpty())) {
+                JOptionPane.showMessageDialog(this, "Por favor, complete todos los campos.", "Error", JOptionPane.ERROR_MESSAGE);
+                return; // Salir del método si hay campos vacíos
+            }
 
-          String nombre = txtNombreProducto.getText();
-          String descripcion = txtDescripcionProducto.getText();
-          float precio = Float.parseFloat(txtPrecioProducto.getText());
-          float costo = Float.parseFloat(txtCostoProducto.getText());
-          boolean elaboracion = chkElaboracion.isSelected();
+            String nombre = txtNombreProducto.getText();
+            String descripcion = txtDescripcionProducto.getText();
+            float precio = Float.parseFloat(txtPrecioProducto.getText());
+            float costo = Float.parseFloat(txtCostoProducto.getText());
+            boolean elaboracion = chkElaboracion.isSelected();
 
-          ControladoraProducto controladoraProducto = new ControladoraProducto();
-          Producto producto = new Producto(nombre, descripcion, precio, costo, elaboracion);
-          try {
-              controladoraProducto.Guardar(producto);
-          } catch (SQLException e) {
-              e.printStackTrace();
-              JOptionPane.showMessageDialog(this, "Error al guardar el producto.", "Error", JOptionPane.ERROR_MESSAGE);
-              return;
-          }
+            ControladoraProducto controladoraProducto = new ControladoraProducto();
+            Producto producto = new Producto(nombre, descripcion, precio, costo, elaboracion);
 
-          txtNombreProducto.setText("");
-          txtDescripcionProducto.setText("");
-          txtCostoProducto.setText("");
-          txtPrecioProducto.setText("");
-          chkElaboracion.setSelected(true);
+            try {
+                controladoraProducto.Guardar(producto);
 
-          cargarProductos();
+                // Si el producto no es elaborado, guardarlo en Stock
+                if (!elaboracion) {
+                    int cantidad = Integer.parseInt(txtCantidadProducto.getText());
+                    Stock stock = new Stock(cantidad, producto);
+                    controladoraProducto.GuardarStock(stock);
+                }
+
+            } catch (SQLException e) {
+                e.printStackTrace();
+                JOptionPane.showMessageDialog(this, "Error al guardar el producto.", "Error", JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+
+            txtNombreProducto.setText("");
+            txtDescripcionProducto.setText("");
+            txtCostoProducto.setText("");
+            txtPrecioProducto.setText("");
+            chkElaboracion.setSelected(true);
+            txtCantidadProducto.setText("");
+
+            cargarProductos();
+
         }
     }//GEN-LAST:event_btnGuardarProductoActionPerformed
    
