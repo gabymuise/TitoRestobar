@@ -1,20 +1,45 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/GUIForms/JPanel.java to edit this template
- */
 package Programa;
 
-/**
- *
- * @author vsmx4
- */
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.ResultSet;
+import java.sql.Statement;
+import javax.swing.table.DefaultTableModel;
+
 public class VistaStock extends javax.swing.JPanel {
 
-    /**
-     * Creates new form VistaStock
-     */
-    public VistaStock() {
+  public VistaStock() {
         initComponents();
+        cargarDatosStock();
+    }
+
+    private void cargarDatosStock() {
+        DefaultTableModel modelo = (DefaultTableModel) tablaStock.getModel();
+        modelo.setRowCount(0); // Limpiar tabla antes de cargar datos
+
+        try {
+            // Conecta a la base de datos (asegúrate de tener el controlador JDBC cargado)
+            Connection conn = DriverManager.getConnection("jdbc:mysql://localhost:3306/titorestobar", "root", "123456");
+
+            // Consulta SQL para obtener los datos del stock junto con el nombre del producto
+            String sql = "SELECT productos.id, productos.nombre, stock.cantidad " +
+                         "FROM stock " +
+                         "JOIN productos ON stock.id_producto = productos.id";
+            Statement stmt = conn.createStatement();
+            ResultSet rs = stmt.executeQuery(sql);
+
+            // Itera a través de los resultados y agrega cada registro a la tabla
+            while (rs.next()) {
+                int idProducto = rs.getInt("id");
+                String nombreProducto = rs.getString("nombre");
+                int cantidad = rs.getInt("cantidad");
+                modelo.addRow(new Object[]{idProducto, nombreProducto, cantidad});
+            }
+
+            conn.close();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     /**
@@ -27,12 +52,12 @@ public class VistaStock extends javax.swing.JPanel {
     private void initComponents() {
 
         jScrollPane1 = new javax.swing.JScrollPane();
-        jTable1 = new javax.swing.JTable();
+        tablaStock = new javax.swing.JTable();
         jLabel1 = new javax.swing.JLabel();
 
         setPreferredSize(new java.awt.Dimension(800, 500));
 
-        jTable1.setModel(new javax.swing.table.DefaultTableModel(
+        tablaStock.setModel(new javax.swing.table.DefaultTableModel(
             new Object [][] {
                 {null, null, null},
                 {null, null, null},
@@ -40,14 +65,14 @@ public class VistaStock extends javax.swing.JPanel {
                 {null, null, null}
             },
             new String [] {
-                "Id", "Nombre", "Cantidad"
+                "IdProducto", "Nombre", "Cantidad"
             }
         ) {
             Class[] types = new Class [] {
                 java.lang.Integer.class, java.lang.String.class, java.lang.String.class
             };
             boolean[] canEdit = new boolean [] {
-                false, true, true
+                false, false, false
             };
 
             public Class getColumnClass(int columnIndex) {
@@ -58,7 +83,7 @@ public class VistaStock extends javax.swing.JPanel {
                 return canEdit [columnIndex];
             }
         });
-        jScrollPane1.setViewportView(jTable1);
+        jScrollPane1.setViewportView(tablaStock);
 
         jLabel1.setText("PRODUCTO NO ELABORADO");
 
@@ -69,21 +94,21 @@ public class VistaStock extends javax.swing.JPanel {
             .addGroup(layout.createSequentialGroup()
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(layout.createSequentialGroup()
-                        .addGap(113, 113, 113)
-                        .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 502, javax.swing.GroupLayout.PREFERRED_SIZE))
-                    .addGroup(layout.createSequentialGroup()
                         .addGap(294, 294, 294)
-                        .addComponent(jLabel1)))
-                .addContainerGap(185, Short.MAX_VALUE))
+                        .addComponent(jLabel1))
+                    .addGroup(layout.createSequentialGroup()
+                        .addGap(127, 127, 127)
+                        .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 502, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                .addContainerGap(171, Short.MAX_VALUE))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
                 .addGap(36, 36, 36)
                 .addComponent(jLabel1)
-                .addGap(38, 38, 38)
+                .addGap(39, 39, 39)
                 .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 227, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(184, Short.MAX_VALUE))
+                .addContainerGap(183, Short.MAX_VALUE))
         );
     }// </editor-fold>//GEN-END:initComponents
 
@@ -91,6 +116,6 @@ public class VistaStock extends javax.swing.JPanel {
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JLabel jLabel1;
     private javax.swing.JScrollPane jScrollPane1;
-    private javax.swing.JTable jTable1;
+    private javax.swing.JTable tablaStock;
     // End of variables declaration//GEN-END:variables
 }

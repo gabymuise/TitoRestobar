@@ -73,7 +73,43 @@ public class DAOProducto {
             comando.executeUpdate();
         }
     }
+<<<<<<< HEAD
     
+=======
+
+    public void eliminarStockPorIdProducto(int idProducto) throws SQLException {
+        String consulta = "DELETE FROM stock WHERE id_producto = ?";
+        try (PreparedStatement comando = conexion.prepareStatement(consulta)) {
+            comando.setInt(1, idProducto);
+            comando.executeUpdate();
+        }
+    }
+
+    public boolean EliminarProductoPorNombre(String nombre) throws SQLException {
+        String consulta = "SELECT id FROM productos WHERE nombre = ?";
+        try (PreparedStatement comando = conexion.prepareStatement(consulta)) {
+            comando.setString(1, nombre);
+            ResultSet rs = comando.executeQuery();
+            if (rs.next()) {
+                int idProducto = rs.getInt("id");
+
+                // Eliminar stock asociado al producto
+                eliminarStockPorIdProducto(idProducto);
+
+                // Eliminar el producto
+                String deleteProducto = "DELETE FROM productos WHERE id = ?";
+                try (PreparedStatement deleteCommand = conexion.prepareStatement(deleteProducto)) {
+                    deleteCommand.setInt(1, idProducto);
+                    int filasAfectadas = deleteCommand.executeUpdate();
+                    return filasAfectadas > 0;
+                }
+            } else {
+                return false;
+            }
+        }
+    }
+
+>>>>>>> eb6203867ec61bbf9de6f87695be8b8079472e23
     public void Ver(Producto producto) throws SQLException {
         String consulta = "SELECT * FROM productos WHERE nombre = ?";
         try (PreparedStatement comando = conexion.prepareStatement(consulta)) {
