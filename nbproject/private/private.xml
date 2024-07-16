@@ -3,28 +3,12 @@
     <editor-bookmarks xmlns="http://www.netbeans.org/ns/editor-bookmarks/2" lastBookmarkId="0"/>
     <open-files xmlns="http://www.netbeans.org/ns/projectui-open-files/2">
         <group>
-<<<<<<< HEAD
-<<<<<<< HEAD
             <file>file:/C:/Users/Vicente/Documents/NetBeansProjects/TitoRestobar/src/Programa/DAO/DAOMesa.java</file>
-            <file>file:/C:/Users/Vicente/Documents/NetBeansProjects/TitoRestobar/src/Programa/DAO/DAOProducto.java</file>
             <file>file:/C:/Users/Vicente/Documents/NetBeansProjects/TitoRestobar/src/Programa/Controller/ControladoraProducto.java</file>
+            <file>file:/C:/Users/Vicente/Documents/NetBeansProjects/TitoRestobar/src/Programa/DAO/DAOProducto.java</file>
             <file>file:/C:/Users/Vicente/Documents/NetBeansProjects/TitoRestobar/src/Programa/Mesa.java</file>
             <file>file:/C:/Users/Vicente/Documents/NetBeansProjects/TitoRestobar/src/Programa/Controller/ControladoraStock.java</file>
             <file>file:/C:/Users/Vicente/Documents/NetBeansProjects/TitoRestobar/src/Programa/Controller/ControladoraMesa.java</file>
-=======
-=======
->>>>>>> eb6203867ec61bbf9de6f87695be8b8079472e23
-            <file>file:/C:/Users/gabri/Documents/NetBeansProjects/TitoRestobar-master/src/Programa/VistaStock.java</file>
-            <file>file:/C:/Users/gabri/Documents/NetBeansProjects/TitoRestobar-master/src/Programa/VistaProducto.java</file>
-            <file>file:/C:/Users/gabri/Documents/NetBeansProjects/TitoRestobar-master/src/Programa/Controller/ControladoraProducto.java</file>
-            <file>file:/C:/Users/gabri/Documents/NetBeansProjects/TitoRestobar-master/src/Programa/DAO/DAOPedido.java</file>
-            <file>file:/C:/Users/gabri/Documents/NetBeansProjects/TitoRestobar-master/src/Programa/DAO/DAOStock.java</file>
-            <file>file:/C:/Users/gabri/Documents/NetBeansProjects/TitoRestobar-master/src/Programa/Controller/ControladoraStock.java</file>
-            <file>file:/C:/Users/gabri/Documents/NetBeansProjects/TitoRestobar-master/src/Programa/DAO/DAOProducto.java</file>
-<<<<<<< HEAD
->>>>>>> eb6203867ec61bbf9de6f87695be8b8079472e23
-=======
->>>>>>> eb6203867ec61bbf9de6f87695be8b8079472e23
         </group>
     </open-files>
 </project-private>
