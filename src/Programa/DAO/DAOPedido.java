@@ -1,6 +1,7 @@
 package Programa.DAO;
 
 import Programa.Conexion;
+import Programa.Descuento;
 import Programa.Pedido;
 import Programa.Item;
 import Programa.Mesa;
@@ -24,27 +25,26 @@ public class DAOPedido {
     }
 
     public void crearPedido(Pedido pedido) throws SQLException {
-        String consulta = "INSERT INTO pedidos (mesa_id, fecha_hora_apertura) VALUES (?, ?)";
+        String consulta = "INSERT INTO pedidos (fechaHoraApertura, descuento) VALUES (?, ?)";
         try (PreparedStatement ps = conexion.prepareStatement(consulta)) {
-            ps.setInt(1, pedido.getId());
-            ps.setTimestamp(2, new java.sql.Timestamp(pedido.getFechaHoraApertura().getTime()));
+            ps.setTimestamp(1, new java.sql.Timestamp(pedido.getFechaHoraApertura().getTime()));
+            ps.setFloat(2, pedido.getDescuento().getPorcentaje());
             ps.executeUpdate();
         }
     }
 
     public void agregarItem(Pedido pedido, Item item) throws SQLException {
-        String consulta = "INSERT INTO items_pedido (pedido_id, producto_id, cantidad, precio_total) VALUES (?, ?, ?, ?)";
+        String consulta = "INSERT INTO items (id_pedido, id_producto, cantidad) VALUES (?, ?, ?)";
         try (PreparedStatement ps = conexion.prepareStatement(consulta)) {
             ps.setInt(1, pedido.getId());
             ps.setInt(2, item.getProducto().getId());
             ps.setInt(3, item.getCantidad());
-            ps.setFloat(4, item.getPrecio());
             ps.executeUpdate();
         }
     }
 
     public void eliminarItem(Pedido pedido, Item item) throws SQLException {
-        String consulta = "DELETE FROM items_pedido WHERE pedido_id = ? AND producto_id = ?";
+        String consulta = "DELETE FROM items WHERE id_pedido = ? AND id_producto = ?";
         try (PreparedStatement ps = conexion.prepareStatement(consulta)) {
             ps.setInt(1, pedido.getId());
             ps.setInt(2, item.getProducto().getId());
@@ -54,14 +54,17 @@ public class DAOPedido {
 
     public List<Pedido> listarPedidosDeMesa(Mesa mesa) throws SQLException {
         List<Pedido> pedidos = new ArrayList<>();
-        String consulta = "SELECT * FROM pedidos WHERE mesa_id = ?";
+        String consulta = "SELECT p.*, mp.id_mesa FROM pedidos p " +
+                          "JOIN mesa_pedido mp ON p.id = mp.id_pedido " +
+                          "WHERE mp.id_mesa = ?";
         try (PreparedStatement ps = conexion.prepareStatement(consulta)) {
             ps.setInt(1, mesa.getId());
             try (ResultSet rs = ps.executeQuery()) {
                 while (rs.next()) {
                     int pedidoId = rs.getInt("id");
-                    java.util.Date fechaHoraApertura = new java.util.Date(rs.getTimestamp("fecha_hora_apertura").getTime());
-                    Pedido pedido = new Pedido(fechaHoraApertura, new ArrayList<>());
+                    java.util.Date fechaHoraApertura = new java.util.Date(rs.getTimestamp("fechaHoraApertura").getTime());
+                    float porcentajeDescuento = rs.getFloat("descuento");
+                    Pedido pedido = new Pedido(fechaHoraApertura, new ArrayList<>(), new Descuento(porcentajeDescuento));
                     pedido.setId(pedidoId);
                     pedidos.add(pedido);
                 }

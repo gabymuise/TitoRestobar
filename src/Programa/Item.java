@@ -3,12 +3,10 @@ package Programa;
 public class Item {
     private Producto producto;
     public int cantidad;
-    public float precioTotal;
 
-    public Item(Producto producto, int cantidad, float precioTotal) {
+    public Item(Producto producto, int cantidad) {
         this.producto = producto;
         this.cantidad = cantidad;
-        this.precioTotal = precioTotal;
     }
 
     public Producto getProducto() {
@@ -27,15 +25,8 @@ public class Item {
         this.cantidad = cantidad;
     }
     
-    public void setPrecio(float precioTotal){
-        this.precioTotal = precioTotal;
-    }
     
-    public float getPrecio(){
-        return precioTotal;
-    }
-    
-    public float CalcularTotal(){
+    public float getSubTotal(){
         return producto.getPrecio()* cantidad;
     }
     

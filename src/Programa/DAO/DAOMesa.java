@@ -1,6 +1,7 @@
 package Programa.DAO;
 
 import Programa.Conexion;
+import Programa.Descuento;
 import Programa.Item;
 import Programa.Mesa;
 import Programa.Pedido;
@@ -70,7 +71,7 @@ public class DAOMesa {
     public Pedido verPedidoActivoEnMesa(Mesa mesa) throws SQLException {
         String consultaPedido = "SELECT p.* FROM pedidos p " +
                                 "JOIN mesa_pedido mp ON p.id = mp.id_pedido " +
-                                "WHERE mp.id_mesa = ? ORDER BY p.fecha_hora_apertura DESC LIMIT 1";
+                                "WHERE mp.id_mesa = ? ORDER BY p.fechaHoraApertura DESC LIMIT 1";
         Pedido pedido = null;
 
         try (PreparedStatement psPedido = conexion.prepareStatement(consultaPedido)) {
@@ -78,13 +79,15 @@ public class DAOMesa {
             try (ResultSet rsPedido = psPedido.executeQuery()) {
                 if (rsPedido.next()) {
                     int pedidoId = rsPedido.getInt("id");
-                    java.util.Date fechaHoraApertura = new java.util.Date(rsPedido.getTimestamp("fecha_hora_apertura").getTime());
+                    java.util.Date fechaHoraApertura = new java.util.Date(rsPedido.getTimestamp("fechaHoraApertura").getTime());
                     List<Item> items = new ArrayList<>();
+                    float porcentajeDescuento = rsPedido.getFloat("descuento");
+                    Descuento descuento = new Descuento(porcentajeDescuento);
 
-                    String consultaItems = "SELECT ip.*, p.nombre, p.descripcion, p.precio, p.costo, p.elaboracion " +
-                                           "FROM items_pedido ip " +
-                                           "JOIN productos p ON ip.producto_id = p.id " +
-                                           "WHERE ip.pedido_id = ?";
+                    String consultaItems = "SELECT ip.*, p.nombre, p.descripcion, p.precio, p.costo, p.elaborado " +
+                                           "FROM items ip " +
+                                           "JOIN productos p ON ip.id_producto = p.id " +
+                                           "WHERE ip.id = ?";
 
                     try (PreparedStatement psItems = conexion.prepareStatement(consultaItems)) {
                         psItems.setInt(1, pedidoId);
@@ -94,20 +97,18 @@ public class DAOMesa {
                                 String descripcion = rsItems.getString("descripcion");
                                 float precio = rsItems.getFloat("precio");
                                 float costo = rsItems.getFloat("costo");
-                                boolean elaboracion = rsItems.getBoolean("elaboracion");
+                                boolean elaborado = rsItems.getBoolean("elaborado");
 
-                                Producto producto = new Producto(nombre, descripcion, precio, costo, elaboracion);
+                                Producto producto = new Producto(nombre, descripcion, precio, costo, elaborado);
                                 int cantidad = rsItems.getInt("cantidad");
-                                float precioTotal = rsItems.getFloat("precio_total");
 
-                                Item item = new Item(producto, cantidad, precioTotal);
-                                item.setPrecio(precioTotal);
+                                Item item = new Item(producto, cantidad);
                                 items.add(item);
                             }
                         }
                     }
 
-                    pedido = new Pedido(fechaHoraApertura, items);
+                    pedido = new Pedido(fechaHoraApertura, items, descuento);
                     pedido.setId(pedidoId);
                 }
             }

@@ -4,6 +4,7 @@ import Programa.DAO.DAOPedido;
 import Programa.Item;
 import Programa.Mesa;
 import Programa.Pedido;
+import Programa.Descuento;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.List;
@@ -30,9 +31,17 @@ public class ControladoraPedido {
     public List<Pedido> listarPedidosDeMesa(Mesa mesa) throws SQLException {
         return daoPedido.listarPedidosDeMesa(mesa);
     }
-    
+
+    public float calcularTotal(Pedido pedido, Descuento descuento) throws SQLException {
+        float total = 0;
+        List<Item> items = pedido.getItems();
+        for (Item item : items) {
+            total += item.getSubTotal();
+        }
+        return descuento.aplicarDescuento(total);
+    }
+
     public void cerrarConexion() {
         daoPedido.cerrarConexion();
     }
-    
 }
