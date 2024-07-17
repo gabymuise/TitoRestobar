@@ -268,20 +268,26 @@ public class VistaPedido extends javax.swing.JPanel {
 
     private void jButtonAgregarProductoActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonAgregarProductoActionPerformed
     Producto productoSeleccionado = (Producto) jComboBoxProducto.getSelectedItem();
-        int cantidad = 0;
-        try {
-            cantidad = Integer.parseInt(txtCantidad.getText());
-        } catch (NumberFormatException e) {
-            JOptionPane.showMessageDialog(this, "Cantidad no válida.");
-            return;
-        }
-        if (productoSeleccionado != null && cantidad > 0) {
-            Item item = new Item(productoSeleccionado, cantidad);
-            itemsPedido.add(item);
-            actualizarTablaItems();
-        } else {
-            JOptionPane.showMessageDialog(this, "Seleccione un producto y/o ingrese una cantidad válida.");
-        }
+    int cantidad = 0;
+    try {
+        cantidad = Integer.parseInt(txtCantidad.getText());
+    } catch (NumberFormatException e) {
+        JOptionPane.showMessageDialog(this, "Cantidad no válida.");
+        return;
+    }
+    if (productoSeleccionado != null && cantidad > 0) {
+        Item item = new Item(productoSeleccionado, cantidad);
+        itemsPedido.add(item);
+        DefaultTableModel model = (DefaultTableModel) jTable1.getModel();
+        model.addRow(new Object[]{
+            productoSeleccionado.getNombre(),
+            cantidad,
+            productoSeleccionado.getPrecio()
+        });
+        actualizarTablaItems();
+    } else {
+        JOptionPane.showMessageDialog(this, "Seleccione un producto y/o ingrese una cantidad válida.");
+    }
     }//GEN-LAST:event_jButtonAgregarProductoActionPerformed
 
     private void crearPedidoActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_crearPedidoActionPerformed
