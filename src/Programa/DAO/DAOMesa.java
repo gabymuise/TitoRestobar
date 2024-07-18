@@ -1,11 +1,11 @@
 package Programa.DAO;
 
-import Programa.Conexion;
-import Programa.Descuento;
-import Programa.Item;
-import Programa.Mesa;
-import Programa.Pedido;
-import Programa.Producto;
+import Programa.Model.Conexion;
+import Programa.Model.Descuento;
+import Programa.Model.Item;
+import Programa.Model.Mesa;
+import Programa.Model.Pedido;
+import Programa.Model.Producto;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -58,20 +58,11 @@ public class DAOMesa {
         }
     }
 
-    public void cerrarConexion() {
-        try {
-            if (conexion != null && !conexion.isClosed()) {
-                conexion.close();
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-    }
-
     public Pedido verPedidoActivoEnMesa(Mesa mesa) throws SQLException {
-        String consultaPedido = "SELECT p.* FROM pedidos p " +
+        String consultaPedido = "SELECT p.id, p.fechaHoraApertura, p.descuento FROM pedidos p " +
                                 "JOIN mesa_pedido mp ON p.id = mp.id_pedido " +
-                                "WHERE mp.id_mesa = ? ORDER BY p.fechaHoraApertura DESC LIMIT 1";
+                                "WHERE mp.id_mesa = ? AND p.fechaHoraCierre IS NULL " +
+                                "ORDER BY p.fechaHoraApertura DESC LIMIT 1";
         Pedido pedido = null;
 
         try (PreparedStatement psPedido = conexion.prepareStatement(consultaPedido)) {
@@ -84,10 +75,10 @@ public class DAOMesa {
                     float porcentajeDescuento = rsPedido.getFloat("descuento");
                     Descuento descuento = new Descuento(porcentajeDescuento);
 
-                    String consultaItems = "SELECT ip.*, p.nombre, p.descripcion, p.precio, p.costo, p.elaborado " +
-                                           "FROM items ip " +
-                                           "JOIN productos p ON ip.id_producto = p.id " +
-                                           "WHERE ip.id = ?";
+                    String consultaItems = "SELECT i.*, p.nombre, p.descripcion, p.precio, p.costo, p.elaborado " +
+                                           "FROM items i " +
+                                           "JOIN productos p ON i.id_producto = p.id " +
+                                           "WHERE i.id_pedido = ?";
 
                     try (PreparedStatement psItems = conexion.prepareStatement(consultaItems)) {
                         psItems.setInt(1, pedidoId);
@@ -108,7 +99,7 @@ public class DAOMesa {
                         }
                     }
 
-                    pedido = new Pedido(fechaHoraApertura, items, descuento);
+                    pedido = new Pedido(mesa, fechaHoraApertura, items, descuento);
                     pedido.setId(pedidoId);
                 }
             }
@@ -123,6 +114,16 @@ public class DAOMesa {
             ps.setInt(1, mesa.getId());
             ps.setInt(2, pedido.getId());
             ps.executeUpdate();
+        }
+    }
+
+    public void cerrarConexion() {
+        try {
+            if (conexion != null && !conexion.isClosed()) {
+                conexion.close();
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
         }
     }
 }

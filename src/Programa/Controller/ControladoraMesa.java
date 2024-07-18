@@ -1,14 +1,13 @@
 package Programa.Controller;
 
 import Programa.DAO.DAOMesa;
-import Programa.Mesa;
-import Programa.Pedido;
+import Programa.Model.Mesa;
+import Programa.Model.Pedido;
 import java.sql.SQLException;
 import java.util.List;
 
 public class ControladoraMesa {
     private DAOMesa daoMesa;
-    private Pedido pedido;
 
     public ControladoraMesa() {
         daoMesa = new DAOMesa();
@@ -26,7 +25,7 @@ public class ControladoraMesa {
         daoMesa.eliminarMesa(nombre);
     }
     
-     public Pedido verPedidoActivoEnMesa(Mesa mesa) throws SQLException {
+    public Pedido verPedidoActivoEnMesa(Mesa mesa) throws SQLException {
         return daoMesa.verPedidoActivoEnMesa(mesa);
     }
      

@@ -1,18 +1,17 @@
 package Programa.Controller;
 
 import Programa.DAO.DAOPedido;
-import Programa.Item;
-import Programa.Mesa;
-import Programa.Pedido;
-import Programa.Descuento;
-import java.sql.Connection;
+import Programa.Model.Item;
+import Programa.Model.Mesa;
+import Programa.Model.Pedido;
+import Programa.Model.Descuento;
 import java.sql.SQLException;
 import java.util.List;
 
 public class ControladoraPedido {
     private DAOPedido daoPedido;
 
-    public ControladoraPedido(Connection conexion) {
+    public ControladoraPedido() throws SQLException {
         daoPedido = new DAOPedido();
     }
 
@@ -41,7 +40,4 @@ public class ControladoraPedido {
         return descuento.aplicarDescuento(total);
     }
 
-    public void cerrarConexion() {
-        daoPedido.cerrarConexion();
-    }
 }

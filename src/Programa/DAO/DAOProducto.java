@@ -1,8 +1,8 @@
 package Programa.DAO;
 
-import Programa.Conexion;
-import Programa.Producto;
-import Programa.Stock;
+import Programa.Model.Conexion;
+import Programa.Model.Producto;
+import Programa.Model.Stock;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;

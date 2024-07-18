@@ -1,66 +1,61 @@
 package Programa.DAO;
 
-import Programa.Stock;
-import Programa.Conexion;
+
+import Programa.Model.Conexion;
+import Programa.Model.Producto;
+import Programa.Model.Stock;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
 public class DAOStock {
-    private Connection conexion;
+    private Producto producto;
+    private Stock stock;
 
-    public DAOStock() {
-        try {
-            conexion = Conexion.Conectar();
+    public Stock obtenerStockPorProducto(int idProducto) {
+        String sql = "SELECT * FROM stock WHERE id_producto = ?";
+        
+        try (Connection con = Conexion.Conectar();
+             PreparedStatement ps = con.prepareStatement(sql)) {
+            ps.setInt(1, idProducto);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    stock.setId(rs.getInt("id"));
+                    stock.setCantidad(rs.getInt("cantidad"));
+                    // Set the product object with the id
+                    producto.setId(rs.getInt("id_producto"));
+                    stock.setProducto(producto);
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return stock;
+    }
+
+    public void actualizarStock(Stock stock) {
+        String sql = "UPDATE stock SET cantidad = ? WHERE id_producto = ?";
+        
+        try (Connection con = Conexion.Conectar();
+             PreparedStatement ps = con.prepareStatement(sql)) {
+            ps.setInt(1, stock.getCantidad());
+            ps.setInt(2, stock.getProducto().getId());
+            ps.executeUpdate();
         } catch (SQLException e) {
             e.printStackTrace();
         }
     }
 
-    public void aumentarStock(int productoId, int cantidad) throws SQLException {
-        String consulta = "UPDATE stock SET cantidad = cantidad + ? WHERE producto_id = ?";
-        try (PreparedStatement ps = conexion.prepareStatement(consulta)) {
-            ps.setInt(1, cantidad);
-            ps.setInt(2, productoId);
+    public void eliminarStock(int idProducto) {
+        String sql = "DELETE FROM stock WHERE id_producto = ?";
+        
+        try (Connection con = Conexion.Conectar();
+             PreparedStatement ps = con.prepareStatement(sql)) {
+            ps.setInt(1, idProducto);
             ps.executeUpdate();
-        }
-    }
-
-    public void disminuirStock(int productoId, int cantidad) throws SQLException {
-        String consulta = "UPDATE stock SET cantidad = cantidad - ? WHERE producto_id = ?";
-        try (PreparedStatement ps = conexion.prepareStatement(consulta)) {
-            ps.setInt(1, cantidad);
-            ps.setInt(2, productoId);
-            ps.executeUpdate();
-        }
-    }
-
-    public void actualizarStock(int productoId, int nuevaCantidad) throws SQLException {
-        String consulta = "UPDATE stock SET cantidad = ? WHERE producto_id = ?";
-        try (PreparedStatement ps = conexion.prepareStatement(consulta)) {
-            ps.setInt(1, nuevaCantidad);
-            ps.setInt(2, productoId);
-            ps.executeUpdate();
-        }
-    }
-
-    public void eliminarStock(int productoId) throws SQLException {
-        String consulta = "DELETE FROM stock WHERE producto_id = ?";
-        try (PreparedStatement ps = conexion.prepareStatement(consulta)) {
-            ps.setInt(1, productoId);
-            ps.executeUpdate();
-        }
-    }
-
-    public void cerrarConexion() {
-        try {
-            if (conexion != null && !conexion.isClosed()) {
-                conexion.close();
-            }
         } catch (SQLException e) {
             e.printStackTrace();
         }
     }
 }
-
