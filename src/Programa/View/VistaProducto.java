@@ -182,6 +182,7 @@ public class VistaProducto extends javax.swing.JPanel {
         modelo.addColumn("Precio");
         modelo.addColumn("Costo");
         modelo.addColumn("Elaborado");
+        tableProductos.setModel(modelo);
 
         try {
             listaDeProductos = dp.listadoDeProductos(); // Intentamos obtener la lista de productos
@@ -319,7 +320,7 @@ public class VistaProducto extends javax.swing.JPanel {
             if (filaSeleccionada >= 0) {
                 try {
                     String nombreProducto = (String) tableProductos.getValueAt(filaSeleccionada, 1); // Nombre
-                    boolean eliminado = controladoraProducto.EliminarProductoPorNombre(nombreProducto);
+                    boolean eliminado = controladoraProducto.eliminarProductoPorNombre(nombreProducto);
                     if (eliminado) {
                         DefaultTableModel modelo = (DefaultTableModel) tableProductos.getModel();
                         modelo.removeRow(filaSeleccionada);
@@ -339,47 +340,43 @@ public class VistaProducto extends javax.swing.JPanel {
 
     private void btnGuardarProductoActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnGuardarProductoActionPerformed
         if (btnGuardarProducto.isEnabled()) {
-              // Validar que los campos no estén vacíos
-            if (txtNombreProducto.getText().isEmpty() || txtDescripcionProducto.getText().isEmpty() || 
-                txtCostoProducto.getText().isEmpty() || txtPrecioProducto.getText().isEmpty() || 
-                (!chkElaboracion.isSelected() && txtCantidadProducto.getText().isEmpty())) {
-                JOptionPane.showMessageDialog(this, "Por favor, complete todos los campos.", "Error", JOptionPane.ERROR_MESSAGE);
-                return; // Salir del método si hay campos vacíos
-            }
-
-            String nombre = txtNombreProducto.getText();
-            String descripcion = txtDescripcionProducto.getText();
-            float precio = Float.parseFloat(txtPrecioProducto.getText());
-            float costo = Float.parseFloat(txtCostoProducto.getText());
-            boolean elaboracion = chkElaboracion.isSelected();
-
-            ControladoraProducto controladoraProducto = new ControladoraProducto();
-            Producto producto = new Producto(nombre, descripcion, precio, costo, elaboracion);
-
             try {
-                controladoraProducto.Guardar(producto);
-
+                // Validar que los campos no estén vacíos
+                if (txtNombreProducto.getText().isEmpty() || txtDescripcionProducto.getText().isEmpty() ||
+                        txtCostoProducto.getText().isEmpty() || txtPrecioProducto.getText().isEmpty() ||
+                        (!chkElaboracion.isSelected() && txtCantidadProducto.getText().isEmpty())) {
+                    JOptionPane.showMessageDialog(this, "Por favor, complete todos los campos.", "Error", JOptionPane.ERROR_MESSAGE);
+                    return; // Salir del método si hay campos vacíos
+                }
+                
+                String nombre = txtNombreProducto.getText();
+                String descripcion = txtDescripcionProducto.getText();
+                float precio = Float.parseFloat(txtPrecioProducto.getText());
+                float costo = Float.parseFloat(txtCostoProducto.getText());
+                boolean elaboracion = chkElaboracion.isSelected();
+                
+                ControladoraProducto controladoraProducto = new ControladoraProducto();
+                Producto producto = new Producto(nombre, descripcion, precio, costo, elaboracion);
+                
+                controladoraProducto.guardar(producto);
                 // Si el producto no es elaborado, guardarlo en Stock
                 if (!elaboracion) {
                     int cantidad = Integer.parseInt(txtCantidadProducto.getText());
                     Stock stock = new Stock(cantidad, producto);
-                    controladoraProducto.GuardarStock(stock);
+                    controladoraProducto.guardarStock(stock);
                 }
-
-            } catch (SQLException e) {
-                e.printStackTrace();
-                JOptionPane.showMessageDialog(this, "Error al guardar el producto.", "Error", JOptionPane.ERROR_MESSAGE);
-                return;
+                
+                txtNombreProducto.setText("");
+                txtDescripcionProducto.setText("");
+                txtCostoProducto.setText("");
+                txtPrecioProducto.setText("");
+                chkElaboracion.setSelected(true);
+                txtCantidadProducto.setText("");
+                
+                cargarProductos();
+            } catch (SQLException ex) {
+                Logger.getLogger(VistaProducto.class.getName()).log(Level.SEVERE, null, ex);
             }
-
-            txtNombreProducto.setText("");
-            txtDescripcionProducto.setText("");
-            txtCostoProducto.setText("");
-            txtPrecioProducto.setText("");
-            chkElaboracion.setSelected(true);
-            txtCantidadProducto.setText("");
-
-            cargarProductos();
 
         }
     }//GEN-LAST:event_btnGuardarProductoActionPerformed

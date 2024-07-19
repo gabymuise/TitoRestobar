@@ -1,17 +1,14 @@
 package Programa.View;
 
+import Programa.Controller.ControladoraMesa;
 import Programa.DAO.DAOMesa;
+import Programa.Model.Mesa;
 import java.sql.SQLException;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.DefaultListModel;
-import Programa.Controller.ControladoraMesa;
-import Programa.Model.Mesa;
 import javax.swing.JOptionPane;
-import javax.swing.table.DefaultTableModel;
-
-
 
 public class VistaMesa extends javax.swing.JPanel {
 
@@ -19,13 +16,13 @@ public class VistaMesa extends javax.swing.JPanel {
 
     public VistaMesa() throws SQLException {
         initComponents();
-        CargarListaMesa();
+        cargarListaMesa();
+        // Inicializa la visibilidad de componentes como no visibles
         lblNombreMesa.setVisible(false);
         txtNombreMesa.setVisible(false);
         btnCrearMesa.setVisible(false);
         btnLimpiarNombre.setVisible(false);
     }
-
     @SuppressWarnings("unchecked")
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
@@ -146,49 +143,52 @@ public class VistaMesa extends javax.swing.JPanel {
     }//GEN-LAST:event_txtNombreMesaActionPerformed
 
     private void btnLimpiarNombreActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnLimpiarNombreActionPerformed
-        if(btnLimpiarNombre.isEnabled()){txtNombreMesa.setText("");}
+         if (btnLimpiarNombre.isEnabled()) {
+            txtNombreMesa.setText(""); // Limpia el campo de texto
+        }
         
     }//GEN-LAST:event_btnLimpiarNombreActionPerformed
 
     private void btnAgregarMesaActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnAgregarMesaActionPerformed
-        if(btnAgregarMesa.isEnabled()){
+        if (btnAgregarMesa.isEnabled()) {
             lblNombreMesa.setVisible(true);
             txtNombreMesa.setVisible(true);
             btnCrearMesa.setVisible(true);
             btnLimpiarNombre.setVisible(true);
         }
     }//GEN-LAST:event_btnAgregarMesaActionPerformed
-    private void CargarListaMesa() throws SQLException {
+    private void cargarListaMesa() throws SQLException {
         DefaultListModel<String> modelo = new DefaultListModel<>();
         ListMesa.setModel(modelo);
         DAOMesa daoMesa = new DAOMesa();
 
         List<Mesa> mesas = daoMesa.listarMesas(); // Maneja la excepción apropiadamente
         for (Mesa mesa : mesas) {
-            modelo.addElement(mesa.getNombre());
+            modelo.addElement(mesa.getNombre()); // Añade cada mesa a la lista
         }
     }
 
     private void btnCrearMesaActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnCrearMesaActionPerformed
-        String nombre = txtNombreMesa.getText();
+          String nombre = txtNombreMesa.getText();
 
-    if (!nombre.isEmpty()) {
+        if (!nombre.isEmpty()) {
             try {
                 Mesa nuevaMesa = new Mesa(nombre);
                 controladoraMesa.crearMesa(nuevaMesa);
-                txtNombreMesa.setText("");
-                CargarListaMesa();
+                txtNombreMesa.setText(""); // Limpia el campo de texto
+                cargarListaMesa(); // Actualiza la lista de mesas
                 JOptionPane.showMessageDialog(this, "Mesa creada correctamente.");
             } catch (SQLException ex) {
                 Logger.getLogger(VistaMesa.class.getName()).log(Level.SEVERE, null, ex);
+                JOptionPane.showMessageDialog(this, "Error al crear la mesa: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
             }
-    } else {
-        JOptionPane.showMessageDialog(this, "El nombre de la mesa no puede estar vacío.", "Error", JOptionPane.WARNING_MESSAGE);
-    }
+        } else {
+            JOptionPane.showMessageDialog(this, "El nombre de la mesa no puede estar vacío.", "Error", JOptionPane.WARNING_MESSAGE);
+        }
     }//GEN-LAST:event_btnCrearMesaActionPerformed
 
     private void btnEliminarMesaActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnEliminarMesaActionPerformed
-        int indiceSeleccionado = ListMesa.getSelectedIndex();
+       int indiceSeleccionado = ListMesa.getSelectedIndex();
 
         if (indiceSeleccionado >= 0) {
             String nombreMesa = (String) ListMesa.getModel().getElementAt(indiceSeleccionado); // Nombre de la mesa
@@ -196,7 +196,7 @@ public class VistaMesa extends javax.swing.JPanel {
             try {
                 controladoraMesa.eliminarMesa(nombreMesa);
                 DefaultListModel<String> modelo = (DefaultListModel<String>) ListMesa.getModel();
-                modelo.remove(indiceSeleccionado);
+                modelo.remove(indiceSeleccionado); // Elimina la mesa de la lista
                 JOptionPane.showMessageDialog(this, "Mesa eliminada correctamente.");
             } catch (SQLException e) {
                 JOptionPane.showMessageDialog(this, "Error al eliminar la mesa: " + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);

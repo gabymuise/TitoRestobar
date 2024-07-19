@@ -6,6 +6,7 @@ import java.sql.ResultSet;
 import java.sql.Statement;
 import javax.swing.JOptionPane;
 import javax.swing.table.DefaultTableModel;
+import java.sql.PreparedStatement;
 
 public class VistaStock extends javax.swing.JPanel {
 
@@ -139,61 +140,62 @@ public class VistaStock extends javax.swing.JPanel {
     }// </editor-fold>//GEN-END:initComponents
 
     private void jButtonEliminarStockActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonEliminarStockActionPerformed
-   int filaSeleccionada = tablaStock.getSelectedRow();
-        if (filaSeleccionada == -1) {
-            JOptionPane.showMessageDialog(this, "Seleccione un producto para eliminar.", "Error", JOptionPane.ERROR_MESSAGE);
-        } else {
-            int idProducto = (int) tablaStock.getValueAt(filaSeleccionada, 0);
+    int filaSeleccionada = tablaStock.getSelectedRow();
+    if (filaSeleccionada == -1) {
+        JOptionPane.showMessageDialog(this, "Seleccione un producto para eliminar.", "Error", JOptionPane.ERROR_MESSAGE);
+    } else {
+        int idProducto = (int) tablaStock.getValueAt(filaSeleccionada, 0);
 
-            try {
-                Connection conn = DriverManager.getConnection("jdbc:mysql://localhost:3306/titorestobar", "root", "123456");
-                String sql = "DELETE FROM stock WHERE id_producto = " + idProducto;
-                Statement stmt = conn.createStatement();
-                stmt.executeUpdate(sql);
-                conn.close();
+        try (Connection conn = DriverManager.getConnection("jdbc:mysql://localhost:3306/titorestobar", "root", "123456")) {
+            String sql = "DELETE FROM stock WHERE id_producto = ?";
+            PreparedStatement pstmt = conn.prepareStatement(sql);
+            pstmt.setInt(1, idProducto);
+            pstmt.executeUpdate();
 
-                JOptionPane.showMessageDialog(this, "Producto eliminado del stock correctamente.", "Eliminar Producto", JOptionPane.INFORMATION_MESSAGE);
-                cargarDatosStock(); // Actualizar la tabla después de eliminar
-            } catch (Exception e) {
-                e.printStackTrace();
-                JOptionPane.showMessageDialog(this, "Error al eliminar producto: " + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
-            }
+            JOptionPane.showMessageDialog(this, "Producto eliminado del stock correctamente.", "Eliminar Producto", JOptionPane.INFORMATION_MESSAGE);
+            cargarDatosStock(); // Actualizar la tabla después de eliminar
+        } catch (Exception e) {
+            e.printStackTrace();
+            JOptionPane.showMessageDialog(this, "Error al eliminar producto: " + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
         }
+    }
     }//GEN-LAST:event_jButtonEliminarStockActionPerformed
 
     private void jButtonModificarStockActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonModificarStockActionPerformed
          int filaSeleccionada = tablaStock.getSelectedRow();
-        if (filaSeleccionada == -1) {
-            JOptionPane.showMessageDialog(this, "Seleccione un producto para modificar.", "Error", JOptionPane.ERROR_MESSAGE);
-        } else {
-            int idProducto = (int) tablaStock.getValueAt(filaSeleccionada, 0);
-            String nombreProducto = (String) tablaStock.getValueAt(filaSeleccionada, 1);
-            int cantidad = (int) tablaStock.getValueAt(filaSeleccionada, 2);
+    if (filaSeleccionada == -1) {
+        JOptionPane.showMessageDialog(this, "Seleccione un producto para modificar.", "Error", JOptionPane.ERROR_MESSAGE);
+    } else {
+        int idProducto = (int) tablaStock.getValueAt(filaSeleccionada, 0);
+        String nombreProducto = (String) tablaStock.getValueAt(filaSeleccionada, 1);
+        int cantidad = (int) tablaStock.getValueAt(filaSeleccionada, 2);
 
-            String nuevaCantidadStr = JOptionPane.showInputDialog(this, "Ingrese la nueva cantidad para " + nombreProducto + ":");
-            if (nuevaCantidadStr != null && !nuevaCantidadStr.isEmpty()) {
-                try {
-                    int nuevaCantidad = Integer.parseInt(nuevaCantidadStr);
-                    if (nuevaCantidad < 0) {
-                        JOptionPane.showMessageDialog(this, "La cantidad no puede ser negativa.", "Error", JOptionPane.ERROR_MESSAGE);
-                    } else {
-                        Connection conn = DriverManager.getConnection("jdbc:mysql://localhost:3306/titorestobar", "root", "123456");
-                        String sql = "UPDATE stock SET cantidad = " + nuevaCantidad + " WHERE id_producto = " + idProducto;
-                        Statement stmt = conn.createStatement();
-                        stmt.executeUpdate(sql);
-                        conn.close();
+        String nuevaCantidadStr = JOptionPane.showInputDialog(this, "Ingrese la nueva cantidad para " + nombreProducto + ":");
+        if (nuevaCantidadStr != null && !nuevaCantidadStr.isEmpty()) {
+            try {
+                int nuevaCantidad = Integer.parseInt(nuevaCantidadStr);
+                if (nuevaCantidad < 0) {
+                    JOptionPane.showMessageDialog(this, "La cantidad no puede ser negativa.", "Error", JOptionPane.ERROR_MESSAGE);
+                } else {
+                    try (Connection conn = DriverManager.getConnection("jdbc:mysql://localhost:3306/titorestobar", "root", "123456")) {
+                        String sql = "UPDATE stock SET cantidad = ? WHERE id_producto = ?";
+                        PreparedStatement pstmt = conn.prepareStatement(sql);
+                        pstmt.setInt(1, nuevaCantidad);
+                        pstmt.setInt(2, idProducto);
+                        pstmt.executeUpdate();
 
                         JOptionPane.showMessageDialog(this, "Cantidad modificada correctamente.", "Modificar Cantidad", JOptionPane.INFORMATION_MESSAGE);
                         cargarDatosStock(); // Actualizar la tabla después de modificar
                     }
-                } catch (NumberFormatException e) {
-                    JOptionPane.showMessageDialog(this, "Ingrese un número válido para la cantidad.", "Error", JOptionPane.ERROR_MESSAGE);
-                } catch (Exception e) {
-                    e.printStackTrace();
-                    JOptionPane.showMessageDialog(this, "Error al modificar cantidad: " + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
                 }
+            } catch (NumberFormatException e) {
+                JOptionPane.showMessageDialog(this, "Ingrese un número válido para la cantidad.", "Error", JOptionPane.ERROR_MESSAGE);
+            } catch (Exception e) {
+                e.printStackTrace();
+                JOptionPane.showMessageDialog(this, "Error al modificar cantidad: " + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
             }
         }
+    }
     }//GEN-LAST:event_jButtonModificarStockActionPerformed
 
 

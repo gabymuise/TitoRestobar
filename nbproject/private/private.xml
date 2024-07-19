@@ -3,12 +3,13 @@
     <editor-bookmarks xmlns="http://www.netbeans.org/ns/editor-bookmarks/2" lastBookmarkId="0"/>
     <open-files xmlns="http://www.netbeans.org/ns/projectui-open-files/2">
         <group>
-            <file>file:/C:/Users/Vicente/Documents/NetBeansProjects/TitoRestobar/src/Programa/View/VistaRestobar.java</file>
-            <file>file:/C:/Users/Vicente/Documents/NetBeansProjects/TitoRestobar/src/Programa/View/VistaProducto.java</file>
-            <file>file:/C:/Users/Vicente/Documents/NetBeansProjects/TitoRestobar/src/Programa/Controller/ControladoraPedido.java</file>
-            <file>file:/C:/Users/Vicente/Documents/NetBeansProjects/TitoRestobar/src/Programa/View/VistaStock.java</file>
-            <file>file:/C:/Users/Vicente/Documents/NetBeansProjects/TitoRestobar/src/Programa/View/VistaPedido.java</file>
-            <file>file:/C:/Users/Vicente/Documents/NetBeansProjects/TitoRestobar/src/Programa/View/VistaMesa.java</file>
+            <file>file:/C:/Users/gabri/Documents/NetBeansProjects/TitoRestobar/src/Programa/DAO/DAOMesa.java</file>
+            <file>file:/C:/Users/gabri/Documents/NetBeansProjects/TitoRestobar/src/Programa/Controller/ControladoraStock.java</file>
+            <file>file:/C:/Users/gabri/Documents/NetBeansProjects/TitoRestobar/src/Programa/Model/Descuento.java</file>
+            <file>file:/C:/Users/gabri/Documents/NetBeansProjects/TitoRestobar/src/Programa/Controller/ControladoraPedido.java</file>
+            <file>file:/C:/Users/gabri/Documents/NetBeansProjects/TitoRestobar/src/Programa/Controller/ControladoraProducto.java</file>
+            <file>file:/C:/Users/gabri/Documents/NetBeansProjects/TitoRestobar/src/Programa/Controller/ControladoraMesa.java</file>
+            <file>file:/C:/Users/gabri/Documents/NetBeansProjects/TitoRestobar/src/Programa/Model/Conexion.java</file>
         </group>
     </open-files>
 </project-private>

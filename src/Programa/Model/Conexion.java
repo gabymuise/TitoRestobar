@@ -16,4 +16,3 @@ public class Conexion {
         return DriverManager.getConnection(cadenaConexion, USUARIO, PASSWORD);
     }
 }
-

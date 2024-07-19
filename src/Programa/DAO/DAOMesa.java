@@ -17,17 +17,20 @@ import java.util.List;
 public class DAOMesa {
     private Connection conexion;
 
+    // Constructor que establece la conexión con la base de datos
     public DAOMesa() {
         try {
             conexion = Conexion.Conectar();
         } catch (SQLException e) {
-            e.printStackTrace();
+            e.printStackTrace(); // Considerar una mejor gestión de errores aquí
         }
     }
 
+    // Lista todas las mesas
     public List<Mesa> listarMesas() throws SQLException {
         List<Mesa> lista = new ArrayList<>();
         String consulta = "SELECT * FROM mesas";
+        
         try (PreparedStatement comando = conexion.prepareStatement(consulta);
              ResultSet lectura = comando.executeQuery()) {
             while (lectura.next()) {
@@ -42,6 +45,7 @@ public class DAOMesa {
         return lista;
     }
 
+    // Crea una nueva mesa
     public void crearMesa(Mesa mesa) throws SQLException {
         String consulta = "INSERT INTO mesas (nombre) VALUES (?)";
         try (PreparedStatement comando = conexion.prepareStatement(consulta)) {
@@ -50,6 +54,7 @@ public class DAOMesa {
         }
     }
 
+    // Elimina una mesa por nombre
     public void eliminarMesa(String nombre) throws SQLException {
         String consulta = "DELETE FROM mesas WHERE nombre = ?";
         try (PreparedStatement comando = conexion.prepareStatement(consulta)) {
@@ -58,6 +63,7 @@ public class DAOMesa {
         }
     }
 
+    // Obtiene el pedido activo en una mesa específica
     public Pedido verPedidoActivoEnMesa(Mesa mesa) throws SQLException {
         String consultaPedido = "SELECT p.id, p.fechaHoraApertura, p.descuento FROM pedidos p " +
                                 "JOIN mesa_pedido mp ON p.id = mp.id_pedido " +
@@ -107,7 +113,8 @@ public class DAOMesa {
 
         return pedido;
     }
-    
+
+    // Elimina el pedido asociado a una mesa específica
     public void eliminarPedidoDeMesa(Mesa mesa, Pedido pedido) throws SQLException {
         String consulta = "DELETE FROM mesa_pedido WHERE id_mesa = ? AND id_pedido = ?";
         try (PreparedStatement ps = conexion.prepareStatement(consulta)) {
@@ -117,13 +124,14 @@ public class DAOMesa {
         }
     }
 
+    // Cierra la conexión con la base de datos
     public void cerrarConexion() {
         try {
             if (conexion != null && !conexion.isClosed()) {
                 conexion.close();
             }
         } catch (SQLException e) {
-            e.printStackTrace();
+            e.printStackTrace(); // Considerar una mejor gestión de errores aquí
         }
     }
 }

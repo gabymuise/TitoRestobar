@@ -9,31 +9,38 @@ import java.util.List;
 public class ControladoraProducto {
     private DAOProducto daoProducto;
 
+    // Constructor que inicializa la instancia de DAOProducto
     public ControladoraProducto() {
         daoProducto = new DAOProducto();
     }
 
+    // Método para obtener una lista de productos
     public List<Producto> listadoDeProductos() throws SQLException {
         return daoProducto.listadoDeProductos();
     }
 
-    public void Guardar(Producto producto) throws SQLException {
-        daoProducto.Guardar(producto);
+    // Método para guardar un nuevo producto en la base de datos
+    public void guardar(Producto producto) throws SQLException {
+        daoProducto.guardar(producto);
     }
 
-    public void Actualizar(Producto producto) throws SQLException {
-        daoProducto.UpDate(producto);
+    // Método para actualizar un producto existente en la base de datos
+    public void actualizar(Producto producto) throws SQLException {
+        daoProducto.actualizar(producto);
     }
 
-    public boolean EliminarProductoPorNombre(String nombre) throws SQLException {
-        return daoProducto.EliminarProductoPorNombre(nombre);
+    // Método para eliminar un producto por su nombre
+    public boolean eliminarProductoPorNombre(String nombre) throws SQLException {
+        return daoProducto.eliminarProductoPorNombre(nombre);
     }
 
-    public void Ver(Producto producto) throws SQLException {
-        daoProducto.Ver(producto);
+    // Método para obtener detalles de un producto específico
+    public void ver(int productoId) throws SQLException {
+        daoProducto.ver(productoId);
     }
-    
-    public void GuardarStock(Stock stock) throws SQLException {
+
+    // Método para guardar la información de stock de un producto
+    public void guardarStock(Stock stock) throws SQLException {
         daoProducto.guardarStock(stock);
     }
 }

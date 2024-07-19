@@ -1,5 +1,8 @@
 package Programa.Model;
 
+/**
+ * Representa un producto en el sistema.
+ */
 public class Producto {
     private int id;
     private String nombre;
@@ -8,6 +11,14 @@ public class Producto {
     private float costo;
     private boolean elaboracion;
 
+    /**
+     * Crea una instancia de Producto con los detalles especificados.
+     * @param nombre El nombre del producto.
+     * @param descripcion La descripción del producto.
+     * @param precio El precio del producto.
+     * @param costo El costo del producto.
+     * @param elaboracion Indica si el producto requiere elaboración.
+     */
     public Producto(String nombre, String descripcion, float precio, float costo, boolean elaboracion) {
         this.nombre = nombre;
         this.descripcion = descripcion;
@@ -16,6 +27,15 @@ public class Producto {
         this.elaboracion = elaboracion;
     }
 
+    public Producto() {
+        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+    }
+
+    public Producto(int aInt, String string, String string0, float aFloat, float aFloat0, boolean aBoolean) {
+        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+    }
+
+    // Getters y Setters
     public int getId() {
         return id;
     }
@@ -62,5 +82,10 @@ public class Producto {
 
     public void setElaboracion(boolean elaboracion) {
         this.elaboracion = elaboracion;
+    }
+
+    @Override
+    public String toString() {
+        return nombre + " - " + descripcion + " (Precio: " + precio + ")";
     }
 }
