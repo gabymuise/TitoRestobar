@@ -15,8 +15,16 @@ public class Pedido {
     public Pedido(Mesa mesa, Timestamp fechaHoraApertura, List<Item> items, Descuento descuento) {
         this.mesa = mesa;
         this.fechaHoraApertura = fechaHoraApertura;
-        this.items = items != null ? items : new ArrayList<>();
-        this.descuento = descuento != null ? descuento : new Descuento(0);
+        this.items = items;
+        this.descuento = descuento;
+    }
+
+    public Pedido() {
+        this.mesa = null;
+        this.fechaHoraApertura = null;
+        this.fechaHoraCierre = null;
+        this.items = new ArrayList<>();
+        this.descuento = null;
     }
 
     public int getId() {
@@ -66,14 +74,7 @@ public class Pedido {
     public void setDescuento(Descuento descuento) {
         this.descuento = descuento;
     }
-
-    public void addItem(Item item) {
-        if (items == null) {
-            items = new ArrayList<>();
-        }
-        items.add(item);
-    }
-
+    
     public float getTotal() {
         float total = 0;
         for (Item item : items) {

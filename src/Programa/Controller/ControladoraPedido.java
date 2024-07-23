@@ -49,7 +49,7 @@ public class ControladoraPedido {
     }
 
     // Método para calcular el total de un pedido, aplicando un descuento si es necesario
-    public float calcularTotal(Pedido pedido, Descuento descuento) throws SQLException {
+    public float getTotal(Pedido pedido, Descuento descuento) throws SQLException {
         float total = 0;
         List<Item> items = pedido.getItems();
         for (Item item : items) {
