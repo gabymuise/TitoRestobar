@@ -37,6 +37,13 @@ public class Pedido {
         this.descuento = new Descuento(0); // Asigna un descuento por defecto si es nulo
     }
 
+    public Pedido(Date fechaHoraApertura, Descuento descuento) {
+       this.fechaHoraApertura = fechaHoraApertura;
+       this.descuento = descuento != null ? descuento : new Descuento(0); // Asigna un descuento por defecto si es nulo
+       this.items = new ArrayList<>(); // Inicializa la lista de items
+   }
+
+
     // Getters y Setters
     public int getId() {
         return id;

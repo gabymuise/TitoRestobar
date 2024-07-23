@@ -7,6 +7,7 @@ import Programa.Model.Pedido;
 import Programa.Model.Descuento;
 import java.sql.SQLException;
 import java.util.List;
+import java.math.BigDecimal;
 
 public class ControladoraPedido {
     private DAOPedido daoPedido;
@@ -17,13 +18,25 @@ public class ControladoraPedido {
     }
 
     // Método para crear un nuevo pedido
-    public void crearPedido(Pedido pedido) throws SQLException {
+    public boolean crearPedido(Pedido pedido, int mesaId, List<Item> items) throws SQLException {
         daoPedido.crearPedido(pedido);
+        boolean mesaAsignada = daoPedido.asignarMesaAPedido(pedido.getId(), mesaId);
+
+        if (mesaAsignada) {
+            for (Item item : items) {
+                boolean itemAgregado = daoPedido.agregarItemAPedido(pedido.getId(), item.getProducto().getId(), item.getCantidad(), BigDecimal.valueOf(item.getSubTotal()));
+                if (!itemAgregado) {
+                    return false; // Si algún item no se agrega, retornar falso
+                }
+            }
+            return true; // Si todos los items se agregan correctamente, retornar verdadero
+        }
+        return false; // Si no se puede asignar la mesa, retornar falso
     }
 
     // Método para agregar un item a un pedido existente
-    public void agregarItem(Pedido pedido, Item item) throws SQLException {
-        daoPedido.agregarItem(pedido, item);
+    public boolean agregarItemAPedido(int pedidoId, int productoId, int cantidad, BigDecimal precioTotal) throws SQLException {
+        return daoPedido.agregarItemAPedido(pedidoId, productoId, cantidad, precioTotal);
     }
 
     // Método para eliminar un item de un pedido existente

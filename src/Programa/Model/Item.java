@@ -52,6 +52,10 @@ public class Item {
         this.subTotal = producto.getPrecio() * cantidad;
     }
 
+    
+    public float getSubtotal(){
+        return cantidad * producto.getPrecio();
+    }
     public double getSubTotal() {
         return subTotal;
     }

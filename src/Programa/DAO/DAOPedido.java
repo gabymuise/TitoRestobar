@@ -5,6 +5,7 @@ import Programa.Model.Descuento;
 import Programa.Model.Item;
 import Programa.Model.Mesa;
 import Programa.Model.Pedido;
+import java.math.BigDecimal;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -21,7 +22,6 @@ public class DAOPedido {
         conexion = Conexion.Conectar();
     }
 
-    // Crea un nuevo pedido y establece su ID en el objeto Pedido
     public void crearPedido(Pedido pedido) throws SQLException {
         String consulta = "INSERT INTO pedidos (fechaHoraApertura, descuento) VALUES (?, ?)";
         try (PreparedStatement ps = conexion.prepareStatement(consulta, PreparedStatement.RETURN_GENERATED_KEYS)) {
@@ -38,22 +38,34 @@ public class DAOPedido {
         }
     }
 
-    // Agrega un ítem a un pedido y asocia el pedido con una mesa
-    public void agregarItem(Pedido pedido, Item item) throws SQLException {
-        String consultaItem = "INSERT INTO items (id_pedido, id_producto, cantidad) VALUES (?, ?, ?)";
-        try (PreparedStatement ps = conexion.prepareStatement(consultaItem)) {
-            ps.setInt(1, pedido.getId());
-            ps.setInt(2, item.getProducto().getId());
-            ps.setInt(3, item.getCantidad());
-            ps.executeUpdate();
+    // Asigna una mesa a un pedido
+    public boolean asignarMesaAPedido(int pedidoId, int mesaId) {
+        String sql = "INSERT INTO mesa_pedido (id_mesa, id_pedido) VALUES (?, ?)";
+        try (PreparedStatement pstmt = conexion.prepareStatement(sql)) {
+            pstmt.setInt(1, mesaId);
+            pstmt.setInt(2, pedidoId);
+            int affectedRows = pstmt.executeUpdate();
+            return affectedRows > 0;
+        } catch (SQLException e) {
+            e.printStackTrace();
         }
+        return false;
+    }
 
-        String consultaMesaPedido = "INSERT INTO mesa_pedido (id_mesa, id_pedido) VALUES (?, ?)";
-        try (PreparedStatement ps = conexion.prepareStatement(consultaMesaPedido)) {
-            ps.setInt(1, pedido.getMesa().getId());
-            ps.setInt(2, pedido.getId());
-            ps.executeUpdate();
+    // Agrega un item a un pedido
+    public boolean agregarItemAPedido(int pedidoId, int productoId, int cantidad, BigDecimal precioTotal) {
+        String sql = "INSERT INTO items (id_pedido, id_producto, cantidad, precioTotal) VALUES (?, ?, ?, ?)";
+        try (PreparedStatement pstmt = conexion.prepareStatement(sql)) {
+            pstmt.setInt(1, pedidoId);
+            pstmt.setInt(2, productoId);
+            pstmt.setInt(3, cantidad);
+            pstmt.setBigDecimal(4, precioTotal);
+            int affectedRows = pstmt.executeUpdate();
+            return affectedRows > 0;
+        } catch (SQLException e) {
+            e.printStackTrace();
         }
+        return false;
     }
 
     // Elimina un ítem de un pedido
