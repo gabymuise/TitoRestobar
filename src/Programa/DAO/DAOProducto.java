@@ -63,7 +63,33 @@ public class DAOProducto {
             }
         }
     }
+    
+     public boolean actualizarProducto(Producto producto) throws SQLException {
+        Connection conn = null;
+        PreparedStatement stmt = null;
+        try {
+            conn = Conexion.Conectar();
+            String sql = "UPDATE productos SET Nombre = ?, Descripcion = ?, Precio = ?, Costo = ?, Elaborado = ? WHERE Id = ?";
+            stmt = conn.prepareStatement(sql);
+            stmt.setString(1, producto.getNombre());
+            stmt.setString(2, producto.getDescripcion());
+            stmt.setFloat(3, producto.getPrecio());
+            stmt.setFloat(4, producto.getCosto());
+            stmt.setBoolean(5, producto.isElaboracion());
+            stmt.setInt(6, producto.getId());
 
+            int rowsUpdated = stmt.executeUpdate();
+            return rowsUpdated > 0;
+        } finally {
+            if (stmt != null) {
+                stmt.close();
+            }
+            if (conn != null) {
+                conn.close();
+            }
+        }
+    }
+    
     // Actualiza la información de un producto existente
     public void actualizar(Producto producto) throws SQLException {
         String consulta = "UPDATE productos SET nombre = ?, descripcion = ?, precio = ?, costo = ?, elaborado = ? WHERE id = ?";

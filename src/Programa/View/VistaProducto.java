@@ -21,52 +21,37 @@ public class VistaProducto extends javax.swing.JPanel {
     public VistaProducto() {
         initComponents();
         chkElaboracion.setSelected(true);
-        // Agrega el listener para chkElaboracion
         chkElaboracion.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 chkElaboracionActionPerformed(evt);
             }
         });
-               txtCantidadProducto.setEnabled(false);
+        txtCantidadProducto.setEnabled(false);
+        cargarProductos();
     }
 
-   
-     public void cargarProductos() {
-      try {
-        // Conecta a la base de datos (asegúrate de tener el controlador JDBC cargado)
-        Connection conn = DriverManager.getConnection("jdbc:mysql://localhost:3306/titorestobar", "root", "123456");
+    public void cargarProductos() {
+        try {
+            Connection conn = DriverManager.getConnection("jdbc:mysql://localhost:3306/titorestobar", "root", "123456");
+            String sql = "SELECT * FROM productos";
+            PreparedStatement statement = conn.prepareStatement(sql);
+            ResultSet resultSet = statement.executeQuery();
+            DefaultTableModel model = (DefaultTableModel) tableProductos.getModel();
+            model.setRowCount(0);
 
-        // Consulta SQL para seleccionar todos los productos
-        String sql = "SELECT * FROM productos";
-
-        // Crea una declaración preparada
-        PreparedStatement statement = conn.prepareStatement(sql);
-
-        // Ejecuta la consulta
-        ResultSet resultSet = statement.executeQuery();
-
-        // Borra todos los registros existentes en la tabla
-        DefaultTableModel model = (DefaultTableModel) tableProductos.getModel();
-        model.setRowCount(0);
-
-        // Itera a través de los resultados y agrega cada producto a la tabla
-        while (resultSet.next()) {
-            int id = resultSet.getInt("Id");
-            String nombre = resultSet.getString("Nombre");
-            String descripcion = resultSet.getString("Descripcion");
-            float precio = resultSet.getFloat("Precio");
-            float costo = resultSet.getFloat("Costo");
-            boolean elaboracion = resultSet.getBoolean("elaborado");
-
-            // Agrega el producto a la tabla
-            model.addRow(new Object[]{id, nombre, descripcion, precio, costo, elaboracion});
+            while (resultSet.next()) {
+                int id = resultSet.getInt("Id");
+                String nombre = resultSet.getString("Nombre");
+                String descripcion = resultSet.getString("Descripcion");
+                float precio = resultSet.getFloat("Precio");
+                float costo = resultSet.getFloat("Costo");
+                boolean elaboracion = resultSet.getBoolean("elaborado");
+                model.addRow(new Object[]{id, nombre, descripcion, precio, costo, elaboracion});
+            }
+            conn.close();
+        } catch (SQLException e) {
+            e.printStackTrace();
         }
-
-        // Cierra la conexión a la base de datos
-        conn.close();
-    } catch (SQLException e) {
-        e.printStackTrace();
-    }
     }
 
     @SuppressWarnings("unchecked")
@@ -91,6 +76,7 @@ public class VistaProducto extends javax.swing.JPanel {
         chkElaboracion = new javax.swing.JCheckBox();
         jLabel1 = new javax.swing.JLabel();
         txtCantidadProducto = new javax.swing.JTextField();
+        jBtnActualizarPrecios = new javax.swing.JButton();
 
         setName(""); // NOI18N
         setPreferredSize(new java.awt.Dimension(800, 500));
@@ -225,21 +211,32 @@ public class VistaProducto extends javax.swing.JPanel {
             }
         });
 
+        jBtnActualizarPrecios.setText("ACTUALIZAR PRECIOS");
+        jBtnActualizarPrecios.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jBtnActualizarPreciosActionPerformed(evt);
+            }
+        });
+
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);
         this.setLayout(layout);
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                        .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
+                    .addGroup(layout.createSequentialGroup()
+                        .addComponent(lblNombreProducto, javax.swing.GroupLayout.PREFERRED_SIZE, 71, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGap(181, 181, 181))
+                    .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
+                        .addComponent(jBtnActualizarPrecios, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addGroup(layout.createSequentialGroup()
                             .addComponent(lblDescripcionProducto, javax.swing.GroupLayout.PREFERRED_SIZE, 71, javax.swing.GroupLayout.PREFERRED_SIZE)
                             .addGap(174, 174, 174))
-                        .addGroup(layout.createSequentialGroup()
+                        .addGroup(javax.swing.GroupLayout.Alignment.LEADING, layout.createSequentialGroup()
                             .addGap(57, 57, 57)
                             .addComponent(lblTitulo))
-                        .addComponent(btnGuardarProducto, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                        .addGroup(layout.createSequentialGroup()
+                        .addComponent(btnGuardarProducto, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addGroup(javax.swing.GroupLayout.Alignment.LEADING, layout.createSequentialGroup()
                             .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
                                 .addComponent(lblCostoProducto, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                                 .addComponent(lblPrecioProducto, javax.swing.GroupLayout.DEFAULT_SIZE, 68, Short.MAX_VALUE)
@@ -256,18 +253,15 @@ public class VistaProducto extends javax.swing.JPanel {
                                     .addComponent(jLabel1)
                                     .addGap(3, 3, 3)
                                     .addComponent(txtCantidadProducto))))
-                        .addComponent(btnEliminarProducto, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                        .addComponent(btnLimpiarTexto, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                    .addGroup(layout.createSequentialGroup()
-                        .addComponent(lblNombreProducto, javax.swing.GroupLayout.PREFERRED_SIZE, 71, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addGap(178, 178, 178)))
+                        .addComponent(btnEliminarProducto, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addComponent(btnLimpiarTexto, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
                 .addComponent(SPTableProductos, javax.swing.GroupLayout.PREFERRED_SIZE, 474, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addGap(376, 376, 376))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
                     .addComponent(SPTableProductos, javax.swing.GroupLayout.PREFERRED_SIZE, 261, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addGroup(layout.createSequentialGroup()
                         .addComponent(lblTitulo)
@@ -303,8 +297,10 @@ public class VistaProducto extends javax.swing.JPanel {
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(btnEliminarProducto)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(btnLimpiarTexto)))
-                .addGap(0, 239, Short.MAX_VALUE))
+                        .addComponent(btnLimpiarTexto)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addComponent(jBtnActualizarPrecios)))
+                .addGap(0, 237, Short.MAX_VALUE))
         );
     }// </editor-fold>//GEN-END:initComponents
 
@@ -313,8 +309,7 @@ public class VistaProducto extends javax.swing.JPanel {
     }//GEN-LAST:event_txtNombreProductoActionPerformed
 
     private void btnEliminarProductoActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnEliminarProductoActionPerformed
-  
-            if (btnEliminarProducto.isEnabled()) {
+        if (btnEliminarProducto.isEnabled()) {
             int filaSeleccionada = tableProductos.getSelectedRow();
             ControladoraProducto controladoraProducto = new ControladoraProducto();
             if (filaSeleccionada >= 0) {
@@ -339,7 +334,7 @@ public class VistaProducto extends javax.swing.JPanel {
     }//GEN-LAST:event_btnEliminarProductoActionPerformed
 
     private void btnGuardarProductoActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnGuardarProductoActionPerformed
-        if (btnGuardarProducto.isEnabled()) {
+               if (btnGuardarProducto.isEnabled()) {
             try {
                 // Validar que los campos no estén vacíos
                 if (txtNombreProducto.getText().isEmpty() || txtDescripcionProducto.getText().isEmpty() ||
@@ -348,16 +343,16 @@ public class VistaProducto extends javax.swing.JPanel {
                     JOptionPane.showMessageDialog(this, "Por favor, complete todos los campos.", "Error", JOptionPane.ERROR_MESSAGE);
                     return; // Salir del método si hay campos vacíos
                 }
-                
+
                 String nombre = txtNombreProducto.getText();
                 String descripcion = txtDescripcionProducto.getText();
                 float precio = Float.parseFloat(txtPrecioProducto.getText());
                 float costo = Float.parseFloat(txtCostoProducto.getText());
                 boolean elaboracion = chkElaboracion.isSelected();
-                
+
                 ControladoraProducto controladoraProducto = new ControladoraProducto();
                 Producto producto = new Producto(nombre, descripcion, precio, costo, elaboracion);
-                
+
                 controladoraProducto.guardar(producto);
                 // Si el producto no es elaborado, guardarlo en Stock
                 if (!elaboracion) {
@@ -365,19 +360,18 @@ public class VistaProducto extends javax.swing.JPanel {
                     Stock stock = new Stock(cantidad, producto);
                     controladoraProducto.guardarStock(stock);
                 }
-                
+
                 txtNombreProducto.setText("");
                 txtDescripcionProducto.setText("");
                 txtCostoProducto.setText("");
                 txtPrecioProducto.setText("");
                 chkElaboracion.setSelected(true);
                 txtCantidadProducto.setText("");
-                
+
                 cargarProductos();
             } catch (SQLException ex) {
                 Logger.getLogger(VistaProducto.class.getName()).log(Level.SEVERE, null, ex);
             }
-
         }
     }//GEN-LAST:event_btnGuardarProductoActionPerformed
    
@@ -408,6 +402,50 @@ public class VistaProducto extends javax.swing.JPanel {
 
     }//GEN-LAST:event_txtCantidadProductoActionPerformed
 
+    private void jBtnActualizarPreciosActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jBtnActualizarPreciosActionPerformed
+        int filaSeleccionada = tableProductos.getSelectedRow();
+    if (filaSeleccionada >= 0) {
+        try {
+            int id = (int) tableProductos.getValueAt(filaSeleccionada, 0);
+            String nombre = (String) tableProductos.getValueAt(filaSeleccionada, 1);
+            String descripcion = (String) tableProductos.getValueAt(filaSeleccionada, 2);
+            
+            String nuevoPrecioStr = JOptionPane.showInputDialog(this, "Ingrese el nuevo precio para el producto:");
+            if (nuevoPrecioStr == null || nuevoPrecioStr.isEmpty()) {
+                JOptionPane.showMessageDialog(this, "El precio no puede estar vacío.", "Error", JOptionPane.WARNING_MESSAGE);
+                return;
+            }
+            
+            String nuevoCostoStr = JOptionPane.showInputDialog(this, "Ingrese el nuevo costo para el producto:");
+            if (nuevoCostoStr == null || nuevoCostoStr.isEmpty()) {
+                JOptionPane.showMessageDialog(this, "El costo no puede estar vacío.", "Error", JOptionPane.WARNING_MESSAGE);
+                return;
+            }
+
+            float nuevoPrecio = Float.parseFloat(nuevoPrecioStr);
+            float nuevoCosto = Float.parseFloat(nuevoCostoStr);
+            boolean elaboracion = (boolean) tableProductos.getValueAt(filaSeleccionada, 5);
+            
+            Producto producto = new Producto(id, nombre, descripcion, nuevoPrecio, nuevoCosto, elaboracion);
+            ControladoraProducto controladoraProducto = new ControladoraProducto();
+            boolean actualizado = controladoraProducto.actualizarPreciosYCostos(producto);
+            
+            if (actualizado) {
+                JOptionPane.showMessageDialog(this, "Producto actualizado correctamente.");
+                cargarProductos(); // Vuelve a cargar los productos en la tabla
+            } else {
+                JOptionPane.showMessageDialog(this, "Error al actualizar el producto.", "Error", JOptionPane.ERROR_MESSAGE);
+            }
+        } catch (NumberFormatException e) {
+            JOptionPane.showMessageDialog(this, "Precio o costo deben ser números válidos.", "Error", JOptionPane.ERROR_MESSAGE);
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(this, "Ocurrió un error inesperado: " + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+        }
+    } else {
+        JOptionPane.showMessageDialog(this, "Selecciona un producto de la tabla antes de actualizar.", "Error", JOptionPane.WARNING_MESSAGE);
+    }
+    }//GEN-LAST:event_jBtnActualizarPreciosActionPerformed
+
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JScrollPane SPTableProductos;
@@ -415,6 +453,7 @@ public class VistaProducto extends javax.swing.JPanel {
     private javax.swing.JButton btnGuardarProducto;
     private javax.swing.JButton btnLimpiarTexto;
     private javax.swing.JCheckBox chkElaboracion;
+    private javax.swing.JButton jBtnActualizarPrecios;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel lblCostoProducto;
     private javax.swing.JLabel lblDescripcionProducto;

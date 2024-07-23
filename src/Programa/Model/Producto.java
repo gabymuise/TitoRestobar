@@ -26,12 +26,17 @@ public class Producto {
         this.costo = costo;
         this.elaboracion = elaboracion;
     }
-
-    public Producto() {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+    
+    public Producto(int id, String nombre, String descripcion, float precio, float costo, boolean elaboracion) {
+        this.id = id;
+        this.nombre = nombre;
+        this.descripcion = descripcion;
+        this.precio = precio;
+        this.costo = costo;
+        this.elaboracion = elaboracion;
     }
-
-    public Producto(int aInt, String string, String string0, float aFloat, float aFloat0, boolean aBoolean) {
+    
+    public Producto() {
         throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
     }
 

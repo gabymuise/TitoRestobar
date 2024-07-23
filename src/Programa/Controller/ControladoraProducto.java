@@ -5,6 +5,8 @@ import Programa.Model.Producto;
 import Programa.Model.Stock;
 import java.sql.SQLException;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class ControladoraProducto {
     private DAOProducto daoProducto;
@@ -33,6 +35,7 @@ public class ControladoraProducto {
     public boolean eliminarProductoPorNombre(String nombre) throws SQLException {
         return daoProducto.eliminarProductoPorNombre(nombre);
     }
+    
 
     // Método para obtener detalles de un producto específico
     public void ver(int productoId) throws SQLException {
@@ -42,5 +45,15 @@ public class ControladoraProducto {
     // Método para guardar la información de stock de un producto
     public void guardarStock(Stock stock) throws SQLException {
         daoProducto.guardarStock(stock);
+    }
+
+    public boolean actualizarPreciosYCostos(Producto producto) {
+        try {
+            daoProducto.actualizarProducto(producto);
+            return true;
+        } catch (SQLException ex) {
+            Logger.getLogger(ControladoraProducto.class.getName()).log(Level.SEVERE, null, ex);
+            return false;
+        }
     }
 }
