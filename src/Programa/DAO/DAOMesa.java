@@ -11,6 +11,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -105,7 +106,7 @@ public class DAOMesa {
                         }
                     }
 
-                    pedido = new Pedido(mesa, fechaHoraApertura, items, descuento);
+                    pedido = new Pedido(mesa, (Timestamp) fechaHoraApertura, items, descuento);
                     pedido.setId(pedidoId);
                 }
             }

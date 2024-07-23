@@ -37,11 +37,6 @@ public class ControladoraProducto {
     }
     
 
-    // Método para obtener detalles de un producto específico
-    public void ver(int productoId) throws SQLException {
-        daoProducto.ver(productoId);
-    }
-
     // Método para guardar la información de stock de un producto
     public void guardarStock(Stock stock) throws SQLException {
         daoProducto.guardarStock(stock);
@@ -57,7 +52,8 @@ public class ControladoraProducto {
         }
     }
 
-    public Producto obtenerProductoPorId(int productoId) {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+    public Producto obtenerProductoPorId(int productoId) throws SQLException {
+        daoProducto.ver(productoId);
+        return null;
     }
 }

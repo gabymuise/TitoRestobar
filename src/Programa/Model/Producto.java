@@ -36,15 +36,6 @@ public class Producto {
         this.elaboracion = elaboracion;
     }
     
-    public Producto() {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
-    }
-
-    public Producto(int productoId) {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
-    }
-    
-
     // Getters y Setters
     public int getId() {
         return id;

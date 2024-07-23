@@ -10,21 +10,20 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 
 public class DAOStock {
-    // Obtiene el stock de un producto específico
+    private Stock stock;
+    private Producto producto;
+    
     public Stock obtenerStockPorProducto(int idProducto) {
         String sql = "SELECT * FROM stock WHERE id_producto = ?";
-        Stock stock = null;
         
         try (Connection con = Conexion.Conectar();
              PreparedStatement ps = con.prepareStatement(sql)) {
             ps.setInt(1, idProducto);
             try (ResultSet rs = ps.executeQuery()) {
                 if (rs.next()) {
-                    stock = new Stock(); // Inicializar el objeto Stock
                     stock.setId(rs.getInt("id"));
                     stock.setCantidad(rs.getInt("cantidad"));
                     
-                    Producto producto = new Producto(); // Inicializar el objeto Producto
                     producto.setId(rs.getInt("id_producto"));
                     stock.setProducto(producto);
                 }

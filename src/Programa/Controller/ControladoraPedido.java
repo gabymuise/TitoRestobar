@@ -7,7 +7,6 @@ import Programa.Model.Pedido;
 import Programa.Model.Descuento;
 import java.sql.SQLException;
 import java.util.List;
-import java.math.BigDecimal;
 
 public class ControladoraPedido {
     private DAOPedido daoPedido;
@@ -19,24 +18,24 @@ public class ControladoraPedido {
 
     // Método para crear un nuevo pedido
     public boolean crearPedido(Pedido pedido, int mesaId, List<Item> items) throws SQLException {
-        daoPedido.crearPedido(pedido);
+        boolean pedidoCreado = daoPedido.crearPedido(pedido);
         boolean mesaAsignada = daoPedido.asignarMesaAPedido(pedido.getId(), mesaId);
 
-        if (mesaAsignada) {
+        if (pedidoCreado && mesaAsignada) {
             for (Item item : items) {
-                boolean itemAgregado = daoPedido.agregarItemAPedido(pedido.getId(), item.getProducto().getId(), item.getCantidad(), BigDecimal.valueOf(item.getSubTotal()));
+                boolean itemAgregado = daoPedido.agregarItemAPedido(pedido.getId(), item.getProducto().getId(), item.getCantidad());
                 if (!itemAgregado) {
                     return false; // Si algún item no se agrega, retornar falso
                 }
             }
             return true; // Si todos los items se agregan correctamente, retornar verdadero
         }
-        return false; // Si no se puede asignar la mesa, retornar falso
+        return false; // Si el pedido o la mesa no se pueden asignar, retornar falso
     }
 
     // Método para agregar un item a un pedido existente
-    public boolean agregarItemAPedido(int pedidoId, int productoId, int cantidad, BigDecimal precioTotal) throws SQLException {
-        return daoPedido.agregarItemAPedido(pedidoId, productoId, cantidad, precioTotal);
+    public boolean agregarItemAPedido(int pedidoId, int productoId, int cantidad) throws SQLException {
+        return daoPedido.agregarItemAPedido(pedidoId, productoId, cantidad);
     }
 
     // Método para eliminar un item de un pedido existente
@@ -54,7 +53,7 @@ public class ControladoraPedido {
         float total = 0;
         List<Item> items = pedido.getItems();
         for (Item item : items) {
-            total += item.getSubTotal();
+            total += item.getSubtotal();
         }
         return descuento.aplicarDescuento(total);
     }

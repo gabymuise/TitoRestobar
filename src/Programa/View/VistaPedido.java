@@ -17,6 +17,7 @@ import javax.swing.table.DefaultTableModel;
 import Programa.DAO.DAOPedido;
 import java.math.BigDecimal;
 import java.sql.SQLException;
+import java.sql.Timestamp;
 import java.util.Collections;
 
 public class VistaPedido extends javax.swing.JPanel {
@@ -27,7 +28,8 @@ public class VistaPedido extends javax.swing.JPanel {
     private List<Producto> productosDisponibles;
     private List<Pedido> pedidos;
     private Descuento descuento;
-    private Pedido pedido;
+    private Pedido nuevoPedido;
+    private Item item;
 
     public VistaPedido() throws SQLException {
         initComponents();
@@ -76,6 +78,13 @@ public class VistaPedido extends javax.swing.JPanel {
             e.printStackTrace();
             JOptionPane.showMessageDialog(this, "Error al cargar las mesas.", "Error", JOptionPane.ERROR_MESSAGE);
         }
+    }
+    private Mesa obtenerMesaSeleccionada() {
+        Mesa mesa = (Mesa) jComboBoxMesa.getSelectedItem();
+        if (mesa == null) {
+            throw new RuntimeException("Debe seleccionar una mesa.");
+        }
+        return mesa;
     }
 
     private List<Producto> cargarProductosDisponibles() throws SQLException {
@@ -137,13 +146,13 @@ public class VistaPedido extends javax.swing.JPanel {
         modelo.setRowCount(0); // Limpia la tabla de pedidos
 
         for (Pedido pedido : pedidos) {
-            double subtotal = pedido.getItems().stream().mapToDouble(Item::getSubTotal).sum();
+            //double subtotal = pedido.getItems().stream().mapToDouble(Item::getSubTotal).sum();
             modelo.addRow(new Object[]{
                 pedido.getId(),
                 pedido.getMesa().getNombre(),
                 pedido.getFechaHoraApertura(),
-                subtotal,
-                subtotal - pedido.getDescuento().getPorcentaje(), // Ajusta si es necesario
+                item.getSubtotal(),
+                item.getSubtotal() - pedido.getDescuento().getPorcentaje(), // Ajusta si es necesario
                 pedido.getDescuento().getPorcentaje()
             });
         }
@@ -166,7 +175,7 @@ public List<Item> getItemsFromTable() {
             }
             double subTotal = cantidad * precio;
             
-            items.add(new Item(producto, cantidad, subTotal));
+            items.add(new Item(producto, cantidad));
         } catch (NumberFormatException e) {
             // Manejo de excepción si el formato del número es incorrecto
             e.printStackTrace();
@@ -184,7 +193,7 @@ public List<Item> getItemsFromTable() {
     }
 
 
-    private Producto getProductoById(int productoId) {
+    private Producto getProductoById(int productoId) throws SQLException {
         // Implementa este método para obtener el producto por ID desde la base de datos o un caché
         // Aquí tienes un ejemplo de cómo podría ser:
         ControladoraProducto controladoraProducto = new ControladoraProducto();
@@ -398,49 +407,53 @@ public List<Item> getItemsFromTable() {
     }//GEN-LAST:event_jButtonAgregarProductoActionPerformed
 
     private void jButtonCrearPedidoActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonCrearPedidoActionPerformed
-     // Validar si jTable1 está vacío
+    // Validar si jTable1 está vacío
     if (jTable1.getRowCount() == 0) {
         JOptionPane.showMessageDialog(this, "No hay productos en la tabla. Agregue productos antes de crear el pedido.", "Error", JOptionPane.ERROR_MESSAGE);
         return; // Salir del método sin crear el pedido
     }
 
-    Date fechaHoraApertura = new Date(); // Capturar la fecha y hora actual
-    float descuento = 0.0f;
+    // Capturar la fecha y hora actual
+    Timestamp fechaHoraApertura = new Timestamp(System.currentTimeMillis());
+    float porcentajeDescuento = 0.0f;
 
     // Preguntar si se desea aplicar descuento
     int applyDiscount = JOptionPane.showConfirmDialog(this, "¿Desea aplicar un descuento?", "Descuento", JOptionPane.YES_NO_OPTION);
     if (applyDiscount == JOptionPane.YES_OPTION) {
-        // Pedir el descuento al usuario
         String descuentoInput = JOptionPane.showInputDialog(this, "Ingrese el porcentaje de descuento (0-100):");
         try {
-            descuento = Float.parseFloat(descuentoInput);
-            if (descuento < 0 || descuento > 100) {
+            porcentajeDescuento = Float.parseFloat(descuentoInput);
+            if (porcentajeDescuento < 0 || porcentajeDescuento > 100) {
                 JOptionPane.showMessageDialog(this, "Descuento debe estar entre 0 y 100.", "Error", JOptionPane.ERROR_MESSAGE);
-                descuento = 0.0f; // Establecer a 0 en caso de valor inválido
+                porcentajeDescuento = 0.0f;
             }
         } catch (NumberFormatException e) {
             JOptionPane.showMessageDialog(this, "Descuento inválido. Se aplicará 0% de descuento.", "Error", JOptionPane.ERROR_MESSAGE);
-            descuento = 0.0f;
+            porcentajeDescuento = 0.0f;
         }
     }
 
-    int mesaId = getSelectedMesaId(); // Obtener el ID de la mesa seleccionada
-    List<Item> items = getItemsFromTable(); // Obtener los items de la tabla de productos
+    Mesa mesaSeleccionada = obtenerMesaSeleccionada();
+    List<Item> items = getItemsFromTable();
+    Descuento descuento = new Descuento(porcentajeDescuento);
 
-    Pedido pedido = new Pedido(fechaHoraApertura, new Descuento(descuento));
-    ControladoraPedido controladoraPedido;
+    nuevoPedido.setMesa(mesaSeleccionada);
+    nuevoPedido.setFechaHoraApertura(fechaHoraApertura);  // Usar Timestamp en lugar de Date
+    nuevoPedido.setDescuento(descuento);
+    nuevoPedido.setItems(items);
 
     try {
-        controladoraPedido = new ControladoraPedido();
-        boolean pedidoCreado = controladoraPedido.crearPedido(pedido, mesaId, items);
-        if (pedidoCreado) {
-            JOptionPane.showMessageDialog(this, "Pedido creado correctamente.");
+        // Usar el método crearPedido en lugar de guardarPedido
+        boolean exito = controladoraPedido.crearPedido(nuevoPedido, mesaSeleccionada.getId(), items);
+        if (exito) {
+            JOptionPane.showMessageDialog(this, "Pedido creado con éxito.");
+            limpiarFormulario(); // Limpiar formulario después de crear el pedido
+            cargarPedidosEnTabla(); // Actualizar la tabla de pedidos
         } else {
-            JOptionPane.showMessageDialog(this, "Error al crear el pedido o agregar items.", "Error", JOptionPane.ERROR_MESSAGE);
+            JOptionPane.showMessageDialog(this, "Error al crear el pedido.", "Error", JOptionPane.ERROR_MESSAGE);
         }
     } catch (SQLException e) {
-        e.printStackTrace();
-        JOptionPane.showMessageDialog(this, "Error al crear el pedido.", "Error", JOptionPane.ERROR_MESSAGE);
+        JOptionPane.showMessageDialog(this, "Error al crear el pedido: " + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
     }
     }//GEN-LAST:event_jButtonCrearPedidoActionPerformed
 
