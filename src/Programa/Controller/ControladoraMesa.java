@@ -38,6 +38,11 @@ public class ControladoraMesa {
     public void eliminarPedidoDeMesa(Mesa mesa, Pedido pedido) throws SQLException {
         daoMesa.eliminarPedidoDeMesa(mesa, pedido);
     }
+    
+    //Metodo para modificar el nombre de una mesa
+    public void modificarMesa(String nombreActual, String nuevoNombre) throws SQLException {
+        daoMesa.modificarMesa(nombreActual, nuevoNombre);
+    }
 
     // Método para cerrar la conexión a la base de datos
     public void cerrarConexion() {

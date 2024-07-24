@@ -1,8 +1,10 @@
 package Programa.View;
 
 import Programa.Controller.ControladoraMesa;
+import Programa.Controller.ControladoraPedido;
 import Programa.DAO.DAOMesa;
 import Programa.Model.Mesa;
+import Programa.Model.Pedido;
 import java.sql.SQLException;
 import java.util.List;
 import java.util.logging.Level;
@@ -13,6 +15,8 @@ import javax.swing.JOptionPane;
 public class VistaMesa extends javax.swing.JPanel {
 
     private final ControladoraMesa controladoraMesa = new ControladoraMesa();
+    private final ControladoraPedido controladoraPedido = new ControladoraPedido();
+    private Mesa mesa;
 
     public VistaMesa() throws SQLException {
         initComponents();
@@ -32,12 +36,14 @@ public class VistaMesa extends javax.swing.JPanel {
         btnCrearMesa = new javax.swing.JButton();
         btnLimpiarNombre = new javax.swing.JButton();
         btnAgregarMesa = new javax.swing.JButton();
-        btnVerMesa = new javax.swing.JButton();
+        btnModificarMesa = new javax.swing.JButton();
         btnEliminarMesa = new javax.swing.JButton();
         txtNombreMesa = new javax.swing.JTextField();
         ListaMesas = new javax.swing.JScrollPane();
         ListMesa = new javax.swing.JList<>();
         Separador1 = new javax.swing.JSeparator();
+        btnEliminarPedidoDeMesa = new javax.swing.JButton();
+        btnVerPedidoActivo = new javax.swing.JButton();
 
         setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
 
@@ -64,7 +70,12 @@ public class VistaMesa extends javax.swing.JPanel {
             }
         });
 
-        btnVerMesa.setText("VER MESA");
+        btnModificarMesa.setText("MODIFICAR MESA");
+        btnModificarMesa.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnModificarMesaActionPerformed(evt);
+            }
+        });
 
         btnEliminarMesa.setText("ELIMINAR MESA");
         btnEliminarMesa.addActionListener(new java.awt.event.ActionListener() {
@@ -81,6 +92,20 @@ public class VistaMesa extends javax.swing.JPanel {
 
         ListMesa.setModel(new DefaultListModel<String>());
         ListaMesas.setViewportView(ListMesa);
+
+        btnEliminarPedidoDeMesa.setText("ELIMINAR PEDIDO");
+        btnEliminarPedidoDeMesa.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnEliminarPedidoDeMesaActionPerformed(evt);
+            }
+        });
+
+        btnVerPedidoActivo.setText("VER PEDIDO EN MESA");
+        btnVerPedidoActivo.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnVerPedidoActivoActionPerformed(evt);
+            }
+        });
 
         javax.swing.GroupLayout jpMesaLayout = new javax.swing.GroupLayout(jpMesa);
         jpMesa.setLayout(jpMesaLayout);
@@ -102,12 +127,14 @@ public class VistaMesa extends javax.swing.JPanel {
                                 .addComponent(txtNombreMesa, javax.swing.GroupLayout.PREFERRED_SIZE, 244, javax.swing.GroupLayout.PREFERRED_SIZE)))
                         .addGap(0, 409, Short.MAX_VALUE))
                     .addGroup(jpMesaLayout.createSequentialGroup()
-                        .addComponent(ListaMesas, javax.swing.GroupLayout.DEFAULT_SIZE, 463, Short.MAX_VALUE)
+                        .addComponent(ListaMesas, javax.swing.GroupLayout.DEFAULT_SIZE, 474, Short.MAX_VALUE)
                         .addGap(18, 18, 18)
                         .addGroup(jpMesaLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
                             .addComponent(btnAgregarMesa, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                            .addComponent(btnVerMesa, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                            .addComponent(btnEliminarMesa, javax.swing.GroupLayout.DEFAULT_SIZE, 226, Short.MAX_VALUE))))
+                            .addComponent(btnModificarMesa, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                            .addComponent(btnEliminarMesa, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                            .addComponent(btnEliminarPedidoDeMesa, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                            .addComponent(btnVerPedidoActivo, javax.swing.GroupLayout.DEFAULT_SIZE, 226, Short.MAX_VALUE))))
                 .addContainerGap())
         );
         jpMesaLayout.setVerticalGroup(
@@ -129,9 +156,13 @@ public class VistaMesa extends javax.swing.JPanel {
                     .addGroup(jpMesaLayout.createSequentialGroup()
                         .addComponent(btnAgregarMesa)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                        .addComponent(btnVerMesa)
+                        .addComponent(btnModificarMesa)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                        .addComponent(btnEliminarMesa)))
+                        .addComponent(btnEliminarMesa)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                        .addComponent(btnEliminarPedidoDeMesa)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                        .addComponent(btnVerPedidoActivo)))
                 .addGap(87, 87, 87))
         );
 
@@ -206,6 +237,70 @@ public class VistaMesa extends javax.swing.JPanel {
         }
     }//GEN-LAST:event_btnEliminarMesaActionPerformed
 
+    private void btnEliminarPedidoDeMesaActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnEliminarPedidoDeMesaActionPerformed
+            int indiceSeleccionado = ListMesa.getSelectedIndex();
+
+        if (indiceSeleccionado >= 0) {
+            String nombreMesa = (String) ListMesa.getModel().getElementAt(indiceSeleccionado);
+
+            try {
+                Pedido pedidoActivo = (Pedido) controladoraPedido.listarPedidosDeMesa(mesa);
+
+                if (pedidoActivo != null) {
+                    // Eliminar el pedido asociado
+                    controladoraMesa.eliminarPedidoDeMesa(mesa, pedidoActivo);
+
+                    // Ahora eliminar la mesa
+                    controladoraMesa.eliminarMesa(nombreMesa);
+
+                    // Actualizar la vista
+                    DefaultListModel<String> modelo = (DefaultListModel<String>) ListMesa.getModel();
+                    modelo.remove(indiceSeleccionado);
+                    JOptionPane.showMessageDialog(this, "Mesa y pedido eliminados correctamente.");
+                } else {
+                    // Solo eliminar la mesa si no hay pedido activo
+                    controladoraMesa.eliminarMesa(nombreMesa);
+                    DefaultListModel<String> modelo = (DefaultListModel<String>) ListMesa.getModel();
+                    modelo.remove(indiceSeleccionado);
+                    JOptionPane.showMessageDialog(this, "Mesa eliminada correctamente.");
+                }
+            } catch (SQLException e) {
+                JOptionPane.showMessageDialog(this, "Error al eliminar la mesa o el pedido: " + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+            }
+        } else {
+            JOptionPane.showMessageDialog(this, "Selecciona una mesa de la lista antes de eliminarla.", "Error", JOptionPane.WARNING_MESSAGE);
+        }
+    }//GEN-LAST:event_btnEliminarPedidoDeMesaActionPerformed
+
+    private void btnModificarMesaActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnModificarMesaActionPerformed
+        int indiceSeleccionado = ListMesa.getSelectedIndex();
+
+        if (indiceSeleccionado >= 0) {
+            String nuevoNombre = JOptionPane.showInputDialog(this, "Introduce el nuevo nombre para la mesa:", "Modificar Mesa", JOptionPane.QUESTION_MESSAGE);
+
+            if (nuevoNombre != null && !nuevoNombre.trim().isEmpty()) {
+                String nombreActual = (String) ListMesa.getModel().getElementAt(indiceSeleccionado);
+
+                try {
+                    controladoraMesa.modificarMesa(nombreActual, nuevoNombre);
+                    cargarListaMesa(); // Actualiza la lista de mesas
+                    JOptionPane.showMessageDialog(this, "Nombre de la mesa actualizado correctamente.");
+                } catch (SQLException ex) {
+                    Logger.getLogger(VistaMesa.class.getName()).log(Level.SEVERE, null, ex);
+                    JOptionPane.showMessageDialog(this, "Error al actualizar el nombre de la mesa: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+                }
+            } else {
+                JOptionPane.showMessageDialog(this, "El nuevo nombre no puede estar vacío.", "Error", JOptionPane.WARNING_MESSAGE);
+            }
+        } else {
+            JOptionPane.showMessageDialog(this, "Selecciona una mesa de la lista antes de modificarla.", "Error", JOptionPane.WARNING_MESSAGE);
+        }
+    }//GEN-LAST:event_btnModificarMesaActionPerformed
+
+    private void btnVerPedidoActivoActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnVerPedidoActivoActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_btnVerPedidoActivoActionPerformed
+
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JList<String> ListMesa;
@@ -214,8 +309,10 @@ public class VistaMesa extends javax.swing.JPanel {
     private javax.swing.JButton btnAgregarMesa;
     private javax.swing.JButton btnCrearMesa;
     private javax.swing.JButton btnEliminarMesa;
+    private javax.swing.JButton btnEliminarPedidoDeMesa;
     private javax.swing.JButton btnLimpiarNombre;
-    private javax.swing.JButton btnVerMesa;
+    private javax.swing.JButton btnModificarMesa;
+    private javax.swing.JButton btnVerPedidoActivo;
     private javax.swing.JPanel jpMesa;
     private javax.swing.JLabel lblNombreMesa;
     private javax.swing.JTextField txtNombreMesa;

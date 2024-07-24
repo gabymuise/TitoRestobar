@@ -60,10 +60,30 @@ public class DAOMesa {
         String consulta = "DELETE FROM mesas WHERE nombre = ?";
         try (PreparedStatement comando = conexion.prepareStatement(consulta)) {
             comando.setString(1, nombre);
-            comando.executeUpdate();
+            int filasAfectadas = comando.executeUpdate();
+            if (filasAfectadas == 0) {
+                throw new SQLException("La mesa no se pudo eliminar porque no existe.");
+            }
+        } catch (SQLException e) {
+            if (e.getSQLState().equals("23000")) { // Código de estado SQL para violación de restricción de clave foránea
+                throw new SQLException("No se puede eliminar la mesa porque tiene pedidos asociados.");
+            } else {
+                throw e; // Re-lanzar la excepción si no es una violación de clave foránea
+            }
         }
     }
 
+    public void modificarMesa(String nombreActual, String nuevoNombre) throws SQLException {
+        String consulta = "UPDATE mesas SET nombre = ? WHERE nombre = ?";
+
+        try (PreparedStatement ps = conexion.prepareStatement(consulta)) {
+            ps.setString(1, nuevoNombre);
+            ps.setString(2, nombreActual);
+            ps.executeUpdate();
+        }
+    }
+    
+    
     // Obtiene el pedido activo en una mesa específica
     public Pedido verPedidoActivoEnMesa(Mesa mesa) throws SQLException {
         String consultaPedido = "SELECT p.id, p.fechaHoraApertura, p.descuento FROM pedidos p " +
@@ -72,42 +92,19 @@ public class DAOMesa {
                                 "ORDER BY p.fechaHoraApertura DESC LIMIT 1";
 
         Pedido pedido = null;
-        
+
         try (PreparedStatement psPedido = conexion.prepareStatement(consultaPedido)) {
             psPedido.setInt(1, mesa.getId());
             try (ResultSet rsPedido = psPedido.executeQuery()) {
                 if (rsPedido.next()) {
                     int pedidoId = rsPedido.getInt("id");
-                    java.util.Date fechaHoraApertura = new java.util.Date(rsPedido.getTimestamp("fechaHoraApertura").getTime());
-                    List<Item> items = new ArrayList<>();
+                    Timestamp fechaHoraApertura = rsPedido.getTimestamp("fechaHoraApertura");
                     float porcentajeDescuento = rsPedido.getFloat("descuento");
                     Descuento descuento = new Descuento(porcentajeDescuento);
 
-                    String consultaItems = "SELECT i.*, p.nombre, p.descripcion, p.precio, p.costo, p.elaborado " +
-                                           "FROM items i " +
-                                           "JOIN productos p ON i.id_producto = p.id " +
-                                           "WHERE i.id_pedido = ?";
+                    List<Item> items = obtenerItemsDelPedido(pedidoId);
 
-                    try (PreparedStatement psItems = conexion.prepareStatement(consultaItems)) {
-                        psItems.setInt(1, pedidoId);
-                        try (ResultSet rsItems = psItems.executeQuery()) {
-                            while (rsItems.next()) {
-                                String nombre = rsItems.getString("nombre");
-                                String descripcion = rsItems.getString("descripcion");
-                                float precio = rsItems.getFloat("precio");
-                                float costo = rsItems.getFloat("costo");
-                                boolean elaborado = rsItems.getBoolean("elaborado");
-
-                                Producto producto = new Producto(nombre, descripcion, precio, costo, elaborado);
-                                int cantidad = rsItems.getInt("cantidad");
-
-                                Item item = new Item(producto, cantidad);
-                                items.add(item);
-                            }
-                        }
-                    }
-
-                    pedido = new Pedido(mesa, (Timestamp) fechaHoraApertura, items, descuento);
+                    pedido = new Pedido(mesa, fechaHoraApertura, items, descuento);
                     pedido.setId(pedidoId);
                 }
             }
@@ -115,6 +112,35 @@ public class DAOMesa {
 
         return pedido;
     }
+
+    private List<Item> obtenerItemsDelPedido(int pedidoId) throws SQLException {
+        List<Item> items = new ArrayList<>();
+        String consultaItems = "SELECT i.*, p.nombre, p.descripcion, p.precio, p.costo, p.elaborado " +
+                               "FROM items i " +
+                               "JOIN productos p ON i.id_producto = p.id " +
+                               "WHERE i.id_pedido = ?";
+
+        try (PreparedStatement psItems = conexion.prepareStatement(consultaItems)) {
+            psItems.setInt(1, pedidoId);
+            try (ResultSet rsItems = psItems.executeQuery()) {
+                while (rsItems.next()) {
+                    String nombre = rsItems.getString("nombre");
+                    String descripcion = rsItems.getString("descripcion");
+                    float precio = rsItems.getFloat("precio");
+                    float costo = rsItems.getFloat("costo");
+                    boolean elaborado = rsItems.getBoolean("elaborado");
+
+                    Producto producto = new Producto(nombre, descripcion, precio, costo, elaborado);
+                    int cantidad = rsItems.getInt("cantidad");
+
+                    Item item = new Item(producto, cantidad);
+                    items.add(item);
+                }
+            }
+        }
+        return items;
+    }
+
 
     // Elimina el pedido asociado a una mesa específica
     public void eliminarPedidoDeMesa(Mesa mesa, Pedido pedido) throws SQLException {
