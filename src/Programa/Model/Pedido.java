@@ -48,6 +48,13 @@ public class Pedido {
         this.descuento = descuento;
     }
 
+    //Constructor Momentaneo
+    public Pedido(int id, Timestamp fechaHoraApertura, Timestamp fechaHoraCierre) {
+        this.id = id;
+        this.fechaHoraApertura = fechaHoraApertura;
+        this.fechaHoraCierre = fechaHoraCierre;
+    }
+
     public int getId() {
         return id;
     }

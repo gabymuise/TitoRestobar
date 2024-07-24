@@ -56,7 +56,6 @@ public class VistaStock extends javax.swing.JPanel {
         jScrollPane1 = new javax.swing.JScrollPane();
         tablaStock = new javax.swing.JTable();
         jLabel1 = new javax.swing.JLabel();
-        jButtonEliminarStock = new javax.swing.JButton();
         jButtonModificarStock = new javax.swing.JButton();
 
         setPreferredSize(new java.awt.Dimension(800, 500));
@@ -91,13 +90,6 @@ public class VistaStock extends javax.swing.JPanel {
 
         jLabel1.setText("PRODUCTO NO ELABORADO");
 
-        jButtonEliminarStock.setText("ELIMINAR");
-        jButtonEliminarStock.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jButtonEliminarStockActionPerformed(evt);
-            }
-        });
-
         jButtonModificarStock.setText("MODIFICAR");
         jButtonModificarStock.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -118,9 +110,7 @@ public class VistaStock extends javax.swing.JPanel {
                         .addGap(127, 127, 127)
                         .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 502, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                            .addComponent(jButtonEliminarStock, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                            .addComponent(jButtonModificarStock, javax.swing.GroupLayout.DEFAULT_SIZE, 132, Short.MAX_VALUE))))
+                        .addComponent(jButtonModificarStock, javax.swing.GroupLayout.PREFERRED_SIZE, 132, javax.swing.GroupLayout.PREFERRED_SIZE)))
                 .addContainerGap(33, Short.MAX_VALUE))
         );
         layout.setVerticalGroup(
@@ -132,34 +122,11 @@ public class VistaStock extends javax.swing.JPanel {
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 227, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addGroup(layout.createSequentialGroup()
-                        .addComponent(jButtonEliminarStock)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addGap(30, 30, 30)
                         .addComponent(jButtonModificarStock)))
-                .addContainerGap(183, Short.MAX_VALUE))
+                .addContainerGap(182, Short.MAX_VALUE))
         );
     }// </editor-fold>//GEN-END:initComponents
-
-    private void jButtonEliminarStockActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonEliminarStockActionPerformed
-    int filaSeleccionada = tablaStock.getSelectedRow();
-    if (filaSeleccionada == -1) {
-        JOptionPane.showMessageDialog(this, "Seleccione un producto para eliminar.", "Error", JOptionPane.ERROR_MESSAGE);
-    } else {
-        int idProducto = (int) tablaStock.getValueAt(filaSeleccionada, 0);
-
-        try (Connection conn = DriverManager.getConnection("jdbc:mysql://localhost:3306/titorestobar", "root", "123456")) {
-            String sql = "DELETE FROM stock WHERE id_producto = ?";
-            PreparedStatement pstmt = conn.prepareStatement(sql);
-            pstmt.setInt(1, idProducto);
-            pstmt.executeUpdate();
-
-            JOptionPane.showMessageDialog(this, "Producto eliminado del stock correctamente.", "Eliminar Producto", JOptionPane.INFORMATION_MESSAGE);
-            cargarDatosStock(); // Actualizar la tabla después de eliminar
-        } catch (Exception e) {
-            e.printStackTrace();
-            JOptionPane.showMessageDialog(this, "Error al eliminar producto: " + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
-        }
-    }
-    }//GEN-LAST:event_jButtonEliminarStockActionPerformed
 
     private void jButtonModificarStockActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonModificarStockActionPerformed
          int filaSeleccionada = tablaStock.getSelectedRow();
@@ -200,7 +167,6 @@ public class VistaStock extends javax.swing.JPanel {
 
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
-    private javax.swing.JButton jButtonEliminarStock;
     private javax.swing.JButton jButtonModificarStock;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JScrollPane jScrollPane1;

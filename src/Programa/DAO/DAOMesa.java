@@ -82,7 +82,27 @@ public class DAOMesa {
             ps.executeUpdate();
         }
     }
-    
+      
+    public Mesa obtenerMesaPorNombre(String nombre) throws SQLException {
+        Mesa mesa = null;
+        String query = "SELECT * FROM Mesas WHERE nombre = ?";
+
+        try (PreparedStatement stmt = conexion.prepareStatement(query)) {
+            stmt.setString(1, nombre);
+            try (ResultSet rs = stmt.executeQuery()) {
+                if (rs.next()) {
+                    int id = rs.getInt("id");
+                    String nombreMesa = rs.getString("nombre");
+                    mesa = new Mesa(id, nombreMesa); // Asegúrate de que el constructor esté definido así
+                }
+            }
+        } catch (SQLException e) {
+            // Manejo de excepciones para identificar posibles problemas
+            throw new SQLException("Error al obtener la mesa por nombre: " + e.getMessage(), e);
+        }
+        return mesa;
+    }
+
     
     // Obtiene el pedido activo en una mesa específica
     public Pedido verPedidoActivoEnMesa(Mesa mesa) throws SQLException {

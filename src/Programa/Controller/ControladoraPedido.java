@@ -44,9 +44,15 @@ public class ControladoraPedido {
     }
 
     // Método para listar todos los pedidos de una mesa específica
-    public List<Pedido> listarPedidosDeMesa(Mesa mesa) throws SQLException {
-        return daoPedido.listarPedidosDeMesa(mesa);
+    public Pedido verificarPedidoActivoEnMesa(Mesa mesa) throws SQLException {
+        return daoPedido.obtenerPedidoActivoEnMesa(mesa);
     }
+    
+    /*//Metodo para obtener el pedido activo de una mesa especifica
+    public void obtenerPedidoActivoEnMesa(Mesa mesa) throws SQLException {
+        daoPedido.obtenerPedidoActivoEnMesa(mesa);
+    }*/
+    
 
     // Método para calcular el total de un pedido, aplicando un descuento si es necesario
     public float getTotal(Pedido pedido, Descuento descuento) throws SQLException {

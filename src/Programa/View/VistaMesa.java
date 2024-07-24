@@ -3,6 +3,7 @@ package Programa.View;
 import Programa.Controller.ControladoraMesa;
 import Programa.Controller.ControladoraPedido;
 import Programa.DAO.DAOMesa;
+import Programa.DAO.DAOPedido;
 import Programa.Model.Mesa;
 import Programa.Model.Pedido;
 import java.sql.SQLException;
@@ -238,32 +239,30 @@ public class VistaMesa extends javax.swing.JPanel {
     }//GEN-LAST:event_btnEliminarMesaActionPerformed
 
     private void btnEliminarPedidoDeMesaActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnEliminarPedidoDeMesaActionPerformed
-            int indiceSeleccionado = ListMesa.getSelectedIndex();
+        int indiceSeleccionado = ListMesa.getSelectedIndex();
 
         if (indiceSeleccionado >= 0) {
             String nombreMesa = (String) ListMesa.getModel().getElementAt(indiceSeleccionado);
 
             try {
-                Pedido pedidoActivo = (Pedido) controladoraPedido.listarPedidosDeMesa(mesa);
+                // Obtener la mesa seleccionada
+                Mesa mesa = controladoraMesa.obtenerMesaPorNombre(nombreMesa);
+
+                DAOPedido daoPedido = new DAOPedido();
+                Pedido pedidoActivo = daoPedido.obtenerPedidoActivoEnMesa(mesa);
 
                 if (pedidoActivo != null) {
                     // Eliminar el pedido asociado
                     controladoraMesa.eliminarPedidoDeMesa(mesa, pedidoActivo);
-
-                    // Ahora eliminar la mesa
-                    controladoraMesa.eliminarMesa(nombreMesa);
-
-                    // Actualizar la vista
-                    DefaultListModel<String> modelo = (DefaultListModel<String>) ListMesa.getModel();
-                    modelo.remove(indiceSeleccionado);
-                    JOptionPane.showMessageDialog(this, "Mesa y pedido eliminados correctamente.");
-                } else {
-                    // Solo eliminar la mesa si no hay pedido activo
-                    controladoraMesa.eliminarMesa(nombreMesa);
-                    DefaultListModel<String> modelo = (DefaultListModel<String>) ListMesa.getModel();
-                    modelo.remove(indiceSeleccionado);
-                    JOptionPane.showMessageDialog(this, "Mesa eliminada correctamente.");
                 }
+
+                // Ahora eliminar la mesa
+                controladoraMesa.eliminarMesa(nombreMesa);
+
+                // Actualizar la vista
+                DefaultListModel<String> modelo = (DefaultListModel<String>) ListMesa.getModel();
+                modelo.remove(indiceSeleccionado);
+                JOptionPane.showMessageDialog(this, "Mesa y pedido eliminados correctamente.");
             } catch (SQLException e) {
                 JOptionPane.showMessageDialog(this, "Error al eliminar la mesa o el pedido: " + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
             }
@@ -298,7 +297,26 @@ public class VistaMesa extends javax.swing.JPanel {
     }//GEN-LAST:event_btnModificarMesaActionPerformed
 
     private void btnVerPedidoActivoActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnVerPedidoActivoActionPerformed
-        // TODO add your handling code here:
+      int indiceSeleccionado = ListMesa.getSelectedIndex();
+
+        if (indiceSeleccionado >= 0) {
+            String nombreMesa = (String) ListMesa.getModel().getElementAt(indiceSeleccionado);
+
+            try {
+                // Obtener la mesa seleccionada
+                Mesa mesaSeleccionada = controladoraMesa.obtenerMesaPorNombre(nombreMesa);
+
+                // Verificar si la mesa tiene un pedido activo
+                controladoraPedido.verificarPedidoActivoEnMesa(mesaSeleccionada);
+
+                JOptionPane.showMessageDialog(this, "La mesa seleccionada tiene un pedido activo.", "Pedido Activo", JOptionPane.INFORMATION_MESSAGE);
+            } catch (SQLException ex) {
+                Logger.getLogger(VistaMesa.class.getName()).log(Level.SEVERE, null, ex);
+                JOptionPane.showMessageDialog(this, ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+            }
+        } else {
+            JOptionPane.showMessageDialog(this, "Selecciona una mesa de la lista para verificar el pedido.", "Error", JOptionPane.WARNING_MESSAGE);
+        }
     }//GEN-LAST:event_btnVerPedidoActivoActionPerformed
 
 

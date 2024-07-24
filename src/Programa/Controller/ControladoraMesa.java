@@ -1,6 +1,7 @@
 package Programa.Controller;
 
 import Programa.DAO.DAOMesa;
+import Programa.DAO.DAOPedido;
 import Programa.Model.Mesa;
 import Programa.Model.Pedido;
 import java.sql.SQLException;
@@ -42,6 +43,16 @@ public class ControladoraMesa {
     //Metodo para modificar el nombre de una mesa
     public void modificarMesa(String nombreActual, String nuevoNombre) throws SQLException {
         daoMesa.modificarMesa(nombreActual, nuevoNombre);
+    }
+    
+    // Método para obtener una mesa por su nombre
+    public Mesa obtenerMesaPorNombre(String nombre) throws SQLException {
+        return daoMesa.obtenerMesaPorNombre(nombre);
+    }
+    
+    public Pedido obtenerPedidoActivoEnMesa(Mesa mesa) throws SQLException {
+        DAOPedido daoPedido = new DAOPedido();
+        return daoPedido.obtenerPedidoActivoEnMesa(mesa);
     }
 
     // Método para cerrar la conexión a la base de datos

@@ -76,36 +76,74 @@ public class DAOPedido {
         }
     }
 
-    // Método para listar todos los pedidos de una mesa específica
-    public List<Pedido> listarPedidosDeMesa(Mesa mesa) throws SQLException {
-        String query = "SELECT p.id, p.fechaHoraApertura, p.fechaHoraCierre, p.descuento " +
-                       "FROM pedidos p " +
-                       "JOIN mesa_pedido mp ON p.id = mp.id_pedido " +
-                       "WHERE mp.id_mesa = ?";
-        List<Pedido> pedidos = new ArrayList<>();
-        try (PreparedStatement ps = conexion.prepareStatement(query)) {
-            ps.setInt(1, mesa.getId());
-            try (ResultSet rs = ps.executeQuery()) {
-                while (rs.next()) {
-                    pedido.setId(rs.getInt("id"));
-                    pedido.setFechaHoraApertura(rs.getTimestamp("fechaHoraApertura"));
-                    pedido.setFechaHoraCierre(rs.getTimestamp("fechaHoraCierre"));
+    public Pedido obtenerPedidoActivoEnMesa(Mesa mesa) throws SQLException {
+        String query = "SELECT P.id, P.fechaHoraApertura, P.fechaHoraCierre "
+                     + "FROM Pedidos P "
+                     + "JOIN Mesa_Pedido MP ON P.id = MP.idPedido "
+                     + "WHERE MP.idMesa = ? AND P.fechaHoraCierre IS NULL";
 
-                    // Convertir BigDecimal a float y crear Descuento
-                    BigDecimal descuentoBD = rs.getBigDecimal("descuento");
-                    if (descuentoBD != null) {
-                        float porcentajeDescuento = descuentoBD.floatValue();
-                        pedido.setDescuento(new Descuento(porcentajeDescuento));
-                    } else {
-                        // Asumir descuento 0 si es NULL
-                        pedido.setDescuento(new Descuento(0));
-                    }
+        try (PreparedStatement statement = conexion.prepareStatement(query)) {
+            statement.setInt(1, mesa.getId());
+            ResultSet resultSet = statement.executeQuery();
 
-                    // Aquí puedes cargar los items del pedido si es necesario
-                    pedidos.add(pedido);
-                }
+            if (resultSet.next()) {
+                int id = resultSet.getInt("id");
+                Timestamp fechaHoraApertura = resultSet.getTimestamp("fechaHoraApertura");
+                Timestamp fechaHoraCierre = resultSet.getTimestamp("fechaHoraCierre");
+
+                return new Pedido(id, fechaHoraApertura, fechaHoraCierre);
+            } else {
+                return null; // No hay pedido activo
             }
         }
+    }
+    
+    // Método para listar todos los pedidos de una mesa específica
+    public List<Pedido> listarPedidosDeMesa(Mesa mesa) throws SQLException {
+        List<Pedido> pedidos = new ArrayList<>();
+        String query = "SELECT P.id, P.fechaHoraApertura, P.fechaHoraCierre "
+                     + "FROM Pedidos P "
+                     + "JOIN Mesa_Pedido MP ON P.id = MP.idPedido "
+                     + "WHERE MP.idMesa = ?";
+
+        try (PreparedStatement statement = conexion.prepareStatement(query)) {
+            statement.setInt(1, mesa.getId());
+            ResultSet resultSet = statement.executeQuery();
+
+            while (resultSet.next()) {
+                int id = resultSet.getInt("id");
+                Timestamp fechaHoraApertura = resultSet.getTimestamp("fechaHoraApertura");
+                Timestamp fechaHoraCierre = resultSet.getTimestamp("fechaHoraCierre");
+
+                // Crear y agregar el objeto Pedido a la lista
+                Pedido pedido = new Pedido(id, fechaHoraApertura, fechaHoraCierre);
+                pedidos.add(pedido);
+            }
+        }
+
         return pedidos;
+    }
+    
+    // Método para verificar todos los pedidos de una mesa específica
+    public void verificarPedidoActivoEnMesa(Mesa mesa) throws SQLException {
+        String query = "SELECT P.id " +
+                       "FROM Pedidos P " +
+                       "INNER JOIN Mesa_Pedido MP ON P.id = MP.idPedido " +
+                       "WHERE MP.idMesa = ? " +
+                       "AND P.fechaHoraCierre IS NULL"; // Suponiendo que fechaHoraCierre es NULL para pedidos activos
+
+        try (PreparedStatement stmt = conexion.prepareStatement(query)) {
+            stmt.setInt(1, mesa.getId());
+            try (ResultSet rs = stmt.executeQuery()) {
+                if (rs.next()) {
+                    int idPedido = rs.getInt("id");
+                    // Lanza una excepción con el ID del pedido activo
+                    throw new SQLException("La mesa con ID " + mesa.getId() + " tiene un pedido activo con ID: " + idPedido);
+                }
+            }
+        } catch (SQLException e) {
+            // Manejo de excepciones para identificar posibles problemas
+            throw new SQLException("Error al verificar si la mesa tiene un pedido activo: " + e.getMessage(), e);
+        }
     }
 }
