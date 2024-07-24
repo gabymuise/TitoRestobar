@@ -1,11 +1,14 @@
 package Programa.Model;
 
-/**
- * Representa un descuento aplicable a un subtotal.
- */
 public class Descuento {
     private float porcentaje;
 
+    // Constructor vacío
+    public Descuento() {
+        this.porcentaje = 0.0f;
+    }
+
+    // Constructor de Descuento
     public Descuento(float porcentaje) {
         this.porcentaje = porcentaje;
     }

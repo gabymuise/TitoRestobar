@@ -8,12 +8,25 @@ public class Stock {
     private int cantidad;
     private Producto producto;
 
+    // Constructor vacío
+    public Stock() {
+        this.cantidad = 0;
+        this.producto = null;
+    }
+
+    // Constructor de Stock
     public Stock(int cantidad, Producto producto) {
         this.cantidad = cantidad;
         this.producto = producto;
     }
 
-    // Getters y Setters
+    // Constructor de Base de Datos
+    public Stock(int id, int cantidad, Producto producto) {
+        this.id = id;
+        this.cantidad = cantidad;
+        this.producto = producto;
+    }
+
     public int getId() {
         return id;
     }

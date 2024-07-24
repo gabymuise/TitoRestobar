@@ -11,14 +11,16 @@ public class Producto {
     private float costo;
     private boolean elaboracion;
 
-    /**
-     * Crea una instancia de Producto con los detalles especificados.
-     * @param nombre El nombre del producto.
-     * @param descripcion La descripción del producto.
-     * @param precio El precio del producto.
-     * @param costo El costo del producto.
-     * @param elaboracion Indica si el producto requiere elaboración.
-     */
+    //Constructor vacio
+    public Producto() {
+        this.nombre = null;
+        this.descripcion = null;
+        this.precio = 0;
+        this.costo = 0;
+        this.elaboracion = false;
+    }
+        
+    //Constructor de Producto
     public Producto(String nombre, String descripcion, float precio, float costo, boolean elaboracion) {
         this.nombre = nombre;
         this.descripcion = descripcion;
@@ -27,6 +29,7 @@ public class Producto {
         this.elaboracion = elaboracion;
     }
     
+    //Constructor de Base de Datos
     public Producto(int id, String nombre, String descripcion, float precio, float costo, boolean elaboracion) {
         this.id = id;
         this.nombre = nombre;
@@ -36,7 +39,6 @@ public class Producto {
         this.elaboracion = elaboracion;
     }
     
-    // Getters y Setters
     public int getId() {
         return id;
     }

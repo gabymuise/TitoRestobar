@@ -70,8 +70,9 @@ public class DAOMesa {
                                 "JOIN mesa_pedido mp ON p.id = mp.id_pedido " +
                                 "WHERE mp.id_mesa = ? AND p.fechaHoraCierre IS NULL " +
                                 "ORDER BY p.fechaHoraApertura DESC LIMIT 1";
-        Pedido pedido = null;
 
+        Pedido pedido = null;
+        
         try (PreparedStatement psPedido = conexion.prepareStatement(consultaPedido)) {
             psPedido.setInt(1, mesa.getId());
             try (ResultSet rsPedido = psPedido.executeQuery()) {

@@ -12,6 +12,7 @@ public class Pedido {
     private List<Item> items;
     private Descuento descuento;
 
+    //Pedido Activo
     public Pedido(Mesa mesa, Timestamp fechaHoraApertura, List<Item> items, Descuento descuento) {
         this.mesa = mesa;
         this.fechaHoraApertura = fechaHoraApertura;
@@ -19,12 +20,32 @@ public class Pedido {
         this.descuento = descuento;
     }
 
+    // Constructor vacío
     public Pedido() {
         this.mesa = null;
         this.fechaHoraApertura = null;
         this.fechaHoraCierre = null;
         this.items = new ArrayList<>();
         this.descuento = null;
+    }
+
+    // Constructor de Pedido
+    public Pedido(Mesa mesa, Timestamp fechaHoraApertura, Timestamp fechaHoraCierre, List<Item> items, Descuento descuento) {
+        this.mesa = mesa;
+        this.fechaHoraApertura = fechaHoraApertura;
+        this.fechaHoraCierre = fechaHoraCierre;
+        this.items = items;
+        this.descuento = descuento;
+    }
+
+    // Constructor de Base de Datos
+    public Pedido(int id, Mesa mesa, Timestamp fechaHoraApertura, Timestamp fechaHoraCierre, List<Item> items, Descuento descuento) {
+        this.id = id;
+        this.mesa = mesa;
+        this.fechaHoraApertura = fechaHoraApertura;
+        this.fechaHoraCierre = fechaHoraCierre;
+        this.items = items;
+        this.descuento = descuento;
     }
 
     public int getId() {
