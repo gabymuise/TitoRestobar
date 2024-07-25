@@ -404,46 +404,42 @@ public class VistaProducto extends javax.swing.JPanel {
 
     private void jBtnActualizarPreciosActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jBtnActualizarPreciosActionPerformed
         int filaSeleccionada = tableProductos.getSelectedRow();
-    if (filaSeleccionada >= 0) {
-        try {
-            int id = (int) tableProductos.getValueAt(filaSeleccionada, 0);
-            String nombre = (String) tableProductos.getValueAt(filaSeleccionada, 1);
-            String descripcion = (String) tableProductos.getValueAt(filaSeleccionada, 2);
-            
-            String nuevoPrecioStr = JOptionPane.showInputDialog(this, "Ingrese el nuevo precio para el producto:");
-            if (nuevoPrecioStr == null || nuevoPrecioStr.isEmpty()) {
-                JOptionPane.showMessageDialog(this, "El precio no puede estar vacío.", "Error", JOptionPane.WARNING_MESSAGE);
-                return;
-            }
-            
-            String nuevoCostoStr = JOptionPane.showInputDialog(this, "Ingrese el nuevo costo para el producto:");
-            if (nuevoCostoStr == null || nuevoCostoStr.isEmpty()) {
-                JOptionPane.showMessageDialog(this, "El costo no puede estar vacío.", "Error", JOptionPane.WARNING_MESSAGE);
-                return;
-            }
+        if (filaSeleccionada >= 0) {
+            try {
+                int id = (int) tableProductos.getValueAt(filaSeleccionada, 0);
+                String nombre = (String) tableProductos.getValueAt(filaSeleccionada, 1);
+                String descripcion = (String) tableProductos.getValueAt(filaSeleccionada, 2);
 
-            float nuevoPrecio = Float.parseFloat(nuevoPrecioStr);
-            float nuevoCosto = Float.parseFloat(nuevoCostoStr);
-            boolean elaboracion = (boolean) tableProductos.getValueAt(filaSeleccionada, 5);
-            
-            Producto producto = new Producto(id, nombre, descripcion, nuevoPrecio, nuevoCosto, elaboracion);
-            ControladoraProducto controladoraProducto = new ControladoraProducto();
-            boolean actualizado = controladoraProducto.actualizarPreciosYCostos(producto);
-            
-            if (actualizado) {
+                String nuevoPrecioStr = JOptionPane.showInputDialog(this, "Ingrese el nuevo precio para el producto:");
+                if (nuevoPrecioStr == null || nuevoPrecioStr.isEmpty()) {
+                    JOptionPane.showMessageDialog(this, "El precio no puede estar vacío.", "Error", JOptionPane.WARNING_MESSAGE);
+                    return;
+                }
+
+                String nuevoCostoStr = JOptionPane.showInputDialog(this, "Ingrese el nuevo costo para el producto:");
+                if (nuevoCostoStr == null || nuevoCostoStr.isEmpty()) {
+                    JOptionPane.showMessageDialog(this, "El costo no puede estar vacío.", "Error", JOptionPane.WARNING_MESSAGE);
+                    return;
+                }
+
+                float nuevoPrecio = Float.parseFloat(nuevoPrecioStr);
+                float nuevoCosto = Float.parseFloat(nuevoCostoStr);
+                boolean elaborado = (boolean) tableProductos.getValueAt(filaSeleccionada, 5);
+
+                Producto producto = new Producto(id, nombre, descripcion, nuevoPrecio, nuevoCosto, elaborado);
+                ControladoraProducto controladoraProducto = new ControladoraProducto();
+                controladoraProducto.actualizar(producto);
+
                 JOptionPane.showMessageDialog(this, "Producto actualizado correctamente.");
                 cargarProductos(); // Vuelve a cargar los productos en la tabla
-            } else {
-                JOptionPane.showMessageDialog(this, "Error al actualizar el producto.", "Error", JOptionPane.ERROR_MESSAGE);
+            } catch (NumberFormatException e) {
+                JOptionPane.showMessageDialog(this, "Precio o costo deben ser números válidos.", "Error", JOptionPane.ERROR_MESSAGE);
+            } catch (Exception e) {
+                JOptionPane.showMessageDialog(this, "Ocurrió un error inesperado: " + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
             }
-        } catch (NumberFormatException e) {
-            JOptionPane.showMessageDialog(this, "Precio o costo deben ser números válidos.", "Error", JOptionPane.ERROR_MESSAGE);
-        } catch (Exception e) {
-            JOptionPane.showMessageDialog(this, "Ocurrió un error inesperado: " + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+        } else {
+            JOptionPane.showMessageDialog(this, "Selecciona un producto de la tabla antes de actualizar.", "Error", JOptionPane.WARNING_MESSAGE);
         }
-    } else {
-        JOptionPane.showMessageDialog(this, "Selecciona un producto de la tabla antes de actualizar.", "Error", JOptionPane.WARNING_MESSAGE);
-    }
     }//GEN-LAST:event_jBtnActualizarPreciosActionPerformed
 
 

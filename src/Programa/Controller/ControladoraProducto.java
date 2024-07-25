@@ -3,6 +3,7 @@ package Programa.Controller;
 import Programa.DAO.DAOProducto;
 import Programa.Model.Producto;
 import Programa.Model.Stock;
+
 import java.sql.SQLException;
 import java.util.List;
 import java.util.logging.Level;
@@ -35,25 +36,23 @@ public class ControladoraProducto {
     public boolean eliminarProductoPorNombre(String nombre) throws SQLException {
         return daoProducto.eliminarProductoPorNombre(nombre);
     }
-    
 
     // Método para guardar la información de stock de un producto
     public void guardarStock(Stock stock) throws SQLException {
         daoProducto.guardarStock(stock);
     }
 
-    public boolean actualizarPreciosYCostos(Producto producto) {
+    // Método para actualizar los precios y costos de un producto
+    public void actualizarPreciosYCostos(Producto producto) {
         try {
-            daoProducto.actualizarProducto(producto);
-            return true;
+            daoProducto.actualizar(producto);
         } catch (SQLException ex) {
             Logger.getLogger(ControladoraProducto.class.getName()).log(Level.SEVERE, null, ex);
-            return false;
         }
     }
 
+    // Método para obtener un producto por su ID
     public Producto obtenerProductoPorId(int productoId) throws SQLException {
-        daoProducto.ver(productoId);
-        return null;
+        return daoProducto.ver(productoId);
     }
 }

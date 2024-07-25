@@ -10,10 +10,10 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 
 public class DAOStock {
-    private Stock stock;
-    private Producto producto;
-    
+    // Obtiene el stock de un producto por su ID
     public Stock obtenerStockPorProducto(int idProducto) {
+        Stock stock = new Stock();
+        Producto producto = new Producto();
         String sql = "SELECT * FROM stock WHERE id_producto = ?";
         
         try (Connection con = Conexion.Conectar();

@@ -13,7 +13,7 @@ import java.util.List;
 
 public class DAOProducto {
     private Connection conexion;
-    
+
     // Constructor que establece la conexión con la base de datos
     public DAOProducto() {
         try {
@@ -22,7 +22,7 @@ public class DAOProducto {
             e.printStackTrace(); // Considerar una mejor gestión de errores aquí
         }
     }
-        
+
     // Lista todos los productos
     public List<Producto> listadoDeProductos() throws SQLException {
         List<Producto> lista = new ArrayList<>();
@@ -63,33 +63,7 @@ public class DAOProducto {
             }
         }
     }
-    
-     public boolean actualizarProducto(Producto producto) throws SQLException {
-        Connection conn = null;
-        PreparedStatement stmt = null;
-        try {
-            conn = Conexion.Conectar();
-            String sql = "UPDATE productos SET Nombre = ?, Descripcion = ?, Precio = ?, Costo = ?, Elaborado = ? WHERE Id = ?";
-            stmt = conn.prepareStatement(sql);
-            stmt.setString(1, producto.getNombre());
-            stmt.setString(2, producto.getDescripcion());
-            stmt.setDouble(3, producto.getPrecio());
-            stmt.setDouble(4, producto.getCosto());
-            stmt.setBoolean(5, producto.isElaboracion());
-            stmt.setInt(6, producto.getId());
 
-            int rowsUpdated = stmt.executeUpdate();
-            return rowsUpdated > 0;
-        } finally {
-            if (stmt != null) {
-                stmt.close();
-            }
-            if (conn != null) {
-                conn.close();
-            }
-        }
-    }
-    
     // Actualiza la información de un producto existente
     public void actualizar(Producto producto) throws SQLException {
         String consulta = "UPDATE productos SET nombre = ?, descripcion = ?, precio = ?, costo = ?, elaborado = ? WHERE id = ?";
@@ -105,7 +79,7 @@ public class DAOProducto {
     }
 
     // Elimina el stock asociado a un producto por su ID
-    public void eliminarStockPorIdProducto(int idProducto) throws SQLException {
+    private void eliminarStockPorIdProducto(int idProducto) throws SQLException {
         String consulta = "DELETE FROM stock WHERE id_producto = ?";
         try (PreparedStatement comando = conexion.prepareStatement(consulta)) {
             comando.setInt(1, idProducto);
@@ -165,26 +139,29 @@ public class DAOProducto {
             comando.executeUpdate();
         }
     }
-        public Producto ver(int id) throws SQLException {
-            Producto producto = null;
-            String sql = "SELECT * FROM productos WHERE id = ?";
-            try (PreparedStatement stmt = conexion.prepareStatement(sql)) {
-                stmt.setInt(1, id);
-                try (ResultSet rs = stmt.executeQuery()) {
-                    if (rs.next()) {
-                        producto = new Producto(rs.getInt("id"),
-                                                rs.getString("nombre"),
-                                                rs.getString("descripcion"),
-                                                rs.getFloat("precio"),
-                                                rs.getFloat("costo"),
-                                                rs.getBoolean("elaborado"));
-                    }
+
+    // Obtiene un producto por su ID
+    public Producto ver(int id) throws SQLException {
+        Producto producto = null;
+        String sql = "SELECT * FROM productos WHERE id = ?";
+        try (PreparedStatement stmt = conexion.prepareStatement(sql)) {
+            stmt.setInt(1, id);
+            try (ResultSet rs = stmt.executeQuery()) {
+                if (rs.next()) {
+                    producto = new Producto(rs.getInt("id"),
+                                            rs.getString("nombre"),
+                                            rs.getString("descripcion"),
+                                            rs.getFloat("precio"),
+                                            rs.getFloat("costo"),
+                                            rs.getBoolean("elaborado"));
                 }
             }
-            return producto;
         }
+        return producto;
+    }
+
     // Cierra la conexión con la base de datos
-    public void cerrarConexion(Connection conexion) {
+    public void cerrarConexion() {
         try {
             if (conexion != null && !conexion.isClosed()) {
                 conexion.close();

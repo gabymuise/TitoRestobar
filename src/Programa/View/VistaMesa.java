@@ -6,6 +6,7 @@ import Programa.DAO.DAOMesa;
 import Programa.DAO.DAOPedido;
 import Programa.Model.Mesa;
 import Programa.Model.Pedido;
+import Resources.PedidoNoActivoException;
 import java.sql.SQLException;
 import java.util.List;
 import java.util.logging.Level;
@@ -240,7 +241,6 @@ public class VistaMesa extends javax.swing.JPanel {
 
     private void btnEliminarPedidoDeMesaActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnEliminarPedidoDeMesaActionPerformed
         int indiceSeleccionado = ListMesa.getSelectedIndex();
-
         if (indiceSeleccionado >= 0) {
             String nombreMesa = (String) ListMesa.getModel().getElementAt(indiceSeleccionado);
 
@@ -248,21 +248,30 @@ public class VistaMesa extends javax.swing.JPanel {
                 // Obtener la mesa seleccionada
                 Mesa mesa = controladoraMesa.obtenerMesaPorNombre(nombreMesa);
 
-                DAOPedido daoPedido = new DAOPedido();
-                Pedido pedidoActivo = daoPedido.obtenerPedidoActivoEnMesa(mesa);
+                if (mesa != null) {
+                    // Verificar si hay un pedido activo en la mesa
+                    Pedido pedidoActivo = null;
+                    try {
+                        pedidoActivo = controladoraMesa.verPedidoActivoEnMesa(mesa);
+                    } catch (PedidoNoActivoException ex) {
+                        Logger.getLogger(VistaMesa.class.getName()).log(Level.SEVERE, null, ex);
+                    }
 
-                if (pedidoActivo != null) {
-                    // Eliminar el pedido asociado
-                    controladoraMesa.eliminarPedidoDeMesa(mesa, pedidoActivo);
+                    if (pedidoActivo != null) {
+                        // Eliminar el pedido asociado de la mesa
+                        controladoraMesa.eliminarPedidoDeMesa(mesa, pedidoActivo);
+                    }
+
+                    // Ahora eliminar la mesa
+                    controladoraMesa.eliminarMesa(nombreMesa);
+
+                    // Actualizar la vista
+                    DefaultListModel<String> modelo = (DefaultListModel<String>) ListMesa.getModel();
+                    modelo.remove(indiceSeleccionado);
+                    JOptionPane.showMessageDialog(this, "Mesa y pedido eliminados correctamente.");
+                } else {
+                    JOptionPane.showMessageDialog(this, "No se pudo encontrar la mesa seleccionada.", "Error", JOptionPane.ERROR_MESSAGE);
                 }
-
-                // Ahora eliminar la mesa
-                controladoraMesa.eliminarMesa(nombreMesa);
-
-                // Actualizar la vista
-                DefaultListModel<String> modelo = (DefaultListModel<String>) ListMesa.getModel();
-                modelo.remove(indiceSeleccionado);
-                JOptionPane.showMessageDialog(this, "Mesa y pedido eliminados correctamente.");
             } catch (SQLException e) {
                 JOptionPane.showMessageDialog(this, "Error al eliminar la mesa o el pedido: " + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
             }
@@ -297,7 +306,7 @@ public class VistaMesa extends javax.swing.JPanel {
     }//GEN-LAST:event_btnModificarMesaActionPerformed
 
     private void btnVerPedidoActivoActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnVerPedidoActivoActionPerformed
-      int indiceSeleccionado = ListMesa.getSelectedIndex();
+        int indiceSeleccionado = ListMesa.getSelectedIndex();
 
         if (indiceSeleccionado >= 0) {
             String nombreMesa = (String) ListMesa.getModel().getElementAt(indiceSeleccionado);
@@ -306,13 +315,22 @@ public class VistaMesa extends javax.swing.JPanel {
                 // Obtener la mesa seleccionada
                 Mesa mesaSeleccionada = controladoraMesa.obtenerMesaPorNombre(nombreMesa);
 
-                // Verificar si la mesa tiene un pedido activo
-                controladoraPedido.verificarPedidoActivoEnMesa(mesaSeleccionada);
+                // Verificar si la mesa tiene un pedido activo usando ControladoraMesa
+                Pedido pedidoActivo = controladoraMesa.verPedidoActivoEnMesa(mesaSeleccionada);
 
-                JOptionPane.showMessageDialog(this, "La mesa seleccionada tiene un pedido activo.", "Pedido Activo", JOptionPane.INFORMATION_MESSAGE);
-            } catch (SQLException ex) {
-                Logger.getLogger(VistaMesa.class.getName()).log(Level.SEVERE, null, ex);
-                JOptionPane.showMessageDialog(this, ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+                if (pedidoActivo != null) {
+                    // Mostrar información del pedido activo
+                    JOptionPane.showMessageDialog(this, "La mesa seleccionada tiene un pedido activo.", "Pedido Activo", JOptionPane.INFORMATION_MESSAGE);
+                    // Puedes agregar más lógica aquí para mostrar detalles del pedido, si es necesario
+                } else {
+                    JOptionPane.showMessageDialog(this, "La mesa seleccionada no tiene un pedido activo.", "Sin Pedido Activo", JOptionPane.INFORMATION_MESSAGE);
+                }
+            } catch (PedidoNoActivoException e) {
+                JOptionPane.showMessageDialog(this, e.getMessage(), "Error", JOptionPane.WARNING_MESSAGE);
+            } catch (SQLException e) {
+                JOptionPane.showMessageDialog(this, "Error al obtener el pedido activo: " + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+            } catch (Exception e) {
+                JOptionPane.showMessageDialog(this, "Ocurrió un error inesperado: " + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
             }
         } else {
             JOptionPane.showMessageDialog(this, "Selecciona una mesa de la lista para verificar el pedido.", "Error", JOptionPane.WARNING_MESSAGE);

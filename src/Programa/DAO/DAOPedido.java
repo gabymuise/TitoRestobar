@@ -2,41 +2,43 @@ package Programa.DAO;
 
 import Programa.Model.Conexion;
 import Programa.Model.Descuento;
+import Programa.Model.Pedido;
 import Programa.Model.Item;
 import Programa.Model.Mesa;
-import Programa.Model.Pedido;
 import Programa.Model.Producto;
-import java.math.BigDecimal;
+import java.sql.Timestamp;
 import java.sql.Connection;
-import java.sql.ResultSet;
 import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
-import java.sql.Timestamp;
 
 public class DAOPedido {
     private Connection conexion;
-    private Pedido pedido;
+    private Item item;
 
-    public DAOPedido() throws SQLException {
-        // Inicializa la conexión a la base de datos
-        conexion = Conexion.Conectar();
+    public DAOPedido() {
+        try {
+            conexion = Conexion.Conectar();
+        } catch (SQLException e) {
+            e.printStackTrace(); // Considerar una mejor gestión de errores aquí
+        }
     }
 
-    // Método para crear un nuevo pedido
+    // Crea un nuevo pedido
     public boolean crearPedido(Pedido pedido) throws SQLException {
-        String sql = "INSERT INTO pedidos (fechaHoraApertura, descuento) VALUES (?, ?)";
+        String sql = "INSERT INTO Pedidos (fechaHoraApertura, fechaHoraCierre) VALUES (?, ?)";
         try (PreparedStatement stmt = conexion.prepareStatement(sql, PreparedStatement.RETURN_GENERATED_KEYS)) {
             stmt.setTimestamp(1, pedido.getFechaHoraApertura());
-            stmt.setFloat(2, pedido.getDescuento().getPorcentaje());
+            stmt.setTimestamp(2, null); // fechaHoraCierre es NULL al momento de crear el pedido
+
             int rowsAffected = stmt.executeUpdate();
-            
             if (rowsAffected > 0) {
-                // Retrieve the generated id
+                // Obtener el ID del nuevo pedido
                 try (ResultSet generatedKeys = stmt.getGeneratedKeys()) {
                     if (generatedKeys.next()) {
-                        pedido.setId(generatedKeys.getInt(1)); // Set the generated ID to the Pedido object
+                        pedido.setId(generatedKeys.getInt(1)); // Establecer el ID generado al objeto Pedido
                         return true;
                     }
                 }
@@ -44,106 +46,126 @@ public class DAOPedido {
             return false;
         }
     }
+    
+    public void insertarDetallePedido(Pedido pedido, Item item) throws SQLException {
+        String sql = "INSERT INTO Detalle_Pedido (idPedido, subtotal, total, descuento) VALUES (?, ?, ?, ?)";
+        try (PreparedStatement stmt = conexion.prepareStatement(sql)) {
+            stmt.setInt(1, pedido.getId());
+            stmt.setDouble(2, item.getSubtotal()); // Asegúrate de que el tipo coincida
+            stmt.setDouble(3, pedido.getTotal()); // Asegúrate de que el tipo coincida
+            stmt.setFloat(4, pedido.getDescuento().getPorcentaje()); // Asegúrate de que el tipo coincida
 
-    // Método para asignar una mesa a un pedido
-    public boolean asignarMesaAPedido(int pedidoId, int mesaId) throws SQLException {
-        String query = "INSERT INTO mesa_pedido (id_mesa, id_pedido) VALUES (?, ?)";
-        try (PreparedStatement ps = conexion.prepareStatement(query)) {
-            ps.setInt(1, mesaId);
-            ps.setInt(2, pedidoId);
-            return ps.executeUpdate() > 0;
-        }
-    }
-
-    // Método para agregar un item a un pedido
-    public boolean agregarItemAPedido(int pedidoId, int productoId, int cantidad) throws SQLException {
-        String query = "INSERT INTO items (id_pedido, id_producto, cantidad) VALUES (?, ?, ?)";
-        try (PreparedStatement ps = conexion.prepareStatement(query)) {
-            ps.setInt(1, pedidoId);
-            ps.setInt(2, productoId);
-            ps.setInt(3, cantidad);
-            return ps.executeUpdate() > 0;
-        }
-    }
-
-    // Método para eliminar un item de un pedido
-    public void eliminarItem(Pedido pedido, Item item) throws SQLException {
-        String query = "DELETE FROM items WHERE id_pedido = ? AND id_producto = ?";
-        try (PreparedStatement ps = conexion.prepareStatement(query)) {
-            ps.setInt(1, pedido.getId());
-            ps.setInt(2, item.getProducto().getId());
-            ps.executeUpdate();
-        }
-    }
-
-    public Pedido obtenerPedidoActivoEnMesa(Mesa mesa) throws SQLException {
-        String query = "SELECT P.id, P.fechaHoraApertura, P.fechaHoraCierre "
-                     + "FROM Pedidos P "
-                     + "JOIN Mesa_Pedido MP ON P.id = MP.idPedido "
-                     + "WHERE MP.idMesa = ? AND P.fechaHoraCierre IS NULL";
-
-        try (PreparedStatement statement = conexion.prepareStatement(query)) {
-            statement.setInt(1, mesa.getId());
-            ResultSet resultSet = statement.executeQuery();
-
-            if (resultSet.next()) {
-                int id = resultSet.getInt("id");
-                Timestamp fechaHoraApertura = resultSet.getTimestamp("fechaHoraApertura");
-                Timestamp fechaHoraCierre = resultSet.getTimestamp("fechaHoraCierre");
-
-                return new Pedido(id, fechaHoraApertura, fechaHoraCierre);
-            } else {
-                return null; // No hay pedido activo
-            }
+            stmt.executeUpdate();
         }
     }
     
-    // Método para listar todos los pedidos de una mesa específica
-    public List<Pedido> listarPedidosDeMesa(Mesa mesa) throws SQLException {
+    public List<Pedido> obtenerTodosLosPedidosActivos() throws SQLException {
         List<Pedido> pedidos = new ArrayList<>();
-        String query = "SELECT P.id, P.fechaHoraApertura, P.fechaHoraCierre "
-                     + "FROM Pedidos P "
-                     + "JOIN Mesa_Pedido MP ON P.id = MP.idPedido "
-                     + "WHERE MP.idMesa = ?";
+        String query = "SELECT p.id, p.fechaHoraApertura, p.descuento, m.nombre AS nombre_mesa "
+                     + "FROM pedidos p "
+                     + "JOIN mesa_pedido mp ON p.id = mp.id_pedido "
+                     + "JOIN mesas m ON mp.id_mesa = m.id "
+                     + "WHERE p.fechaHoraCierre IS NULL "
+                     + "ORDER BY p.fechaHoraApertura DESC";
 
-        try (PreparedStatement statement = conexion.prepareStatement(query)) {
-            statement.setInt(1, mesa.getId());
-            ResultSet resultSet = statement.executeQuery();
+        try (PreparedStatement stmt = conexion.prepareStatement(query);
+             ResultSet rs = stmt.executeQuery()) {
 
-            while (resultSet.next()) {
-                int id = resultSet.getInt("id");
-                Timestamp fechaHoraApertura = resultSet.getTimestamp("fechaHoraApertura");
-                Timestamp fechaHoraCierre = resultSet.getTimestamp("fechaHoraCierre");
+            while (rs.next()) {
+                int id = rs.getInt("id");
+                Timestamp fechaHoraApertura = rs.getTimestamp("fechaHoraApertura");
+                float descuento = rs.getFloat("descuento");
+                String nombreMesa = rs.getString("nombre_mesa");
 
-                // Crear y agregar el objeto Pedido a la lista
-                Pedido pedido = new Pedido(id, fechaHoraApertura, fechaHoraCierre);
+                Pedido pedido = new Pedido();
+                pedido.setId(id);
+                pedido.setFechaHoraApertura(fechaHoraApertura);
+                pedido.setDescuento(new Descuento(descuento)); // Asegúrate de tener un constructor adecuado en Descuento
+                pedido.setMesa(new Mesa(nombreMesa));
+
                 pedidos.add(pedido);
             }
         }
-
         return pedidos;
+        
     }
     
-    // Método para verificar todos los pedidos de una mesa específica
-    public void verificarPedidoActivoEnMesa(Mesa mesa) throws SQLException {
-        String query = "SELECT P.id " +
-                       "FROM Pedidos P " +
-                       "INNER JOIN Mesa_Pedido MP ON P.id = MP.idPedido " +
-                       "WHERE MP.idMesa = ? " +
-                       "AND P.fechaHoraCierre IS NULL"; // Suponiendo que fechaHoraCierre es NULL para pedidos activos
+    
+    
+    // Obtiene un pedido por su ID
+    public Pedido obtenerPedido(int pedidoId) throws SQLException {
+        Pedido pedido = null;
+        String consulta = "SELECT fechaHoraApertura, fechaHoraCierre FROM pedidos WHERE id = ?";
 
-        try (PreparedStatement stmt = conexion.prepareStatement(query)) {
-            stmt.setInt(1, mesa.getId());
-            try (ResultSet rs = stmt.executeQuery()) {
+        try (PreparedStatement comando = conexion.prepareStatement(consulta)) {
+            comando.setInt(1, pedidoId);
+            try (ResultSet rs = comando.executeQuery()) {
                 if (rs.next()) {
-                    int idPedido = rs.getInt("id");
-                    // Lanza una excepción con el ID del pedido activo
-                    throw new SQLException("La mesa con ID " + mesa.getId() + " tiene un pedido activo con ID: " + idPedido);
+                    pedido = new Pedido();
+                    pedido.setId(pedidoId);
+                    pedido.setFechaHoraApertura(rs.getTimestamp("fechaHoraApertura"));
+                    pedido.setFechaHoraCierre(rs.getTimestamp("fechaHoraCierre"));
                 }
             }
+        }
+        return pedido;
+    }
+
+    // Obtiene los items de un pedido
+    public List<Item> obtenerItemsPorPedido(int pedidoId) throws SQLException {
+        List<Item> items = new ArrayList<>();
+        String consulta = "SELECT i.id, i.id_producto, i.cantidad, p.nombre, p.descripcion, p.precio, p.costo, p.elaborado " +
+                           "FROM items i " +
+                           "JOIN productos p ON i.id_producto = p.id " +
+                           "WHERE i.id_pedido = ?";
+
+        try (PreparedStatement ps = conexion.prepareStatement(consulta)) {
+            ps.setInt(1, pedidoId);
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    Producto producto = new Producto(
+                        rs.getString("nombre"),
+                        rs.getString("descripcion"),
+                        rs.getFloat("precio"),
+                        rs.getFloat("costo"),
+                        rs.getBoolean("elaborado")
+                    );
+                    producto.setId(rs.getInt("id_producto"));
+
+                    Item item = new Item(producto, rs.getInt("cantidad"));
+                    items.add(item);
+                }
+            }
+        }
+        return items;
+    }
+
+    // Elimina un pedido por ID
+    public void eliminarPedido(int pedidoId) throws SQLException {
+        String consulta = "DELETE FROM pedidos WHERE id = ?";
+        try (PreparedStatement comando = conexion.prepareStatement(consulta)) {
+            comando.setInt(1, pedidoId);
+            comando.executeUpdate();
+        }
+    }
+
+    // Elimina un pedido de una mesa
+    public void eliminarPedidoDeMesa(int mesaId, int pedidoId) throws SQLException {
+        String consulta = "DELETE FROM mesa_pedido WHERE idMesa = ? AND idPedido = ?";
+        try (PreparedStatement comando = conexion.prepareStatement(consulta)) {
+            comando.setInt(1, mesaId);
+            comando.setInt(2, pedidoId);
+            comando.executeUpdate();
+        }
+    }
+
+    public void cerrarConexion() {
+        try {
+            if (conexion != null && !conexion.isClosed()) {
+                conexion.close();
+            }
         } catch (SQLException e) {
-            // Manejo de excepciones para identificar posibles problemas
-            throw new SQLException("Error al verificar si la mesa tiene un pedido activo: " + e.getMessage(), e);
+            e.printStackTrace(); // Considerar una mejor gestión de errores aquí
         }
     }
 }

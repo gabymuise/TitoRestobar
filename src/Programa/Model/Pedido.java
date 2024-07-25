@@ -113,7 +113,7 @@ public class Pedido {
         this.descuento = descuento;
     }
     
-    public float getTotal() {
+    public double getTotal() {
         float total = 0;
         for (Item item : items) {
             if (item.getProducto() != null) {

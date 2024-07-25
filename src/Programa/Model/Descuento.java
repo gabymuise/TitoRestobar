@@ -21,7 +21,7 @@ public class Descuento {
         this.porcentaje = porcentaje;
     }
 
-    public float aplicarDescuento(float subtotal) {
+    public double aplicarDescuento(float subtotal) {
         if (porcentaje < 0 || porcentaje > 100) {
             throw new IllegalArgumentException("El porcentaje de descuento debe estar entre 0 y 100.");
         }
