@@ -262,21 +262,21 @@ public class VistaMesa extends javax.swing.JPanel {
                         controladoraMesa.eliminarPedidoDeMesa(mesa, pedidoActivo);
                     }
 
-                    // Ahora eliminar la mesa
-                    controladoraMesa.eliminarMesa(nombreMesa);
-
                     // Actualizar la vista
                     DefaultListModel<String> modelo = (DefaultListModel<String>) ListMesa.getModel();
                     modelo.remove(indiceSeleccionado);
-                    JOptionPane.showMessageDialog(this, "Mesa y pedido eliminados correctamente.");
+                    JOptionPane.showMessageDialog(this, "Pedido eliminado correctamente.");
                 } else {
-                    JOptionPane.showMessageDialog(this, "No se pudo encontrar la mesa seleccionada.", "Error", JOptionPane.ERROR_MESSAGE);
+                    JOptionPane.showMessageDialog(this, "No se pudo encontrar la mesa seleccionada.",
+                            "Error", JOptionPane.ERROR_MESSAGE);
                 }
             } catch (SQLException e) {
-                JOptionPane.showMessageDialog(this, "Error al eliminar la mesa o el pedido: " + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+                JOptionPane.showMessageDialog(this, "Error eliminar el pedido de la mesa: " + e.getMessage(),
+                        "Error", JOptionPane.ERROR_MESSAGE);
             }
         } else {
-            JOptionPane.showMessageDialog(this, "Selecciona una mesa de la lista antes de eliminarla.", "Error", JOptionPane.WARNING_MESSAGE);
+            JOptionPane.showMessageDialog(this, "Selecciona una mesa de la lista antes de eliminarla.",
+                    "Error", JOptionPane.WARNING_MESSAGE);
         }
     }//GEN-LAST:event_btnEliminarPedidoDeMesaActionPerformed
 
@@ -322,13 +322,11 @@ public class VistaMesa extends javax.swing.JPanel {
                     // Mostrar información del pedido activo
                     JOptionPane.showMessageDialog(this, "La mesa seleccionada tiene un pedido activo.", "Pedido Activo", JOptionPane.INFORMATION_MESSAGE);
                     // Puedes agregar más lógica aquí para mostrar detalles del pedido, si es necesario
-                } else {
-                    JOptionPane.showMessageDialog(this, "La mesa seleccionada no tiene un pedido activo.", "Sin Pedido Activo", JOptionPane.INFORMATION_MESSAGE);
-                }
+                } 
             } catch (PedidoNoActivoException e) {
                 JOptionPane.showMessageDialog(this, e.getMessage(), "Error", JOptionPane.WARNING_MESSAGE);
             } catch (SQLException e) {
-                JOptionPane.showMessageDialog(this, "Error al obtener el pedido activo: " + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+                JOptionPane.showMessageDialog(this, "Error al obtener el pedido activo: La mesa no tiene un pedido asociado", "Error", JOptionPane.ERROR_MESSAGE);
             } catch (Exception e) {
                 JOptionPane.showMessageDialog(this, "Ocurrió un error inesperado: " + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
             }

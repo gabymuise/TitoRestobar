@@ -27,33 +27,35 @@ public class DAOPedido {
     }
 
     // Crea un nuevo pedido
-    public boolean crearPedido(Pedido pedido) throws SQLException {
-        String sql = "INSERT INTO Pedidos (fechaHoraApertura, fechaHoraCierre) VALUES (?, ?)";
+    public void crearPedido(Pedido pedido) throws SQLException {
+        String sql = "INSERT INTO Pedidos (fechaHoraApertura, fechaHoraCierre) VALUES (?, NULL)";
+
         try (PreparedStatement stmt = conexion.prepareStatement(sql, PreparedStatement.RETURN_GENERATED_KEYS)) {
             stmt.setTimestamp(1, pedido.getFechaHoraApertura());
-            stmt.setTimestamp(2, null); // fechaHoraCierre es NULL al momento de crear el pedido
+            // Nota: No se establece fechaHoraCierre porque es NULL por defecto
 
             int rowsAffected = stmt.executeUpdate();
             if (rowsAffected > 0) {
                 // Obtener el ID del nuevo pedido
                 try (ResultSet generatedKeys = stmt.getGeneratedKeys()) {
                     if (generatedKeys.next()) {
-                        pedido.setId(generatedKeys.getInt(1)); // Establecer el ID generado al objeto Pedido
-                        return true;
+                        pedido.setId(generatedKeys.getInt(1)); // Set the generated ID to the Pedido object
                     }
                 }
+            } else {
+                throw new SQLException("No se pudo crear el pedido.");
             }
-            return false;
         }
     }
     
     public void insertarDetallePedido(Pedido pedido, Item item) throws SQLException {
         String sql = "INSERT INTO Detalle_Pedido (idPedido, subtotal, total, descuento) VALUES (?, ?, ?, ?)";
+
         try (PreparedStatement stmt = conexion.prepareStatement(sql)) {
             stmt.setInt(1, pedido.getId());
-            stmt.setDouble(2, item.getSubtotal()); // Asegúrate de que el tipo coincida
-            stmt.setDouble(3, pedido.getTotal()); // Asegúrate de que el tipo coincida
-            stmt.setFloat(4, pedido.getDescuento().getPorcentaje()); // Asegúrate de que el tipo coincida
+            stmt.setDouble(2, item.getSubtotal()); // Suponiendo que getSubtotal devuelve Double
+            stmt.setDouble(3, pedido.getTotal());    // Suponiendo que getTotal devuelve Double
+            stmt.setFloat(4, pedido.getDescuento().getPorcentaje()); // Suponiendo que el descuento es float
 
             stmt.executeUpdate();
         }

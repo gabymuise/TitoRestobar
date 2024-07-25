@@ -3,7 +3,6 @@ package Programa.Controller;
 import Programa.DAO.DAOPedido;
 import Programa.Model.Pedido;
 import Programa.Model.Item;
-import Programa.Model.Producto;
 
 import java.sql.SQLException;
 import java.util.List;
@@ -17,10 +16,20 @@ public class ControladoraPedido {
     }
 
     // Método para crear un nuevo pedido
-    public boolean crearPedido(Pedido pedido) throws SQLException {
-        return daoPedido.crearPedido(pedido);
+    public void crearPedido(Pedido pedido) throws SQLException {
+        daoPedido.crearPedido(pedido);
     }
 
+    public void crearPedidoConDetalles(Pedido pedido, List<Item> items) throws SQLException {
+        // Crear el pedido
+        crearPedido(pedido);
+
+        // Insertar los detalles del pedido
+        for (Item item : items) {
+            insertarDetallePedido(pedido, item);
+        }
+    }
+    
     public List<Pedido> obtenerTodosLosPedidosActivos() throws SQLException {
         return daoPedido.obtenerTodosLosPedidosActivos();
     }

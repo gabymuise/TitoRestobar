@@ -425,49 +425,44 @@ public class VistaPedido extends javax.swing.JPanel {
     }//GEN-LAST:event_jButtonAgregarProductoActionPerformed
    
     private void jButtonCrearPedidoActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonCrearPedidoActionPerformed
-         try {
-        // Obtener la mesa seleccionada
-        int idMesa = ((Mesa) jComboBoxMesa.getSelectedItem()).getId();
-        Mesa mesa = controladoraMesa.obtenerMesaPorId(idMesa);
-        
-        // Obtener los items de la tabla
-        List<Item> items = getItemsFromTable();
-        
-        // Verificar si hay productos en el pedido
-        if (items.isEmpty()) {
-            JOptionPane.showMessageDialog(this, "No hay productos en el pedido.", "Error", JOptionPane.ERROR_MESSAGE);
-            return;
-        }
-        // Aplicar descuento
-        Descuento descuento = aplicarDescuento();
-        
-        // Crear un nuevo pedido
-        Pedido nuevoPedido = new Pedido(mesa, new Timestamp(System.currentTimeMillis()), items, descuento);
-        
-        // Establecer los items del pedido
-        nuevoPedido.setItems(items);
-        
-        // Crear el pedido en la base de datos
-        if (controladoraPedido.crearPedido(nuevoPedido)) {
+            try {
+            // Obtener la mesa seleccionada
+            int idMesa = ((Mesa) jComboBoxMesa.getSelectedItem()).getId();
+            Mesa mesa = controladoraMesa.obtenerMesaPorId(idMesa);
+
+            // Obtener los items de la tabla
+            List<Item> items = getItemsFromTable();
+
+            // Verificar si hay productos en el pedido
+            if (items.isEmpty()) {
+                JOptionPane.showMessageDialog(this, "No hay productos en el pedido.", "Error", JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+
+            // Aplicar descuento
+            Descuento descuento = aplicarDescuento();
+
+            // Crear un nuevo pedido
+            Pedido nuevoPedido = new Pedido(mesa, new Timestamp(System.currentTimeMillis()), items, descuento);
+            nuevoPedido.setItems(items);
+
+            // Crear el pedido en la base de datos
+            controladoraPedido.crearPedido(nuevoPedido);
+
             // Ahora insertar los detalles del pedido en la tabla Detalle_Pedido
             for (Item item : items) {
                 controladoraPedido.insertarDetallePedido(nuevoPedido, item);
             }
-            
+
             JOptionPane.showMessageDialog(this, "Pedido creado con éxito.", "Éxito", JOptionPane.INFORMATION_MESSAGE);
-            
+
             // Limpiar formulario y cargar datos
             limpiarFormulario();
             cargarDatosTabla();
-        } else {
-            JOptionPane.showMessageDialog(this, "No se pudo crear el pedido.", "Error", JOptionPane.ERROR_MESSAGE);
-        }  
-        }catch (SQLException e) {
+        } catch (SQLException e) {
             // Manejo de excepciones SQL
             JOptionPane.showMessageDialog(this, "Error al crear el pedido: " + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
-        }
-        // Manejo de excepción personalizada para pedido no activo
-         catch (Exception e) {
+        } catch (Exception e) {
             // Manejo de cualquier otra excepción
             JOptionPane.showMessageDialog(this, "Error inesperado: " + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
         }
@@ -486,8 +481,6 @@ public class VistaPedido extends javax.swing.JPanel {
             return new Descuento(); // Retorna un descuento sin aplicar
         }
     }
-    
-    
     
     private void jComboBoxMesaActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jComboBoxMesaActionPerformed
         // TODO add your handling code here:
