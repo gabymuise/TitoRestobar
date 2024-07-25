@@ -12,11 +12,11 @@ public class Pedido {
     private List<Item> items;
     private Descuento descuento;
 
-    //Pedido Activo
+    // Pedido Activo
     public Pedido(Mesa mesa, Timestamp fechaHoraApertura, List<Item> items, Descuento descuento) {
         this.mesa = mesa;
         this.fechaHoraApertura = fechaHoraApertura;
-        this.items = items;
+        this.items = items != null ? items : new ArrayList<>();
         this.descuento = descuento;
     }
 
@@ -34,7 +34,7 @@ public class Pedido {
         this.mesa = mesa;
         this.fechaHoraApertura = fechaHoraApertura;
         this.fechaHoraCierre = fechaHoraCierre;
-        this.items = items;
+        this.items = items != null ? items : new ArrayList<>();
         this.descuento = descuento;
     }
 
@@ -44,15 +44,25 @@ public class Pedido {
         this.mesa = mesa;
         this.fechaHoraApertura = fechaHoraApertura;
         this.fechaHoraCierre = fechaHoraCierre;
-        this.items = items;
+        this.items = items != null ? items : new ArrayList<>();
         this.descuento = descuento;
     }
-
-    //Constructor Momentaneo
+    
+    // Constructor de Base de Datos Actual
+    public Pedido(int id, Timestamp fechaHoraApertura, Timestamp fechaHoraCierre, Descuento descuento) {
+        this.id = id;
+        this.fechaHoraApertura = fechaHoraApertura;
+        this.fechaHoraCierre = fechaHoraCierre;
+        this.descuento = descuento;
+        this.items = new ArrayList<>();
+    }
+    
+    // Constructor Momentáneo
     public Pedido(int id, Timestamp fechaHoraApertura, Timestamp fechaHoraCierre) {
         this.id = id;
         this.fechaHoraApertura = fechaHoraApertura;
         this.fechaHoraCierre = fechaHoraCierre;
+        this.items = new ArrayList<>();
     }
 
     public int getId() {
@@ -92,7 +102,7 @@ public class Pedido {
     }
 
     public void setItems(List<Item> items) {
-        this.items = items;
+        this.items = items != null ? items : new ArrayList<>();
     }
 
     public Descuento getDescuento() {
@@ -106,8 +116,14 @@ public class Pedido {
     public float getTotal() {
         float total = 0;
         for (Item item : items) {
-            total += item.getProducto().getPrecio() * item.getCantidad();
+            if (item.getProducto() != null) {
+                total += item.getProducto().getPrecio() * item.getCantidad();
+            }
         }
-        return descuento.aplicarDescuento(total);
+        if (descuento != null) {
+            return descuento.aplicarDescuento(total);
+        } else {
+            return total;
+        }
     }
 }

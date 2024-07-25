@@ -7,21 +7,21 @@ public class Producto {
     private int id;
     private String nombre;
     private String descripcion;
-    private float precio;
-    private float costo;
+    private double precio; // Cambiado a double para mayor precisión
+    private double costo;  // Cambiado a double para mayor precisión
     private boolean elaboracion;
 
-    //Constructor vacio
+    // Constructor vacío
     public Producto() {
-        this.nombre = null;
-        this.descripcion = null;
-        this.precio = 0;
-        this.costo = 0;
+        this.nombre = "";
+        this.descripcion = "";
+        this.precio = 0.0;
+        this.costo = 0.0;
         this.elaboracion = false;
     }
         
-    //Constructor de Producto
-    public Producto(String nombre, String descripcion, float precio, float costo, boolean elaboracion) {
+    // Constructor de Producto
+    public Producto(String nombre, String descripcion, double precio, double costo, boolean elaboracion) {
         this.nombre = nombre;
         this.descripcion = descripcion;
         this.precio = precio;
@@ -29,8 +29,8 @@ public class Producto {
         this.elaboracion = elaboracion;
     }
     
-    //Constructor de Base de Datos
-    public Producto(int id, String nombre, String descripcion, float precio, float costo, boolean elaboracion) {
+    // Constructor de Base de Datos
+    public Producto(int id, String nombre, String descripcion, double precio, double costo, boolean elaboracion) {
         this.id = id;
         this.nombre = nombre;
         this.descripcion = descripcion;
@@ -63,19 +63,19 @@ public class Producto {
         this.descripcion = descripcion;
     }
 
-    public float getPrecio() {
+    public double getPrecio() {
         return precio;
     }
 
-    public void setPrecio(float precio) {
+    public void setPrecio(double precio) {
         this.precio = precio;
     }
 
-    public float getCosto() {
+    public double getCosto() {
         return costo;
     }
 
-    public void setCosto(float costo) {
+    public void setCosto(double costo) {
         this.costo = costo;
     }
 

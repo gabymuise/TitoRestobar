@@ -9,7 +9,7 @@ public class Mesa {
 
    // Constructor vacío
     public Mesa() {
-        this.nombre = null;
+        this.nombre = "";
     }
 
     // Constructor de Mesa
@@ -22,7 +22,7 @@ public class Mesa {
         this.id = id;
         this.nombre = nombre;
     }
-    
+
     public int getId() {
         return id;
     }
@@ -38,7 +38,7 @@ public class Mesa {
     public void setNombre(String nombre) {
         this.nombre = nombre;
     }
-    
+
     @Override
     public String toString() {
         return nombre;

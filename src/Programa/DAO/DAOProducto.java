@@ -51,8 +51,8 @@ public class DAOProducto {
         try (PreparedStatement comando = conexion.prepareStatement(consulta, PreparedStatement.RETURN_GENERATED_KEYS)) {
             comando.setString(1, producto.getNombre());
             comando.setString(2, producto.getDescripcion());
-            comando.setFloat(3, producto.getPrecio());
-            comando.setFloat(4, producto.getCosto());
+            comando.setDouble(3, producto.getPrecio());
+            comando.setDouble(4, producto.getCosto());
             comando.setBoolean(5, producto.isElaboracion());
             comando.executeUpdate();
 
@@ -73,8 +73,8 @@ public class DAOProducto {
             stmt = conn.prepareStatement(sql);
             stmt.setString(1, producto.getNombre());
             stmt.setString(2, producto.getDescripcion());
-            stmt.setFloat(3, producto.getPrecio());
-            stmt.setFloat(4, producto.getCosto());
+            stmt.setDouble(3, producto.getPrecio());
+            stmt.setDouble(4, producto.getCosto());
             stmt.setBoolean(5, producto.isElaboracion());
             stmt.setInt(6, producto.getId());
 
@@ -96,8 +96,8 @@ public class DAOProducto {
         try (PreparedStatement comando = conexion.prepareStatement(consulta)) {
             comando.setString(1, producto.getNombre());
             comando.setString(2, producto.getDescripcion());
-            comando.setFloat(3, producto.getPrecio());
-            comando.setFloat(4, producto.getCosto());
+            comando.setDouble(3, producto.getPrecio());
+            comando.setDouble(4, producto.getCosto());
             comando.setBoolean(5, producto.isElaboracion());
             comando.setInt(6, producto.getId());
             comando.executeUpdate();

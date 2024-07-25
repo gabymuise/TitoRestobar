@@ -10,20 +10,20 @@ public class Item {
 
     // Constructor vacío
     public Item() {
-        this.producto = null;
+        this.producto = new Producto();
         this.cantidad = 0;
     }
 
     // Constructor de Item
     public Item(Producto producto, int cantidad) {
-        this.producto = producto;
+        this.producto = producto != null ? producto : new Producto();
         this.cantidad = cantidad;
     }
 
     // Constructor de Base de Datos
     public Item(int id, Producto producto, int cantidad) {
         this.id = id;
-        this.producto = producto;
+        this.producto = producto != null ? producto : new Producto();
         this.cantidad = cantidad;
     }
 
@@ -35,13 +35,12 @@ public class Item {
         this.id = id;
     }
 
-        
     public Producto getProducto() {
         return producto;
     }
 
     public void setProducto(Producto producto) {
-        this.producto = producto;
+        this.producto = producto != null ? producto : new Producto();
     }
 
     public int getCantidad() {
@@ -52,8 +51,11 @@ public class Item {
         this.cantidad = cantidad;
     }
 
-    
-    public float getSubtotal(){
-        return cantidad * producto.getPrecio();
+    public double getSubtotal() {
+        if (producto != null) {
+            return cantidad * producto.getPrecio();
+        } else {
+            return 0;
+        }
     }
 }

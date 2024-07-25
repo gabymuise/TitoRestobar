@@ -11,20 +11,20 @@ public class Stock {
     // Constructor vacío
     public Stock() {
         this.cantidad = 0;
-        this.producto = null;
+        this.producto = new Producto();
     }
 
     // Constructor de Stock
     public Stock(int cantidad, Producto producto) {
         this.cantidad = cantidad;
-        this.producto = producto;
+        this.producto = producto != null ? producto : new Producto();
     }
 
     // Constructor de Base de Datos
     public Stock(int id, int cantidad, Producto producto) {
         this.id = id;
         this.cantidad = cantidad;
-        this.producto = producto;
+        this.producto = producto != null ? producto : new Producto();
     }
 
     public int getId() {
@@ -48,7 +48,7 @@ public class Stock {
     }
 
     public void setProducto(Producto producto) {
-        this.producto = producto;
+        this.producto = producto != null ? producto : new Producto();
     }
 
     @Override
