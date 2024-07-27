@@ -119,13 +119,13 @@ public class VistaPedido extends javax.swing.JPanel {
         return 0.0;
     }
 
-    private void cargarDatosTabla() {
+   private void cargarDatosTabla() {
         try {
             DefaultTableModel modelo = (DefaultTableModel) jTable2.getModel();
             modelo.setRowCount(0); // Limpiar la tabla
 
             // Obtener la lista de pedidos activos
-           // List<Pedido> pedidos = controladoraPedido.obtenerTodosLosPedidosActivos();
+            List<Pedido> pedidos = controladoraPedido.obtenerTodosLosPedidosActivos();
 
             for (Pedido pedido : pedidos) {
                 // Obtener todos los items del pedido para calcular subtotal
@@ -158,10 +158,10 @@ public class VistaPedido extends javax.swing.JPanel {
 
     private List<Item> obtenerItemsDelPedido(int pedidoId) throws SQLException {
         List<Item> items = new ArrayList<>();
-        String query = "SELECT i.id, i.id_producto, i.cantidad, p.nombre, p.precio " +
+        String query = "SELECT i.id, i.idProducto, i.cantidad, p.nombre, p.precio " +
                        "FROM items i " +
-                       "JOIN productos p ON i.id_producto = p.id " +
-                       "WHERE i.id_pedido = ?";
+                       "JOIN productos p ON i.idProducto = p.id " +
+                       "WHERE i.id = ?";
 
         try (PreparedStatement stmt = conexion.prepareStatement(query)) {
             stmt.setInt(1, pedidoId);
@@ -169,7 +169,7 @@ public class VistaPedido extends javax.swing.JPanel {
                 while (rs.next()) {
                     int id = rs.getInt("id");
                     Producto producto = new Producto(); // Asegúrate de tener un constructor adecuado en Producto
-                    producto.setId(rs.getInt("id_producto"));
+                    producto.setId(rs.getInt("idProducto"));
                     producto.setNombre(rs.getString("nombre"));
                     producto.setPrecio(rs.getFloat("precio"));
 
@@ -346,14 +346,9 @@ public class VistaPedido extends javax.swing.JPanel {
         );
 
         jTable2.setModel(new javax.swing.table.DefaultTableModel(
-            new Object [][] {
-                {null, null, null, null, null, null},
-                {null, null, null, null, null, null},
-                {null, null, null, null, null, null},
-                {null, null, null, null, null, null}
-            },
+            new Object [][] {},
             new String [] {
-                "idPedido", "Mesa", "HoraApertura", "Subtotal", "Total", "descuento"
+                "idPedido", "Mesa", "HoraApertura", "Subtotal", "Total", "Descuento"
             }
         ) {
             Class[] types = new Class [] {
@@ -425,7 +420,7 @@ public class VistaPedido extends javax.swing.JPanel {
     }//GEN-LAST:event_jButtonAgregarProductoActionPerformed
    
     private void jButtonCrearPedidoActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonCrearPedidoActionPerformed
-    try {
+            try {
             // Obtener la mesa seleccionada
             int idMesa = ((Mesa) jComboBoxMesa.getSelectedItem()).getId();
             Mesa mesa = controladoraMesa.obtenerMesaPorId(idMesa);
@@ -466,7 +461,7 @@ public class VistaPedido extends javax.swing.JPanel {
 
             // Limpiar formulario y cargar datos
             limpiarFormulario();
-            cargarDatosTabla();
+            cargarDatosTabla(); // Asegúrate de que la tabla se actualice
         } catch (SQLException e) {
             // Manejo de excepciones SQL
             JOptionPane.showMessageDialog(this, "Error al crear el pedido: " + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);

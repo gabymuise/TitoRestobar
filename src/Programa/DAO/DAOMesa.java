@@ -16,7 +16,20 @@ import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
 
-public class DAOMesa {
+// Interfaz que define las operaciones básicas para una entidad Mesa
+interface IMesaDAO {
+    List<Mesa> listarMesas() throws SQLException;
+    void crearMesa(Mesa mesa) throws SQLException;
+    void eliminarMesa(String nombre) throws SQLException;
+    void modificarMesa(String nombreActual, String nuevoNombre) throws SQLException;
+    Mesa obtenerMesaPorNombre(String nombre) throws SQLException;
+    Mesa obtenerMesaPorId(int id) throws SQLException;
+    Pedido verPedidoActivoEnMesa(Mesa mesa) throws SQLException, PedidoNoActivoException;
+    void eliminarPedidoDeMesa(Mesa mesa, Pedido pedido) throws SQLException;
+}
+
+// Implementación concreta de IMesaDAO
+public class DAOMesa implements IMesaDAO {
     private Connection conexion;
 
     public DAOMesa() {
@@ -27,6 +40,7 @@ public class DAOMesa {
         }
     }
 
+    @Override
     public List<Mesa> listarMesas() throws SQLException {
         List<Mesa> lista = new ArrayList<>();
         String consulta = "SELECT * FROM mesas";
@@ -45,6 +59,7 @@ public class DAOMesa {
         return lista;
     }
 
+    @Override
     public void crearMesa(Mesa mesa) throws SQLException {
         String consulta = "INSERT INTO mesas (nombre) VALUES (?)";
         try (PreparedStatement comando = conexion.prepareStatement(consulta)) {
@@ -53,6 +68,7 @@ public class DAOMesa {
         }
     }
 
+    @Override
     public void eliminarMesa(String nombre) throws SQLException {
         String consulta = "DELETE FROM mesas WHERE nombre = ?";
         try (PreparedStatement comando = conexion.prepareStatement(consulta)) {
@@ -70,6 +86,7 @@ public class DAOMesa {
         }
     }
 
+    @Override
     public void modificarMesa(String nombreActual, String nuevoNombre) throws SQLException {
         String consulta = "UPDATE mesas SET nombre = ? WHERE nombre = ?";
 
@@ -80,9 +97,10 @@ public class DAOMesa {
         }
     }
 
+    @Override
     public Mesa obtenerMesaPorNombre(String nombre) throws SQLException {
         Mesa mesa = null;
-        String query = "SELECT * FROM Mesas WHERE nombre = ?";
+        String query = "SELECT * FROM mesas WHERE nombre = ?";
 
         try (PreparedStatement stmt = conexion.prepareStatement(query)) {
             stmt.setString(1, nombre);
@@ -96,8 +114,8 @@ public class DAOMesa {
         }
         return mesa;
     }
-    
-    // Obtiene una mesa por ID
+
+    @Override
     public Mesa obtenerMesaPorId(int id) throws SQLException {
         Mesa mesa = null;
         String query = "SELECT * FROM mesas WHERE id = ?";
@@ -109,19 +127,20 @@ public class DAOMesa {
                     String nombreMesa = rs.getString("nombre");
                     mesa = new Mesa(id, nombreMesa);
                 }
+            } catch (SQLException e) {
+                throw new SQLException("Error al obtener la mesa por ID: " + e.getMessage(), e);
             }
-        } catch (SQLException e) {
-            throw new SQLException("Error al obtener la mesa por ID: " + e.getMessage(), e);
         }
         return mesa;
     }
-    
+
+    @Override
     public Pedido verPedidoActivoEnMesa(Mesa mesa) throws SQLException, PedidoNoActivoException {
         String consultaPedido = "SELECT p.id, p.fechaHoraApertura, d.descuento " +
                                 "FROM pedidos p " +
-                                "JOIN mesa_pedido mp ON p.id = mp.pedido_id " +
-                                "JOIN detalle_pedido d ON p.id = d.pedido_id " +
-                                "WHERE mp.mesa_id = ? AND p.fechaHoraCierre IS NULL " +
+                                "JOIN mesa_pedido mp ON p.id = mp.idPedido " +
+                                "JOIN detalle_pedido d ON p.id = d.idPedido " +
+                                "WHERE mp.idMesa = ? AND p.fechaHoraCierre IS NULL " +
                                 "ORDER BY p.fechaHoraApertura DESC LIMIT 1";
 
         Pedido pedido = null;
@@ -148,15 +167,11 @@ public class DAOMesa {
         return pedido;
     }
 
-
-
-
-
     private List<Item> obtenerItemsDelPedido(int pedidoId) throws SQLException {
         List<Item> items = new ArrayList<>();
         String consultaItems = "SELECT i.*, p.nombre, p.descripcion, p.precio, p.costo, p.elaborado " +
                                "FROM items i " +
-                               "JOIN productos p ON i.id_producto = p.id " +
+                               "JOIN productos p ON i.idProducto = p.id " +
                                "WHERE i.id_pedido = ?";
 
         try (PreparedStatement psItems = conexion.prepareStatement(consultaItems)) {
@@ -180,8 +195,9 @@ public class DAOMesa {
         return items;
     }
 
+    @Override
     public void eliminarPedidoDeMesa(Mesa mesa, Pedido pedido) throws SQLException {
-        String consulta = "DELETE FROM mesa_pedido WHERE id_mesa = ? AND id_pedido = ?";
+        String consulta = "DELETE FROM mesa_pedido WHERE idMesa = ? AND idPedido = ?";
         try (PreparedStatement ps = conexion.prepareStatement(consulta)) {
             ps.setInt(1, mesa.getId());
             ps.setInt(2, pedido.getId());

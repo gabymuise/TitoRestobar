@@ -25,16 +25,16 @@ public class DAOItem {
     // Obtiene los items de un pedido
     public List<Item> obtenerItemsPorPedido(int pedidoId) throws SQLException {
         List<Item> items = new ArrayList<>();
-        String consulta = "SELECT i.id, i.id_producto, i.cantidad, p.nombre, p.descripcion, p.precio, p.costo, p.elaborado " +
+        String consulta = "SELECT i.id, i.idProducto, i.cantidad, p.nombre, p.descripcion, p.precio, p.costo, p.elaborado " +
                            "FROM items i " +
-                           "JOIN productos p ON i.id_producto = p.id " +
+                           "JOIN productos p ON i.idProducto = p.id " +
                            "WHERE i.id_pedido = ?";
 
         try (PreparedStatement ps = conexion.prepareStatement(consulta)) {
             ps.setInt(1, pedidoId);
             try (ResultSet rs = ps.executeQuery()) {
                 while (rs.next()) {
-                    int idProducto = rs.getInt("id_producto");
+                    int idProducto = rs.getInt("idProducto");
                     int cantidad = rs.getInt("cantidad");
 
                     Producto producto = new Producto(
@@ -56,7 +56,7 @@ public class DAOItem {
 
     // Agrega un nuevo item a un pedido
     public boolean agregarItem(Item item, int pedidoId) throws SQLException {
-        String consulta = "INSERT INTO items (id_pedido, id_producto, cantidad) VALUES (?, ?, ?)";
+        String consulta = "INSERT INTO items (id, idProducto, cantidad) VALUES (?, ?, ?)";
         try (PreparedStatement comando = conexion.prepareStatement(consulta)) {
             comando.setInt(1, pedidoId);
             comando.setInt(2, item.getProducto().getId());
@@ -67,7 +67,7 @@ public class DAOItem {
 
     // Elimina un item de un pedido
     public void eliminarItem(int pedidoId, int productoId) throws SQLException {
-        String consulta = "DELETE FROM items WHERE id_pedido = ? AND id_producto = ?";
+        String consulta = "DELETE FROM items WHERE id_pedido = ? AND idProducto = ?";
         try (PreparedStatement comando = conexion.prepareStatement(consulta)) {
             comando.setInt(1, pedidoId);
             comando.setInt(2, productoId);
