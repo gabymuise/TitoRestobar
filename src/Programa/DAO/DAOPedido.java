@@ -141,6 +141,29 @@ public class DAOPedido {
         }
         return items;
     }
+    
+    public void insertarItem(Pedido pedido, Item item) throws SQLException {
+        String sql = "INSERT INTO items (idProducto, cantidad) VALUES (?, ?)";
+
+        try (PreparedStatement stmt = conexion.prepareStatement(sql)) {
+            stmt.setInt(1, item.getProducto().getId());
+            stmt.setInt(2, item.getCantidad());
+
+            stmt.executeUpdate();
+        }
+    }
+
+    public void insertarMesaPedido(Mesa mesa, Pedido pedido) throws SQLException {
+        String sql = "INSERT INTO mesa_pedido (idMesa, idPedido) VALUES (?, ?)";
+
+        try (PreparedStatement stmt = conexion.prepareStatement(sql)) {
+            stmt.setInt(1, mesa.getId());
+            stmt.setInt(2, pedido.getId());
+
+            stmt.executeUpdate();
+        }
+    }
+
 
     // Elimina un pedido por ID
     public void eliminarPedido(int pedidoId) throws SQLException {

@@ -425,7 +425,7 @@ public class VistaPedido extends javax.swing.JPanel {
     }//GEN-LAST:event_jButtonAgregarProductoActionPerformed
    
     private void jButtonCrearPedidoActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonCrearPedidoActionPerformed
-            try {
+    try {
             // Obtener la mesa seleccionada
             int idMesa = ((Mesa) jComboBoxMesa.getSelectedItem()).getId();
             Mesa mesa = controladoraMesa.obtenerMesaPorId(idMesa);
@@ -448,6 +448,14 @@ public class VistaPedido extends javax.swing.JPanel {
 
             // Crear el pedido en la base de datos
             controladoraPedido.crearPedido(nuevoPedido);
+
+            // Insertar la relación mesa-pedido
+            controladoraPedido.insertarMesaPedido(mesa, nuevoPedido);
+
+            // Insertar los items del pedido en la tabla items
+            for (Item item : items) {
+                controladoraPedido.insertarItem(nuevoPedido, item);
+            }
 
             // Ahora insertar los detalles del pedido en la tabla Detalle_Pedido
             for (Item item : items) {
