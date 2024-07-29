@@ -434,9 +434,12 @@ public class VistaPedido extends javax.swing.JPanel {
                 JOptionPane.showMessageDialog(this, "No hay productos en el pedido.", "Error", JOptionPane.ERROR_MESSAGE);
                 return;
             }
-
-            // Aplicar descuento
-            Descuento descuento = aplicarDescuento();
+            
+            Descuento descuento = new Descuento();
+            Pedido pedido = new Pedido();
+            pedido.getSubtotal();
+            descuento.aplicarDescuento(pedido.getTotal());
+            pedido.getTotal();
 
             // Crear un nuevo pedido
             Pedido nuevoPedido = new Pedido(mesa, new Timestamp(System.currentTimeMillis()), items, descuento);
@@ -444,17 +447,9 @@ public class VistaPedido extends javax.swing.JPanel {
             // Crear el pedido en la base de datos
             controladoraPedido.crearPedido(nuevoPedido);
 
-            // Insertar la relación mesa-pedido
-            controladoraPedido.insertarMesaPedido(mesa, nuevoPedido);
-
             // Insertar los items del pedido en la tabla items
             for (Item item : items) {
                 controladoraPedido.insertarItem(nuevoPedido, item);
-            }
-
-            // Ahora insertar los detalles del pedido en la tabla Detalle_Pedido
-            for (Item item : items) {
-                controladoraPedido.insertarDetallePedido(nuevoPedido, item);
             }
 
             // Mostrar el pedido creado en la tabla
@@ -499,7 +494,7 @@ public class VistaPedido extends javax.swing.JPanel {
     }
 
     
-    private Descuento aplicarDescuento() {
+    /*private Descuento aplicarDescuento() {
         // Puedes reemplazar esto con tu lógica para obtener un descuento del usuario
         String input = JOptionPane.showInputDialog("Ingrese el porcentaje de descuento:");
         float porcentaje;
@@ -511,7 +506,7 @@ public class VistaPedido extends javax.swing.JPanel {
             JOptionPane.showMessageDialog(this, "Porcentaje inválido.", "Error", JOptionPane.ERROR_MESSAGE);
             return new Descuento(); // Retorna un descuento sin aplicar
         }
-    }
+    }*/
     
     private void jComboBoxMesaActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jComboBoxMesaActionPerformed
         // TODO add your handling code here:

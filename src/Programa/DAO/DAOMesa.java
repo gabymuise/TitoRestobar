@@ -16,21 +16,8 @@ import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
 
-// Interfaz que define las operaciones básicas para una entidad Mesa
-interface IMesaDAO {
-    List<Mesa> listarMesas() throws SQLException;
-    void crearMesa(Mesa mesa) throws SQLException;
-    void eliminarMesa(int id) throws SQLException;
-    void modificarMesa(int id, String nuevoNombre) throws SQLException;
-    Mesa obtenerMesaPorNombre(String nombre) throws SQLException;
-    Mesa obtenerMesaPorId(int id) throws SQLException;
-    Pedido verPedidoActivoEnMesa(Mesa mesa) throws SQLException, PedidoNoActivoException;
-    void eliminarPedidoDeMesa(Mesa mesa, Pedido pedido) throws SQLException;
-    boolean hasActiveOrders(int id) throws SQLException;
-}
 
-// Implementación concreta de IMesaDAO
-public class DAOMesa implements IMesaDAO {
+public class DAOMesa {
     private Connection conexion;
 
     public DAOMesa() {
@@ -41,7 +28,6 @@ public class DAOMesa implements IMesaDAO {
         }
     }
 
-    @Override
     public List<Mesa> listarMesas() throws SQLException {
         List<Mesa> lista = new ArrayList<>();
         String consulta = "SELECT * FROM mesas";
@@ -59,7 +45,6 @@ public class DAOMesa implements IMesaDAO {
         return lista;
     }
 
-    @Override
     public void crearMesa(Mesa mesa) throws SQLException {
         String consulta = "INSERT INTO mesas (nombre) VALUES (?)";
         try (PreparedStatement comando = conexion.prepareStatement(consulta)) {
@@ -68,7 +53,6 @@ public class DAOMesa implements IMesaDAO {
         }
     }
 
-    @Override
     public void eliminarMesa(int id) throws SQLException {
         if (hasActiveOrders(id)) {
             throw new SQLException("No se puede eliminar la mesa porque tiene pedidos activos.");
@@ -83,7 +67,6 @@ public class DAOMesa implements IMesaDAO {
         }
     }
     
-    @Override
     public void modificarMesa(int id, String nuevoNombre) throws SQLException {
         String consulta = "UPDATE mesas SET nombre = ? WHERE id = ?";
 
@@ -94,7 +77,6 @@ public class DAOMesa implements IMesaDAO {
         }
     }
     
-    @Override
     public Mesa obtenerMesaPorNombre(String nombre) throws SQLException {
         Mesa mesa = null;
         String query = "SELECT * FROM mesas WHERE nombre = ?";
@@ -111,7 +93,6 @@ public class DAOMesa implements IMesaDAO {
         return mesa;
     }
 
-    @Override
     public Mesa obtenerMesaPorId(int id) throws SQLException {
         Mesa mesa = null;
         String query = "SELECT * FROM mesas WHERE id = ?";
@@ -128,13 +109,10 @@ public class DAOMesa implements IMesaDAO {
         return mesa;
     }
 
-    @Override
     public Pedido verPedidoActivoEnMesa(Mesa mesa) throws SQLException, PedidoNoActivoException {
-        String consultaPedido = "SELECT p.id, p.fechaHoraApertura, d.descuento " +
+        String consultaPedido = "SELECT (*) " +
                                 "FROM pedidos p " +
-                                "JOIN mesa_pedido mp ON p.id = mp.idPedido " +
-                                "JOIN detalle_pedido d ON p.id = d.idPedido " +
-                                "WHERE mp.idMesa = ? AND p.fechaHoraCierre IS NULL " +
+                                "WHERE p.idMesa = ? AND p.fechaHoraCierre IS NULL " +
                                 "ORDER BY p.fechaHoraApertura DESC LIMIT 1";
 
         Pedido pedido = null;
@@ -165,7 +143,8 @@ public class DAOMesa implements IMesaDAO {
         String consultaItems = "SELECT i.*, p.nombre, p.descripcion, p.precio, p.costo, p.elaborado " +
                                "FROM items i " +
                                "JOIN productos p ON i.idProducto = p.id " +
-                               "WHERE i.id_pedido = ?";
+                               "JOIN pedidos pe ON i.idPedido = pe.id" +
+                               "WHERE i.idPedido = ?";
 
         try (PreparedStatement psItems = conexion.prepareStatement(consultaItems)) {
             psItems.setInt(1, pedidoId);
@@ -188,28 +167,19 @@ public class DAOMesa implements IMesaDAO {
         return items;
     }
 
-    @Override
     public void eliminarPedidoDeMesa(Mesa mesa, Pedido pedido) throws SQLException {
         DAOPedido daoPedido = new DAOPedido();
         try {
-            // Eliminar los detalles del pedido
-            daoPedido.eliminarDetallesPedido(pedido.getId());
-
-            // Eliminar la relación mesa-pedido
-            daoPedido.eliminarMesaPedido(mesa.getId(), pedido.getId());
-
             // Eliminar el pedido
             daoPedido.eliminarPedido(pedido.getId());
         } catch (SQLException e) {
             throw new SQLException("Error al eliminar el pedido: " + e.getMessage(), e);
         }
     }
-
-    @Override
+    
     public boolean hasActiveOrders(int id) throws SQLException {
         String consulta = "SELECT COUNT(*) FROM pedidos p " +
-                          "JOIN mesa_pedido mp ON p.id = mp.idPedido " +
-                          "WHERE mp.idMesa = ? AND p.fechaHoraCierre IS NULL";
+                          "WHERE p.idMesa = ? AND p.fechaHoraCierre IS NULL";
         try (PreparedStatement comando = conexion.prepareStatement(consulta)) {
             comando.setInt(1, id);
             try (ResultSet lectura = comando.executeQuery()) {

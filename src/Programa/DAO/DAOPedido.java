@@ -27,10 +27,15 @@ public class DAOPedido {
 
     // Crea un nuevo pedido
     public void crearPedido(Pedido pedido) throws SQLException {
-        String sql = "INSERT INTO pedidos (fechaHoraApertura, fechaHoraCierre) VALUES (?, NULL)";
+        String sql = "INSERT INTO pedidos (fechaHoraApertura, fechaHoraCierre, subtotal, total, descuento, idMesa) "
+                + "VALUES (?, NULL, ?, ?, ?, ?)";
 
         try (PreparedStatement stmt = conexion.prepareStatement(sql, PreparedStatement.RETURN_GENERATED_KEYS)) {
             stmt.setTimestamp(1, pedido.getFechaHoraApertura());
+            stmt.setDouble(2, pedido.getSubtotal());  // Subtotal del pedido
+            stmt.setDouble(3, pedido.getTotal());      // Total del pedido
+            stmt.setFloat(4, pedido.getDescuento().getPorcentaje()); // Descuento aplicado
+            stmt.setInt(5, pedido.getMesa().getId());  // ID de la mesa
             int rowsAffected = stmt.executeUpdate();
             if (rowsAffected > 0) {
                 try (ResultSet generatedKeys = stmt.getGeneratedKeys()) {
@@ -44,25 +49,10 @@ public class DAOPedido {
         }
     }
     
-    public void insertarDetallePedido(Pedido pedido, Item item) throws SQLException {
-        String sql = "INSERT INTO detalle_pedido (idPedido, subtotal, total, descuento) VALUES (?, ?, ?, ?)";
-
-        try (PreparedStatement stmt = conexion.prepareStatement(sql)) {
-            stmt.setInt(1, pedido.getId());
-            stmt.setDouble(2, item.getSubtotal());
-            stmt.setDouble(3, pedido.getTotal());
-            stmt.setFloat(4, pedido.getDescuento().getPorcentaje());
-
-            stmt.executeUpdate();
-        }
-    }
-    
     public List<Pedido> obtenerTodosLosPedidosActivos() throws SQLException {
         List<Pedido> pedidos = new ArrayList<>();
-        String query = "SELECT p.id, p.fechaHoraApertura, m.nombre AS nombre_mesa "
+        String query = "SELECT p.id, p.fechaHoraApertura, p.idMesa, p.descuento AS descuento "
                      + "FROM pedidos p "
-                     + "JOIN mesa_pedido mp ON p.id = mp.idPedido "
-                     + "JOIN mesas m ON mp.idMesa = m.id "
                      + "WHERE p.fechaHoraCierre IS NULL "
                      + "ORDER BY p.fechaHoraApertura DESC";
 
@@ -72,15 +62,32 @@ public class DAOPedido {
             while (rs.next()) {
                 int id = rs.getInt("id");
                 Timestamp fechaHoraApertura = rs.getTimestamp("fechaHoraApertura");
-                String nombreMesa = rs.getString("nombre_mesa");
+                int idMesa = rs.getInt("idMesa");
+                float porcentajeDescuento = rs.getFloat("descuento");
 
+                // Crear el objeto Pedido
                 Pedido pedido = new Pedido();
                 pedido.setId(id);
                 pedido.setFechaHoraApertura(fechaHoraApertura);
-                pedido.setMesa(new Mesa(nombreMesa));
 
-                Descuento descuento = obtenerDescuentoPorPedido(id);
-                pedido.setDescuento(descuento);
+                // Crear el objeto Mesa usando el ID y asignarlo al Pedido
+                Mesa mesa = new Mesa();
+                mesa.setId(idMesa); 
+                pedido.setMesa(mesa); 
+
+                // Obtener los items del pedido
+                List<Item> items = obtenerItemsPorPedido(id);
+                for (Item item : items) {
+                    pedido.addItem(item); // Agregar los items al pedido
+                }
+
+                // Calcular el subtotal y el total
+                pedido.getSubtotal(); 
+                pedido.getTotal();
+
+                // Configurar el descuento
+                Descuento descuentoObj = new Descuento(porcentajeDescuento);
+                pedido.setDescuento(descuentoObj);
 
                 pedidos.add(pedido);
             }
@@ -88,8 +95,13 @@ public class DAOPedido {
         return pedidos;
     }
 
+
+
+
+
+
     private Descuento obtenerDescuentoPorPedido(int pedidoId) throws SQLException {
-        String query = "SELECT descuento FROM detalle_pedido WHERE idPedido = ?";
+        String query = "SELECT descuento FROM pedidos WHERE id = ?";
         Descuento descuento = new Descuento(0.0f);
 
         try (PreparedStatement stmt = conexion.prepareStatement(query)) {
@@ -104,12 +116,13 @@ public class DAOPedido {
         return descuento;
     }
 
+
     public List<Item> obtenerItemsPorPedido(int pedidoId) throws SQLException {
         List<Item> items = new ArrayList<>();
-        String consulta = "SELECT i.id, i.idProducto, i.cantidad, p.nombre, p.descripcion, p.precio, p.costo, p.elaborado "
+        String consulta = "SELECT i.id AS idItem, i.idProducto, i.cantidad, p.nombre, p.descripcion, p.precio, p.costo, p.elaborado "
                          + "FROM items i "
                          + "JOIN productos p ON i.idProducto = p.id "
-                         + "WHERE i.id_pedido = ?";
+                         + "WHERE i.idPedido = ?";
 
         try (PreparedStatement ps = conexion.prepareStatement(consulta)) {
             ps.setInt(1, pedidoId);
@@ -138,6 +151,7 @@ public class DAOPedido {
         return items;
     }
 
+
     public void insertarItem(Pedido pedido, Item item) throws SQLException {
         String sql = "INSERT INTO items (idPedido, idProducto, cantidad) VALUES (?, ?, ?)";
 
@@ -150,32 +164,7 @@ public class DAOPedido {
         }
     }
 
-    public void insertarMesaPedido(int idMesa, int idPedido) throws SQLException {
-        String consulta = "INSERT INTO mesa_pedido (idMesa, idPedido) VALUES (?, ?)";
-        
-        try (PreparedStatement comando = conexion.prepareStatement(consulta)) {
-            comando.setInt(1, idMesa);
-            comando.setInt(2, idPedido);
-            comando.executeUpdate();
-        }
-    }
 
-    public void eliminarDetallesPedido(int idPedido) throws SQLException {
-        String sql = "DELETE FROM detalle_pedido WHERE idPedido = ?";
-        try (PreparedStatement stmt = conexion.prepareStatement(sql)) {
-            stmt.setInt(1, idPedido);
-            stmt.executeUpdate();
-        }
-    }
-
-    public void eliminarMesaPedido(int idMesa, int idPedido) throws SQLException {
-        String sql = "DELETE FROM mesa_pedido WHERE idMesa = ? AND idPedido = ?";
-        try (PreparedStatement stmt = conexion.prepareStatement(sql)) {
-            stmt.setInt(1, idMesa);
-            stmt.setInt(2, idPedido);
-            stmt.executeUpdate();
-        }
-    }
 
     public void eliminarPedido(int idPedido) throws SQLException {
         String sql = "DELETE FROM pedidos WHERE id = ?";
@@ -184,6 +173,7 @@ public class DAOPedido {
             stmt.executeUpdate();
         }
     }
+
 
     public void cerrarConexion() {
         try {
@@ -194,4 +184,5 @@ public class DAOPedido {
             e.printStackTrace();
         }
     }
+
 }

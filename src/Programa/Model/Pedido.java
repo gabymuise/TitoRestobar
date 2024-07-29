@@ -113,6 +113,16 @@ public class Pedido {
         this.descuento = descuento;
     }
     
+    // Método para agregar un item al pedido
+    public void addItem(Item item) {
+        items.add(item);
+    }
+
+    // Método para eliminar un item del pedido por el id del producto
+    public void deleteItem(int idProducto) {
+        items.removeIf(item -> item.getProducto().getId() == idProducto);
+    }
+    
     public double getSubtotal() {
         double subtotal = 0.0;
         for (Item item : items) {
