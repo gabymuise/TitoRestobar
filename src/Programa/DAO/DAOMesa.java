@@ -20,12 +20,13 @@ import java.util.List;
 interface IMesaDAO {
     List<Mesa> listarMesas() throws SQLException;
     void crearMesa(Mesa mesa) throws SQLException;
-    void eliminarMesa(String nombre) throws SQLException;
-    void modificarMesa(String nombreActual, String nuevoNombre) throws SQLException;
+    void eliminarMesa(int id) throws SQLException;
+    void modificarMesa(int id, String nuevoNombre) throws SQLException;
     Mesa obtenerMesaPorNombre(String nombre) throws SQLException;
     Mesa obtenerMesaPorId(int id) throws SQLException;
     Pedido verPedidoActivoEnMesa(Mesa mesa) throws SQLException, PedidoNoActivoException;
     void eliminarPedidoDeMesa(Mesa mesa, Pedido pedido) throws SQLException;
+    boolean hasActiveOrders(int id) throws SQLException;
 }
 
 // Implementación concreta de IMesaDAO
@@ -51,8 +52,7 @@ public class DAOMesa implements IMesaDAO {
                 int id = lectura.getInt("id");
                 String nombre = lectura.getString("nombre");
 
-                Mesa mesa = new Mesa(nombre);
-                mesa.setId(id);
+                Mesa mesa = new Mesa(id, nombre);
                 lista.add(mesa);
             }
         }
@@ -69,34 +69,31 @@ public class DAOMesa implements IMesaDAO {
     }
 
     @Override
-    public void eliminarMesa(String nombre) throws SQLException {
-        String consulta = "DELETE FROM mesas WHERE nombre = ?";
+    public void eliminarMesa(int id) throws SQLException {
+        if (hasActiveOrders(id)) {
+            throw new SQLException("No se puede eliminar la mesa porque tiene pedidos activos.");
+        }
+        String consulta = "DELETE FROM mesas WHERE id = ?";
         try (PreparedStatement comando = conexion.prepareStatement(consulta)) {
-            comando.setString(1, nombre);
+            comando.setInt(1, id);
             int filasAfectadas = comando.executeUpdate();
             if (filasAfectadas == 0) {
                 throw new SQLException("La mesa no se pudo eliminar porque no existe.");
             }
-        } catch (SQLException e) {
-            if (e.getSQLState().equals("23000")) {
-                throw new SQLException("No se puede eliminar la mesa porque tiene pedidos asociados.");
-            } else {
-                throw e;
-            }
         }
     }
-
+    
     @Override
-    public void modificarMesa(String nombreActual, String nuevoNombre) throws SQLException {
-        String consulta = "UPDATE mesas SET nombre = ? WHERE nombre = ?";
+    public void modificarMesa(int id, String nuevoNombre) throws SQLException {
+        String consulta = "UPDATE mesas SET nombre = ? WHERE id = ?";
 
         try (PreparedStatement ps = conexion.prepareStatement(consulta)) {
             ps.setString(1, nuevoNombre);
-            ps.setString(2, nombreActual);
+            ps.setInt(2, id);
             ps.executeUpdate();
         }
     }
-
+    
     @Override
     public Mesa obtenerMesaPorNombre(String nombre) throws SQLException {
         Mesa mesa = null;
@@ -107,8 +104,7 @@ public class DAOMesa implements IMesaDAO {
             try (ResultSet rs = stmt.executeQuery()) {
                 if (rs.next()) {
                     int id = rs.getInt("id");
-                    String nombreMesa = rs.getString("nombre");
-                    mesa = new Mesa(id, nombreMesa);
+                    mesa = new Mesa(id, nombre);
                 }
             }
         }
@@ -124,11 +120,9 @@ public class DAOMesa implements IMesaDAO {
             stmt.setInt(1, id);
             try (ResultSet rs = stmt.executeQuery()) {
                 if (rs.next()) {
-                    String nombreMesa = rs.getString("nombre");
-                    mesa = new Mesa(id, nombreMesa);
+                    String nombre = rs.getString("nombre");
+                    mesa = new Mesa(id, nombre);
                 }
-            } catch (SQLException e) {
-                throw new SQLException("Error al obtener la mesa por ID: " + e.getMessage(), e);
             }
         }
         return mesa;
@@ -163,7 +157,6 @@ public class DAOMesa implements IMesaDAO {
                 }
             }
         }
-
         return pedido;
     }
 
@@ -197,12 +190,35 @@ public class DAOMesa implements IMesaDAO {
 
     @Override
     public void eliminarPedidoDeMesa(Mesa mesa, Pedido pedido) throws SQLException {
-        String consulta = "DELETE FROM mesa_pedido WHERE idMesa = ? AND idPedido = ?";
-        try (PreparedStatement ps = conexion.prepareStatement(consulta)) {
-            ps.setInt(1, mesa.getId());
-            ps.setInt(2, pedido.getId());
-            ps.executeUpdate();
+        DAOPedido daoPedido = new DAOPedido();
+        try {
+            // Eliminar los detalles del pedido
+            daoPedido.eliminarDetallesPedido(pedido.getId());
+
+            // Eliminar la relación mesa-pedido
+            daoPedido.eliminarMesaPedido(mesa.getId(), pedido.getId());
+
+            // Eliminar el pedido
+            daoPedido.eliminarPedido(pedido.getId());
+        } catch (SQLException e) {
+            throw new SQLException("Error al eliminar el pedido: " + e.getMessage(), e);
         }
+    }
+
+    @Override
+    public boolean hasActiveOrders(int id) throws SQLException {
+        String consulta = "SELECT COUNT(*) FROM pedidos p " +
+                          "JOIN mesa_pedido mp ON p.id = mp.idPedido " +
+                          "WHERE mp.idMesa = ? AND p.fechaHoraCierre IS NULL";
+        try (PreparedStatement comando = conexion.prepareStatement(consulta)) {
+            comando.setInt(1, id);
+            try (ResultSet lectura = comando.executeQuery()) {
+                if (lectura.next()) {
+                    return lectura.getInt(1) > 0;
+                }
+            }
+        }
+        return false;
     }
 
     public void cerrarConexion() {

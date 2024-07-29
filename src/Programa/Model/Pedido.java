@@ -113,17 +113,20 @@ public class Pedido {
         this.descuento = descuento;
     }
     
-    public double getTotal() {
-        float total = 0;
+    public double getSubtotal() {
+        double subtotal = 0.0;
         for (Item item : items) {
-            if (item.getProducto() != null) {
-                total += item.getProducto().getPrecio() * item.getCantidad();
-            }
+            subtotal += item.getSubtotal();
         }
+        return subtotal;
+    }
+
+    public double getTotal() {
+        double subtotal = getSubtotal();
         if (descuento != null) {
-            return descuento.aplicarDescuento(total);
+            return descuento.aplicarDescuento(subtotal);
         } else {
-            return total;
+            return subtotal;
         }
     }
 }

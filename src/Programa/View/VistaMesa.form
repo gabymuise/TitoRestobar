@@ -56,6 +56,7 @@
                               <Component id="btnEliminarMesa" alignment="0" max="32767" attributes="0"/>
                               <Component id="btnEliminarPedidoDeMesa" alignment="0" max="32767" attributes="0"/>
                               <Component id="btnVerPedidoActivo" alignment="0" pref="226" max="32767" attributes="0"/>
+                              <Component id="btnCerrarPedido" alignment="0" max="32767" attributes="0"/>
                           </Group>
                       </Group>
                   </Group>
@@ -91,6 +92,8 @@
                           <Component id="btnEliminarPedidoDeMesa" min="-2" max="-2" attributes="0"/>
                           <EmptySpace type="unrelated" max="-2" attributes="0"/>
                           <Component id="btnVerPedidoActivo" min="-2" max="-2" attributes="0"/>
+                          <EmptySpace type="unrelated" max="-2" attributes="0"/>
+                          <Component id="btnCerrarPedido" min="-2" max="-2" attributes="0"/>
                       </Group>
                   </Group>
                   <EmptySpace min="-2" pref="87" max="-2" attributes="0"/>
@@ -184,6 +187,14 @@
           </Properties>
           <Events>
             <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="btnVerPedidoActivoActionPerformed"/>
+          </Events>
+        </Component>
+        <Component class="javax.swing.JButton" name="btnCerrarPedido">
+          <Properties>
+            <Property name="text" type="java.lang.String" value="CERRAR PEDIDO EN MESA"/>
+          </Properties>
+          <Events>
+            <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="btnCerrarPedidoActionPerformed"/>
           </Events>
         </Component>
       </SubComponents>

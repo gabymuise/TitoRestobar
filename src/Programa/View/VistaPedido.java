@@ -10,6 +10,7 @@ import Programa.Model.Mesa;
 import Programa.Model.Pedido;
 import Programa.Model.Producto;
 import Resources.PedidoNoActivoException;
+import java.awt.HeadlessException;
 
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
@@ -121,7 +122,7 @@ public class VistaPedido extends javax.swing.JPanel {
 
    private void cargarDatosTabla() {
         try {
-            DefaultTableModel modelo = (DefaultTableModel) jTable2.getModel();
+            DefaultTableModel modelo = (DefaultTableModel) jTablePedidos.getModel();
             modelo.setRowCount(0); // Limpiar la tabla
 
             // Obtener la lista de pedidos activos
@@ -231,7 +232,7 @@ public class VistaPedido extends javax.swing.JPanel {
         jButtonAgregarProducto = new javax.swing.JButton();
         jLabelTotal = new javax.swing.JLabel();
         jScrollPane2 = new javax.swing.JScrollPane();
-        jTable2 = new javax.swing.JTable();
+        jTablePedidos = new javax.swing.JTable();
 
         setPreferredSize(new java.awt.Dimension(800, 500));
 
@@ -345,7 +346,7 @@ public class VistaPedido extends javax.swing.JPanel {
                 .addContainerGap(249, Short.MAX_VALUE))
         );
 
-        jTable2.setModel(new javax.swing.table.DefaultTableModel(
+        jTablePedidos.setModel(new javax.swing.table.DefaultTableModel(
             new Object [][] {},
             new String [] {
                 "idPedido", "Mesa", "HoraApertura", "Subtotal", "Total", "Descuento"
@@ -359,7 +360,7 @@ public class VistaPedido extends javax.swing.JPanel {
                 return types [columnIndex];
             }
         });
-        jScrollPane2.setViewportView(jTable2);
+        jScrollPane2.setViewportView(jTablePedidos);
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);
         this.setLayout(layout);
@@ -420,7 +421,7 @@ public class VistaPedido extends javax.swing.JPanel {
     }//GEN-LAST:event_jButtonAgregarProductoActionPerformed
    
     private void jButtonCrearPedidoActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonCrearPedidoActionPerformed
-            try {
+        try {
             // Obtener la mesa seleccionada
             int idMesa = ((Mesa) jComboBoxMesa.getSelectedItem()).getId();
             Mesa mesa = controladoraMesa.obtenerMesaPorId(idMesa);
@@ -439,7 +440,6 @@ public class VistaPedido extends javax.swing.JPanel {
 
             // Crear un nuevo pedido
             Pedido nuevoPedido = new Pedido(mesa, new Timestamp(System.currentTimeMillis()), items, descuento);
-            nuevoPedido.setItems(items);
 
             // Crear el pedido en la base de datos
             controladoraPedido.crearPedido(nuevoPedido);
@@ -457,6 +457,9 @@ public class VistaPedido extends javax.swing.JPanel {
                 controladoraPedido.insertarDetallePedido(nuevoPedido, item);
             }
 
+            // Mostrar el pedido creado en la tabla
+            mostrarPedidoEnTabla(nuevoPedido);
+
             JOptionPane.showMessageDialog(this, "Pedido creado con éxito.", "Éxito", JOptionPane.INFORMATION_MESSAGE);
 
             // Limpiar formulario y cargar datos
@@ -471,7 +474,32 @@ public class VistaPedido extends javax.swing.JPanel {
         }
     }//GEN-LAST:event_jButtonCrearPedidoActionPerformed
 
-     private Descuento aplicarDescuento() {
+    private void mostrarPedidoEnTabla(Pedido pedido) {
+        // Definir los nombres de las columnas para jTablePedidos
+        String[] columnNames = {"ID Pedido", "Mesa", "Hora Apertura", "Subtotal", "Total", "Descuento"};
+
+        // Crear una lista para los datos de la tabla
+        List<Object[]> data = new ArrayList<>();
+
+        // Crear una fila con la información del pedido
+        Object[] row = new Object[6];
+        row[0] = pedido.getId(); // ID del pedido
+        row[1] = pedido.getMesa().getNombre(); // Nombre de la mesa
+        row[2] = pedido.getFechaHoraApertura(); // Hora de apertura
+        row[3] = pedido.getSubtotal(); // Subtotal del pedido
+        row[4] = pedido.getTotal(); // Total del pedido
+        row[5] = pedido.getDescuento().getPorcentaje(); // Descuento aplicado
+
+        data.add(row);
+
+        // Crear el modelo de la tabla y asignar los datos
+        DefaultTableModel tableModel = new DefaultTableModel(data.toArray(new Object[0][]), columnNames);
+        // Obtener la referencia a la tabla (suponiendo que se llama jTablePedidos)
+        jTablePedidos.setModel(tableModel);
+    }
+
+    
+    private Descuento aplicarDescuento() {
         // Puedes reemplazar esto con tu lógica para obtener un descuento del usuario
         String input = JOptionPane.showInputDialog("Ingrese el porcentaje de descuento:");
         float porcentaje;
@@ -507,8 +535,9 @@ public class VistaPedido extends javax.swing.JPanel {
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JScrollPane jScrollPane2;
     private javax.swing.JTable jTable1;
-    private javax.swing.JTable jTable2;
+    private javax.swing.JTable jTablePedidos;
     private javax.swing.JTextField txtCantidad;
     // End of variables declaration//GEN-END:variables
+
 
 }

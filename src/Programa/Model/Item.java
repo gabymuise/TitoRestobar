@@ -51,6 +51,7 @@ public class Item {
         this.cantidad = cantidad;
     }
 
+    //calcula el subtotal de un solo item
     public double getSubtotal() {
         if (producto != null) {
             return cantidad * producto.getPrecio();
