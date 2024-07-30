@@ -371,7 +371,7 @@ public class VistaPedido extends javax.swing.JPanel {
     }// </editor-fold>//GEN-END:initComponents
 
     private void jButtonAgregarProductoActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonAgregarProductoActionPerformed
-    String nombreProducto = (String) jComboBoxProducto.getSelectedItem();
+        String nombreProducto = (String) jComboBoxProducto.getSelectedItem();
     if (nombreProducto == null || nombreProducto.isEmpty()) {
         JOptionPane.showMessageDialog(this, "Por favor, seleccione un producto.", "Error", JOptionPane.ERROR_MESSAGE);
         return;
@@ -389,7 +389,26 @@ public class VistaPedido extends javax.swing.JPanel {
         return;
     }
     
-    double precio = obtenerPrecioProducto(nombreProducto);
+    // Verificar stock disponible
+    Producto producto = obtenerProductoPorNombre(nombreProducto);
+    if (producto == null) {
+        JOptionPane.showMessageDialog(this, "El producto seleccionado no es válido.", "Error", JOptionPane.ERROR_MESSAGE);
+        return;
+    }
+
+    DAOStock daoStock = new DAOStock();
+    Stock stock = daoStock.obtenerStockPorProducto(producto.getId());
+    if (stock == null) {
+        JOptionPane.showMessageDialog(this, "No se encontró stock para el producto.", "Error", JOptionPane.ERROR_MESSAGE);
+        return;
+    }
+
+    if (cantidad > stock.getCantidad()) {
+        JOptionPane.showMessageDialog(this, "No hay suficiente stock disponible. Solo hay " + stock.getCantidad() + " unidades en stock.", "Error", JOptionPane.ERROR_MESSAGE);
+        return;
+    }
+
+    double precio = producto.getPrecio(); // Asumo que obtienes el precio del producto directamente
     DefaultTableModel modelo = (DefaultTableModel) jTable1.getModel();
     modelo.addRow(new Object[]{nombreProducto, cantidad, precio * cantidad});
     
@@ -398,7 +417,7 @@ public class VistaPedido extends javax.swing.JPanel {
     }//GEN-LAST:event_jButtonAgregarProductoActionPerformed
    
     private void jButtonCrearPedidoActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonCrearPedidoActionPerformed
-      try {
+     try {
         // Obtener la mesa seleccionada
         Mesa mesaSeleccionada = (Mesa) jComboBoxMesa.getSelectedItem();
         if (mesaSeleccionada == null) {
@@ -426,34 +445,27 @@ public class VistaPedido extends javax.swing.JPanel {
         nuevoPedido.setDescuento(new Descuento(porcentajeDescuento));
 
         DefaultTableModel modelo = (DefaultTableModel) jTable1.getModel();
-        DAOStock daoStock = new DAOStock();
         for (int i = 0; i < modelo.getRowCount(); i++) {
             String nombreProducto = (String) modelo.getValueAt(i, 0);
             int cantidad = (int) modelo.getValueAt(i, 1);
             Producto producto = obtenerProductoPorNombre(nombreProducto);
             if (producto != null) {
                 Item item = new Item(producto, cantidad);
-                nuevoPedido.addItem(item); //addItem, agrega item
-
-                // Verificar si el producto es no elaborado y actualizar el stock
-                if (!producto.isElaboracion()) {
-                    Stock stock = daoStock.obtenerStockPorProducto(producto.getId());
-                    if (stock != null) {
-                        int stockActual = stock.getCantidad();
-                        int nuevaCantidad = stockActual - cantidad;
-                        stock.setCantidad(nuevaCantidad);
-                        daoStock.actualizarStock(stock);
-                    }
+                nuevoPedido.addItem(item); // addItem, agrega item
+                // Actualizar el stock
+                DAOStock daoStock = new DAOStock();
+                Stock stock = daoStock.obtenerStockPorProducto(producto.getId());
+                if (stock != null) {
+                    stock.setCantidad(stock.getCantidad() - cantidad);
+                    daoStock.actualizarStock(stock);
                 }
             }
         }
 
-        // Insertar el pedido y los items en la base de datos
         controladoraPedido.crearPedido(nuevoPedido);
         for (Item item : nuevoPedido.getItems()) {
             controladoraPedido.insertarItem(nuevoPedido, item);
         }
-
         JOptionPane.showMessageDialog(this, "Pedido creado exitosamente.", "Éxito", JOptionPane.INFORMATION_MESSAGE);
         limpiarFormulario();
         cargarDatosTabla();
