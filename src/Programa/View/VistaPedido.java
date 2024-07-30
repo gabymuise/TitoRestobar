@@ -417,7 +417,7 @@ public class VistaPedido extends javax.swing.JPanel {
     }//GEN-LAST:event_jButtonAgregarProductoActionPerformed
    
     private void jButtonCrearPedidoActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonCrearPedidoActionPerformed
-     try {
+    try {
         // Obtener la mesa seleccionada
         Mesa mesaSeleccionada = (Mesa) jComboBoxMesa.getSelectedItem();
         if (mesaSeleccionada == null) {
@@ -429,12 +429,18 @@ public class VistaPedido extends javax.swing.JPanel {
         int aplicarDescuento = JOptionPane.showConfirmDialog(this, "¿Desea aplicar un descuento?", "Descuento", JOptionPane.YES_NO_OPTION);
         float porcentajeDescuento = 0;
         if (aplicarDescuento == JOptionPane.YES_OPTION) {
-            String input = JOptionPane.showInputDialog(this, "Ingrese el porcentaje de descuento:");
+            String input = JOptionPane.showInputDialog(this, "Ingrese el porcentaje de descuento (0 a 99):");
             if (input != null && !input.isEmpty()) {
                 try {
                     porcentajeDescuento = Float.parseFloat(input);
+                    // Validar que el descuento esté en el rango de 0 a 99
+                    if (porcentajeDescuento < 0 || porcentajeDescuento >= 100) {
+                        JOptionPane.showMessageDialog(this, "El porcentaje de descuento debe estar entre 0 y 99.", "Error", JOptionPane.ERROR_MESSAGE);
+                        return;
+                    }
                 } catch (NumberFormatException e) {
                     JOptionPane.showMessageDialog(this, "Porcentaje de descuento no válido. Se aplicará 0% de descuento.", "Error", JOptionPane.ERROR_MESSAGE);
+                    porcentajeDescuento = 0; // Aplicar 0% de descuento en caso de error
                 }
             }
         }
