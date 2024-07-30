@@ -37,8 +37,8 @@ public class ControladoraPedido {
     }
 
     // Método para eliminar un pedido por ID y sus detalles asociados
-    public void eliminarPedido(int pedidoId) throws SQLException {
-        daoPedido.eliminarPedido(pedidoId);
+    public void eliminarPedido(Pedido pedido) throws SQLException {
+        daoPedido.eliminarPedido(pedido);
     }
     
     // Método para obtener una mesa por su ID
@@ -49,8 +49,7 @@ public class ControladoraPedido {
         return daoPedido.verPedidoActivoDeMesa(mesa);
     }
 
-    
     public void cerrarPedido(Pedido pedido) throws SQLException{
-        daoPedido.cerrarPedido(pedido.getId());
+        daoPedido.cerrarPedido(pedido);
     }
 }

@@ -139,12 +139,11 @@ public class DAOPedido {
 
     // Método para insertar un item en un pedido
     public void insertarItem(Pedido pedido, Item item) throws SQLException {
-        String query = "INSERT INTO items (idPedido, idProducto, cantidad, precio) VALUES (?, ?, ?, ?)";
+        String query = "INSERT INTO items (idPedido, idProducto, cantidad) VALUES (?, ?, ?)";
         try (PreparedStatement stmt = conexion.prepareStatement(query, Statement.RETURN_GENERATED_KEYS)) {
             stmt.setInt(1, pedido.getId());
             stmt.setInt(2, item.getProducto().getId());
             stmt.setInt(3, item.getCantidad());
-            stmt.setDouble(4, item.getProducto().getPrecio());
             stmt.executeUpdate();
 
             try (ResultSet generatedKeys = stmt.getGeneratedKeys()) {
@@ -155,32 +154,36 @@ public class DAOPedido {
         }
     }
 
-
-    public void eliminarPedido(int idPedido) throws SQLException {
-            String sql = "DELETE FROM pedidos WHERE id = ?";
-            try (PreparedStatement stmt = conexion.prepareStatement(sql)) {
-                // Verificar si el pedido existe antes de intentar eliminarlo
-                if (!pedidoExiste(idPedido)) {
-                    throw new SQLException("El pedido con ID " + idPedido + " no existe.");
-                }
-
-                // Configurar el PreparedStatement
-                stmt.setInt(1, idPedido);
-
-                // Ejecutar la actualización
-                int rowsAffected = stmt.executeUpdate();
-
-                if (rowsAffected == 0) {
-                    throw new SQLException("No se pudo eliminar el pedido con ID " + idPedido + ". Puede que ya haya sido eliminado.");
-                }
-            } catch (SQLException e) {
-                throw new SQLException("Error al eliminar el pedido: " + e.getMessage(), e);
-            }
+    public void eliminarPedido(Pedido pedido) throws SQLException {
+        if (pedido == null) {
+            throw new IllegalArgumentException("El objeto Pedido no puede ser null.");
         }
+
+        int idPedido = pedido.getId(); // Obtener el ID del objeto Pedido
+        String sql = "DELETE FROM pedidos WHERE id = ?";
+        try (PreparedStatement stmt = conexion.prepareStatement(sql)) {
+            // Verificar si el pedido existe antes de intentar eliminarlo
+            if (!pedidoExiste(idPedido)) {
+                throw new SQLException("El pedido con ID " + idPedido + " no existe.");
+            }
+
+            // Configurar el PreparedStatement
+            stmt.setInt(1, idPedido);
+
+            // Ejecutar la actualización
+            int rowsAffected = stmt.executeUpdate();
+
+            if (rowsAffected == 0) {
+                throw new SQLException("No se pudo eliminar el pedido con ID " + idPedido + ". Puede que ya haya sido eliminado.");
+            }
+        } catch (SQLException e) {
+            throw new SQLException("Error al eliminar el pedido: " + e.getMessage(), e);
+        }
+    }
 
     
     public Pedido verPedidoActivoDeMesa(Mesa mesa) throws SQLException {
-        String query = "SELECT p.id, p.idMesa, p.fechaHoraCierre " +
+        String query = "SELECT p.id, p.fechaHoraApertura, p.fechaHoraCierre " +
                        "FROM pedidos p " +
                        "WHERE p.idMesa = ? " +
                        "AND p.fechaHoraCierre IS NULL";
@@ -190,8 +193,15 @@ public class DAOPedido {
             try (ResultSet resultSet = statement.executeQuery()) {
                 if (resultSet.next()) {
                     int id = resultSet.getInt("id");
+                    Timestamp fechaHoraApertura = resultSet.getTimestamp("fechaHoraApertura");
                     Timestamp fechaHoraCierre = resultSet.getTimestamp("fechaHoraCierre");
 
+                    // Imprimir valores para depuración
+                    System.out.println("ID del Pedido: " + id);
+                    System.out.println("Fecha de Apertura: " + fechaHoraApertura);
+                    System.out.println("Fecha de Cierre: " + fechaHoraCierre);
+
+                    // Crear el objeto Pedido
                     return new Pedido(id, mesa, fechaHoraCierre);
                 } else {
                     return null; // No hay pedido activo
@@ -201,7 +211,6 @@ public class DAOPedido {
             throw new SQLException("Error al obtener el pedido activo de la mesa: " + ex.getMessage(), ex);
         }
     }
-
 
     // Método auxiliar para verificar si un pedido existe
     private boolean pedidoExiste(int idPedido) throws SQLException {
@@ -216,7 +225,12 @@ public class DAOPedido {
         }
     }
     
-    public void cerrarPedido(int idPedido) throws SQLException {
+    public void cerrarPedido(Pedido pedido) throws SQLException {
+        if (pedido == null) {
+            throw new IllegalArgumentException("El objeto Pedido no puede ser null.");
+        }
+
+        int idPedido = pedido.getId(); // Obtener el ID del objeto Pedido
         String sql = "UPDATE pedidos SET fechaHoraCierre = NOW() WHERE id = ? AND fechaHoraCierre IS NULL";
         try (PreparedStatement stmt = conexion.prepareStatement(sql)) {
             // Configurar el PreparedStatement

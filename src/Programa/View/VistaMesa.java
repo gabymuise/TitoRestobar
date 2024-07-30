@@ -213,8 +213,7 @@ public class VistaMesa extends javax.swing.JPanel {
     }
 
     private void btnCrearMesaActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnCrearMesaActionPerformed
-          String nombre = txtNombreMesa.getText();
-
+    String nombre = txtNombreMesa.getText();
         if (!nombre.isEmpty()) {
             try {
                 Mesa nuevaMesa = new Mesa(nombre);
@@ -223,8 +222,12 @@ public class VistaMesa extends javax.swing.JPanel {
                 cargarListaMesa(); // Actualiza la lista de mesas
                 JOptionPane.showMessageDialog(this, "Mesa creada correctamente.");
             } catch (SQLException ex) {
-                Logger.getLogger(VistaMesa.class.getName()).log(Level.SEVERE, null, ex);
-                JOptionPane.showMessageDialog(this, "Error al crear la mesa: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+                if (ex.getMessage().contains("La mesa ya existe")) {
+                    JOptionPane.showMessageDialog(this, "La mesa ya existe. Por favor, elige otro nombre.", "Error", JOptionPane.WARNING_MESSAGE);
+                } else {
+                    Logger.getLogger(VistaMesa.class.getName()).log(Level.SEVERE, null, ex);
+                    JOptionPane.showMessageDialog(this, "Error al crear la mesa: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+                }
             }
         } else {
             JOptionPane.showMessageDialog(this, "El nombre de la mesa no puede estar vacío.", "Error", JOptionPane.WARNING_MESSAGE);

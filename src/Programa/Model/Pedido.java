@@ -108,12 +108,11 @@ public class Pedido {
         return total;
     }
 
-    private void calcularSubtotalYTotal() {
-        subtotal = items.stream().mapToDouble(Item::getSubtotal).sum();
-        total = subtotal;
-
-        if (descuento != null) {
-            total -= total * (descuento.getPorcentaje() / 100);
+    public void calcularSubtotalYTotal() {
+        subtotal = 0;
+        for (Item item : items) {
+            subtotal += item.getSubtotal(); // Asegúrate de que `getSubtotal` en `Item` esté calculando correctamente.
         }
+        total = subtotal - (subtotal * (descuento != null ? descuento.getPorcentaje() / 100 : 0));
     }
 }

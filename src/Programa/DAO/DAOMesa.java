@@ -86,7 +86,8 @@ public class DAOMesa {
             try (ResultSet rs = stmt.executeQuery()) {
                 if (rs.next()) {
                     int id = rs.getInt("id");
-                    mesa = new Mesa(id, nombre);
+                    String nombreMesa = rs.getString("nombre");
+                    mesa = new Mesa(id, nombreMesa);
                 }
             }
         }
@@ -171,7 +172,7 @@ public class DAOMesa {
         DAOPedido daoPedido = new DAOPedido();
         try {
             // Eliminar el pedido
-            daoPedido.eliminarPedido(pedido.getId());
+            daoPedido.eliminarPedido(pedido);
         } catch (SQLException e) {
             throw new SQLException("Error al eliminar el pedido: " + e.getMessage(), e);
         }

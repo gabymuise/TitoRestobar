@@ -22,8 +22,14 @@ public class ControladoraMesa {
         return daoMesa.listarMesas();
     }
 
-    // Método para crear una nueva mesa
+    public boolean existeMesa(String nombre) throws SQLException {
+        return daoMesa.obtenerMesaPorNombre(nombre) != null;
+    }
+
     public void crearMesa(Mesa mesa) throws SQLException {
+        if (existeMesa(mesa.getNombre())) {
+            throw new SQLException("La mesa ya existe.");
+        }
         daoMesa.crearMesa(mesa);
     }
 
@@ -67,9 +73,6 @@ public class ControladoraMesa {
 
     // Método para eliminar un pedido de una mesa
     public void eliminarPedidoDeMesa(Mesa mesa, Pedido pedido) throws SQLException {
-        // Primero eliminamos el pedido de la mesa
-        daoMesa.eliminarPedidoDeMesa(mesa, pedido);
-        // Luego eliminamos el pedido en sí mismo
-        new ControladoraPedido().eliminarPedido(pedido.getId());
+        new ControladoraPedido().eliminarPedido(pedido);
     }
 }
