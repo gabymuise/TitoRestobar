@@ -3,12 +3,14 @@ package Programa.View;
 import Programa.Controller.ControladoraMesa;
 import Programa.Controller.ControladoraPedido;
 import Programa.Controller.ControladoraProducto;
+import Programa.DAO.DAOStock;
 import Programa.Model.Conexion;
 import Programa.Model.Descuento;
 import Programa.Model.Item;
 import Programa.Model.Mesa;
 import Programa.Model.Pedido;
 import Programa.Model.Producto;
+import Programa.Model.Stock;
 
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
@@ -396,53 +398,68 @@ public class VistaPedido extends javax.swing.JPanel {
     }//GEN-LAST:event_jButtonAgregarProductoActionPerformed
    
     private void jButtonCrearPedidoActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonCrearPedidoActionPerformed
-        try {
-     // Obtener la mesa seleccionada
-     Mesa mesaSeleccionada = (Mesa) jComboBoxMesa.getSelectedItem();
-     if (mesaSeleccionada == null) {
-         JOptionPane.showMessageDialog(this, "Por favor, seleccione una mesa.", "Error", JOptionPane.ERROR_MESSAGE);
-         return;
-     }
+      try {
+        // Obtener la mesa seleccionada
+        Mesa mesaSeleccionada = (Mesa) jComboBoxMesa.getSelectedItem();
+        if (mesaSeleccionada == null) {
+            JOptionPane.showMessageDialog(this, "Por favor, seleccione una mesa.", "Error", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
 
-     // Preguntar si se desea aplicar un descuento
-     int aplicarDescuento = JOptionPane.showConfirmDialog(this, "¿Desea aplicar un descuento?", "Descuento", JOptionPane.YES_NO_OPTION);
-     float porcentajeDescuento = 0;
-     if (aplicarDescuento == JOptionPane.YES_OPTION) {
-         String input = JOptionPane.showInputDialog(this, "Ingrese el porcentaje de descuento:");
-         if (input != null && !input.isEmpty()) {
-             try {
-                 porcentajeDescuento = Float.parseFloat(input);
-             } catch (NumberFormatException e) {
-                 JOptionPane.showMessageDialog(this, "Porcentaje de descuento no válido. Se aplicará 0% de descuento.", "Error", JOptionPane.ERROR_MESSAGE);
-             }
-         }
-     }
+        // Preguntar si se desea aplicar un descuento
+        int aplicarDescuento = JOptionPane.showConfirmDialog(this, "¿Desea aplicar un descuento?", "Descuento", JOptionPane.YES_NO_OPTION);
+        float porcentajeDescuento = 0;
+        if (aplicarDescuento == JOptionPane.YES_OPTION) {
+            String input = JOptionPane.showInputDialog(this, "Ingrese el porcentaje de descuento:");
+            if (input != null && !input.isEmpty()) {
+                try {
+                    porcentajeDescuento = Float.parseFloat(input);
+                } catch (NumberFormatException e) {
+                    JOptionPane.showMessageDialog(this, "Porcentaje de descuento no válido. Se aplicará 0% de descuento.", "Error", JOptionPane.ERROR_MESSAGE);
+                }
+            }
+        }
 
-     // Crear el pedido
-     Pedido nuevoPedido = new Pedido();
-     nuevoPedido.setMesa(mesaSeleccionada);
-     nuevoPedido.setDescuento(new Descuento(porcentajeDescuento));
+        // Crear el pedido
+        Pedido nuevoPedido = new Pedido();
+        nuevoPedido.setMesa(mesaSeleccionada);
+        nuevoPedido.setDescuento(new Descuento(porcentajeDescuento));
 
-     DefaultTableModel modelo = (DefaultTableModel) jTable1.getModel();
-     for (int i = 0; i < modelo.getRowCount(); i++) {
-         String nombreProducto = (String) modelo.getValueAt(i, 0);
-         int cantidad = (int) modelo.getValueAt(i, 1);
-         Producto producto = obtenerProductoPorNombre(nombreProducto);
-         if (producto != null) {
-             Item item = new Item(producto, cantidad);
-             nuevoPedido.addItem(item); //addItem, agrega item
-         }
-     }
-     controladoraPedido.crearPedido(nuevoPedido);
-       for (Item item : nuevoPedido.getItems()) {
+        DefaultTableModel modelo = (DefaultTableModel) jTable1.getModel();
+        DAOStock daoStock = new DAOStock();
+        for (int i = 0; i < modelo.getRowCount(); i++) {
+            String nombreProducto = (String) modelo.getValueAt(i, 0);
+            int cantidad = (int) modelo.getValueAt(i, 1);
+            Producto producto = obtenerProductoPorNombre(nombreProducto);
+            if (producto != null) {
+                Item item = new Item(producto, cantidad);
+                nuevoPedido.addItem(item); //addItem, agrega item
+
+                // Verificar si el producto es no elaborado y actualizar el stock
+                if (!producto.isElaboracion()) {
+                    Stock stock = daoStock.obtenerStockPorProducto(producto.getId());
+                    if (stock != null) {
+                        int stockActual = stock.getCantidad();
+                        int nuevaCantidad = stockActual - cantidad;
+                        stock.setCantidad(nuevaCantidad);
+                        daoStock.actualizarStock(stock);
+                    }
+                }
+            }
+        }
+
+        // Insertar el pedido y los items en la base de datos
+        controladoraPedido.crearPedido(nuevoPedido);
+        for (Item item : nuevoPedido.getItems()) {
             controladoraPedido.insertarItem(nuevoPedido, item);
         }
-     JOptionPane.showMessageDialog(this, "Pedido creado exitosamente.", "Éxito", JOptionPane.INFORMATION_MESSAGE);
-     limpiarFormulario();
-     cargarDatosTabla();
- } catch (SQLException e) {
-     JOptionPane.showMessageDialog(this, "Error al crear el pedido: " + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
- }
+
+        JOptionPane.showMessageDialog(this, "Pedido creado exitosamente.", "Éxito", JOptionPane.INFORMATION_MESSAGE);
+        limpiarFormulario();
+        cargarDatosTabla();
+    } catch (SQLException e) {
+        JOptionPane.showMessageDialog(this, "Error al crear el pedido: " + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+    }
     }//GEN-LAST:event_jButtonCrearPedidoActionPerformed
 
     private void jComboBoxMesaActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jComboBoxMesaActionPerformed
