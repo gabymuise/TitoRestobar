@@ -9,16 +9,12 @@ import Programa.Model.Item;
 import Programa.Model.Mesa;
 import Programa.Model.Pedido;
 import Programa.Model.Producto;
-import Resources.PedidoNoActivoException;
-import java.awt.HeadlessException;
 
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 public class VistaPedido extends javax.swing.JPanel {
     private final ControladoraPedido controladoraPedido;
@@ -28,12 +24,12 @@ public class VistaPedido extends javax.swing.JPanel {
     private final List<Producto> productosDisponibles;
     private final List<Pedido> pedidos;
     private Pedido nuevoPedido;
-    private Connection conexion; // Define la variable para la conexión
+    private Connection conexion;
 
     public VistaPedido() throws SQLException {
         initComponents();
         try {
-            this.conexion = Conexion.Conectar(); // Inicializa la conexión
+            conexion = Conexion.Conectar();
             controladoraPedido = new ControladoraPedido();
             controladoraProducto = new ControladoraProducto();
             controladoraMesa = new ControladoraMesa();
@@ -43,16 +39,17 @@ public class VistaPedido extends javax.swing.JPanel {
             actualizarComboBoxMesas();
             actualizarComboBoxProductos();
             limpiarFormulario();
-            cargarDatosTabla(); // Asegúrate de que este método sea llamado para cargar los datos
+            cargarDatosTabla();
         } catch (SQLException e) {
             JOptionPane.showMessageDialog(this, "Error al conectar a la base de datos: " + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
-            throw e; // Rethrow to handle further up the call stack if needed
+            throw e;
+        } finally {
+            // Asegúrate de cerrar la conexión si es necesario
         }
     }
-
     private void inicializarTabla() {
         DefaultTableModel modelo = (DefaultTableModel) jTable1.getModel();
-        modelo.setRowCount(0); // Limpia la tabla de productos
+        modelo.setRowCount(0);
     }
 
     private List<Mesa> cargarMesasDisponibles() {
@@ -71,10 +68,11 @@ public class VistaPedido extends javax.swing.JPanel {
     private void actualizarComboBoxMesas() {
         DefaultComboBoxModel<Mesa> mesaModel = new DefaultComboBoxModel<>();
         for (Mesa mesa : mesasDisponibles) {
-            mesaModel.addElement(mesa); // Agregar objetos Mesa directamente
+            mesaModel.addElement(mesa);
         }
         jComboBoxMesa.setModel(mesaModel);
     }
+
 
     private void actualizarComboBoxProductos() {
         DefaultComboBoxModel<String> productoModel = new DefaultComboBoxModel<>();
@@ -97,18 +95,18 @@ public class VistaPedido extends javax.swing.JPanel {
     }
 
     private void limpiarFormulario() {
-        inicializarTabla(); // Limpia la tabla de productos
+        inicializarTabla();
 
         if (jComboBoxMesa.getItemCount() > 0) {
-            jComboBoxMesa.setSelectedIndex(0); // Solo resetea selección si hay elementos
+            jComboBoxMesa.setSelectedIndex(0);
         }
 
         if (jComboBoxProducto.getItemCount() > 0) {
-            jComboBoxProducto.setSelectedIndex(0); // Solo resetea selección si hay elementos
+            jComboBoxProducto.setSelectedIndex(0);
         }
 
-        txtCantidad.setText(""); // Limpia campo de cantidad
-        jLabelTotal.setText("Total: $0.00"); // Resetea total
+        txtCantidad.setText("");
+        jLabelTotal.setText("Total: $0.00");
     }
 
     private double obtenerPrecioProducto(String productoNombre) {
@@ -120,34 +118,26 @@ public class VistaPedido extends javax.swing.JPanel {
         return 0.0;
     }
 
-   private void cargarDatosTabla() {
+      private void cargarDatosTabla() {
         try {
             DefaultTableModel modelo = (DefaultTableModel) jTablePedidos.getModel();
-            modelo.setRowCount(0); // Limpiar la tabla
+            modelo.setRowCount(0);
 
-            // Obtener la lista de pedidos activos
             List<Pedido> pedidos = controladoraPedido.obtenerTodosLosPedidosActivos();
 
             for (Pedido pedido : pedidos) {
-                // Obtener todos los items del pedido para calcular subtotal
                 List<Item> items = obtenerItemsDelPedido(pedido.getId());
                 pedido.setItems(items);
+                
+                double descuento = pedido.getDescuento() != null ? pedido.getDescuento().getPorcentaje() : 0;
 
-                // Calcular subtotal y total
-                float subtotal = 0;
-                for (Item item : items) {
-                    subtotal += item.getSubtotal();
-                }
-                double total = pedido.getTotal();
-
-                // Crear fila y añadirla a la tabla
                 Object[] fila = {
                     pedido.getId(),
                     pedido.getMesa().getNombre(),
                     pedido.getFechaHoraApertura(),
-                    subtotal,
-                    total,
-                    pedido.getDescuento() != null ? pedido.getDescuento().getPorcentaje() : 0
+                    pedido.getSubtotal(),
+                    pedido.getTotal(),
+                    descuento
                 };
                 modelo.addRow(fila);
             }
@@ -157,64 +147,40 @@ public class VistaPedido extends javax.swing.JPanel {
         }
     }
 
-    private List<Item> obtenerItemsDelPedido(int pedidoId) throws SQLException {
+    private List<Item> obtenerItemsDelPedido(int idPedido) throws SQLException {
         List<Item> items = new ArrayList<>();
-        String query = "SELECT i.id, i.idProducto, i.cantidad, p.nombre, p.precio " +
-                       "FROM items i " +
-                       "JOIN productos p ON i.idProducto = p.id " +
-                       "WHERE i.id = ?";
+        String query = "SELECT * FROM items WHERE idPedido = ?";
 
         try (PreparedStatement stmt = conexion.prepareStatement(query)) {
-            stmt.setInt(1, pedidoId);
+            stmt.setInt(1, idPedido);
+
             try (ResultSet rs = stmt.executeQuery()) {
                 while (rs.next()) {
-                    int id = rs.getInt("id");
-                    Producto producto = new Producto(); // Asegúrate de tener un constructor adecuado en Producto
-                    producto.setId(rs.getInt("idProducto"));
-                    producto.setNombre(rs.getString("nombre"));
-                    producto.setPrecio(rs.getFloat("precio"));
-
+                    int idProducto = rs.getInt("idProducto");
                     int cantidad = rs.getInt("cantidad");
 
-                    Item item = new Item(id, producto, cantidad);
-                    items.add(item);
-                }
-            }
-        }
+                    Producto producto = controladoraProducto.obtenerProductoPorId(idProducto);
 
-        return items;
-    }
-
-    private List<Item> getItemsFromTable() {
-        List<Item> items = new ArrayList<>();
-        DefaultTableModel model = (DefaultTableModel) jTable1.getModel();
-
-        for (int i = 0; i < model.getRowCount(); i++) {
-            try {
-                String nombreProducto = (String) model.getValueAt(i, 0); // Asegúrate de que sea String
-                int cantidad = (Integer) model.getValueAt(i, 1); // Cambiar de String a Integer
-                Producto producto = obtenerProductoPorNombre(nombreProducto);
-                if (producto != null) {
+                    // Crea un nuevo Item sin subtotal
                     Item item = new Item(producto, cantidad);
+
+                    // Agrega el Item a la lista
                     items.add(item);
                 }
-            } catch (NumberFormatException ex) {
-                // Manejo de error si la conversión a entero falla
-                JOptionPane.showMessageDialog(this, "Error al convertir cantidad: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
             }
         }
         return items;
     }
-
-    private Producto obtenerProductoPorNombre(String nombre) {
-        for (Producto producto : productosDisponibles) {
-            if (producto.getNombre().equals(nombre)) {
-                return producto;
-            }
+    
+    private Producto obtenerProductoPorNombre(String nombreProducto) {
+    for (Producto producto : productosDisponibles) {
+        if (producto.getNombre().equals(nombreProducto)) {
+            return producto;
         }
-        return null; // Retorna null si no se encuentra el producto
     }
-
+    return null;
+    }
+    
     @SuppressWarnings("unchecked")
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
@@ -399,115 +365,68 @@ public class VistaPedido extends javax.swing.JPanel {
     }// </editor-fold>//GEN-END:initComponents
 
     private void jButtonAgregarProductoActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonAgregarProductoActionPerformed
-       try {
-            String nombreProducto = (String) jComboBoxProducto.getSelectedItem();
-            int cantidad = Integer.parseInt(txtCantidad.getText());
+    String nombreProducto = (String) jComboBoxProducto.getSelectedItem();
+    int cantidad = Integer.parseInt(txtCantidad.getText());
+    double precio = obtenerPrecioProducto(nombreProducto);
 
-            if (cantidad <= 0) {
-                JOptionPane.showMessageDialog(this, "La cantidad debe ser mayor a 0.", "Error", JOptionPane.ERROR_MESSAGE);
-                return;
-            }
-
-            double precio = obtenerPrecioProducto(nombreProducto);
-
-            DefaultTableModel modelo = (DefaultTableModel) jTable1.getModel();
-            modelo.addRow(new Object[]{nombreProducto, cantidad, precio * cantidad});
-            actualizarTotal();
-            txtCantidad.setText(""); // Limpia el campo de cantidad
-        } catch (NumberFormatException e) {
-            JOptionPane.showMessageDialog(this, "Ingrese un número válido para la cantidad.", "Error", JOptionPane.ERROR_MESSAGE);
-        }
- 
+    if (cantidad > 0 && !nombreProducto.isEmpty()) {
+        DefaultTableModel modelo = (DefaultTableModel) jTable1.getModel();
+        modelo.addRow(new Object[]{nombreProducto, cantidad, precio * cantidad});
+        txtCantidad.setText(""); // Limpiar txtCantidad después de agregar el producto
+        actualizarTotal();
+    } else {
+        JOptionPane.showMessageDialog(this, "Por favor, ingrese una cantidad válida y seleccione un producto.", "Error", JOptionPane.ERROR_MESSAGE);
+    }
     }//GEN-LAST:event_jButtonAgregarProductoActionPerformed
    
     private void jButtonCrearPedidoActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonCrearPedidoActionPerformed
-        try {
-            // Obtener la mesa seleccionada
-            int idMesa = ((Mesa) jComboBoxMesa.getSelectedItem()).getId();
-            Mesa mesa = controladoraMesa.obtenerMesaPorId(idMesa);
-
-            // Obtener los items de la tabla
-            List<Item> items = getItemsFromTable();
-
-            // Verificar si hay productos en el pedido
-            if (items.isEmpty()) {
-                JOptionPane.showMessageDialog(this, "No hay productos en el pedido.", "Error", JOptionPane.ERROR_MESSAGE);
-                return;
-            }
-            
-            Descuento descuento = new Descuento();
-            Pedido pedido = new Pedido();
-            pedido.getSubtotal();
-            descuento.aplicarDescuento(pedido.getTotal());
-            pedido.getTotal();
-
-            // Crear un nuevo pedido
-            Pedido nuevoPedido = new Pedido(mesa, new Timestamp(System.currentTimeMillis()), items, descuento);
-
-            // Crear el pedido en la base de datos
-            controladoraPedido.crearPedido(nuevoPedido);
-
-            // Insertar los items del pedido en la tabla items
-            for (Item item : items) {
-                controladoraPedido.insertarItem(nuevoPedido, item);
-            }
-
-            // Mostrar el pedido creado en la tabla
-            mostrarPedidoEnTabla(nuevoPedido);
-
-            JOptionPane.showMessageDialog(this, "Pedido creado con éxito.", "Éxito", JOptionPane.INFORMATION_MESSAGE);
-
-            // Limpiar formulario y cargar datos
-            limpiarFormulario();
-            cargarDatosTabla(); // Asegúrate de que la tabla se actualice
-        } catch (SQLException e) {
-            // Manejo de excepciones SQL
-            JOptionPane.showMessageDialog(this, "Error al crear el pedido: " + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
-        } catch (Exception e) {
-            // Manejo de cualquier otra excepción
-            JOptionPane.showMessageDialog(this, "Error inesperado: " + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+       try {
+        // Obtener la mesa seleccionada
+        Mesa mesaSeleccionada = (Mesa) jComboBoxMesa.getSelectedItem();
+        if (mesaSeleccionada == null) {
+            JOptionPane.showMessageDialog(this, "Por favor, seleccione una mesa.", "Error", JOptionPane.ERROR_MESSAGE);
+            return;
         }
+
+        // Preguntar si se desea aplicar un descuento
+        int aplicarDescuento = JOptionPane.showConfirmDialog(this, "¿Desea aplicar un descuento?", "Descuento", JOptionPane.YES_NO_OPTION);
+        float porcentajeDescuento = 0;
+        if (aplicarDescuento == JOptionPane.YES_OPTION) {
+            String input = JOptionPane.showInputDialog(this, "Ingrese el porcentaje de descuento:");
+            if (input != null && !input.isEmpty()) {
+                try {
+                    porcentajeDescuento = Float.parseFloat(input);
+                } catch (NumberFormatException e) {
+                    JOptionPane.showMessageDialog(this, "Porcentaje de descuento no válido. Se aplicará 0% de descuento.", "Error", JOptionPane.ERROR_MESSAGE);
+                }
+            }
+        }
+
+        // Crear el pedido
+        
+        Pedido nuevoPedido = new Pedido();
+        nuevoPedido.setMesa(mesaSeleccionada);
+        nuevoPedido.setDescuento(new Descuento(porcentajeDescuento));
+
+        DefaultTableModel modelo = (DefaultTableModel) jTable1.getModel();
+        for (int i = 0; i < modelo.getRowCount(); i++) {
+            String nombreProducto = (String) modelo.getValueAt(i, 0);
+            int cantidad = (int) modelo.getValueAt(i, 1);
+            Producto producto = obtenerProductoPorNombre(nombreProducto);
+            if (producto != null) {
+                Item item = new Item(producto, cantidad);
+                nuevoPedido.addItem(item); //addItem, agrega item
+            }
+        }
+        controladoraPedido.crearPedido(nuevoPedido);
+        JOptionPane.showMessageDialog(this, "Pedido creado exitosamente.", "Éxito", JOptionPane.INFORMATION_MESSAGE);
+        limpiarFormulario();
+        cargarDatosTabla();
+    } catch (SQLException e) {
+        JOptionPane.showMessageDialog(this, "Error al crear el pedido: " + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+    }
     }//GEN-LAST:event_jButtonCrearPedidoActionPerformed
 
-    private void mostrarPedidoEnTabla(Pedido pedido) {
-        // Definir los nombres de las columnas para jTablePedidos
-        String[] columnNames = {"ID Pedido", "Mesa", "Hora Apertura", "Subtotal", "Total", "Descuento"};
-
-        // Crear una lista para los datos de la tabla
-        List<Object[]> data = new ArrayList<>();
-
-        // Crear una fila con la información del pedido
-        Object[] row = new Object[6];
-        row[0] = pedido.getId(); // ID del pedido
-        row[1] = pedido.getMesa().getNombre(); // Nombre de la mesa
-        row[2] = pedido.getFechaHoraApertura(); // Hora de apertura
-        row[3] = pedido.getSubtotal(); // Subtotal del pedido
-        row[4] = pedido.getTotal(); // Total del pedido
-        row[5] = pedido.getDescuento().getPorcentaje(); // Descuento aplicado
-
-        data.add(row);
-
-        // Crear el modelo de la tabla y asignar los datos
-        DefaultTableModel tableModel = new DefaultTableModel(data.toArray(new Object[0][]), columnNames);
-        // Obtener la referencia a la tabla (suponiendo que se llama jTablePedidos)
-        jTablePedidos.setModel(tableModel);
-    }
-
-    
-    /*private Descuento aplicarDescuento() {
-        // Puedes reemplazar esto con tu lógica para obtener un descuento del usuario
-        String input = JOptionPane.showInputDialog("Ingrese el porcentaje de descuento:");
-        float porcentaje;
-
-        try {
-            porcentaje = Float.parseFloat(input);
-            return new Descuento(porcentaje);
-        } catch (NumberFormatException e) {
-            JOptionPane.showMessageDialog(this, "Porcentaje inválido.", "Error", JOptionPane.ERROR_MESSAGE);
-            return new Descuento(); // Retorna un descuento sin aplicar
-        }
-    }*/
-    
     private void jComboBoxMesaActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jComboBoxMesaActionPerformed
         // TODO add your handling code here:
     }//GEN-LAST:event_jComboBoxMesaActionPerformed
@@ -515,7 +434,6 @@ public class VistaPedido extends javax.swing.JPanel {
     private void jComboBoxProductoActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jComboBoxProductoActionPerformed
         // TODO add your handling code here:
     }//GEN-LAST:event_jComboBoxProductoActionPerformed
-
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton jButtonAgregarProducto;
@@ -533,6 +451,4 @@ public class VistaPedido extends javax.swing.JPanel {
     private javax.swing.JTable jTablePedidos;
     private javax.swing.JTextField txtCantidad;
     // End of variables declaration//GEN-END:variables
-
-
 }

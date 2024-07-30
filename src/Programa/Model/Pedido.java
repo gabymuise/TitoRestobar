@@ -11,34 +11,25 @@ public class Pedido {
     private Timestamp fechaHoraCierre;
     private List<Item> items;
     private Descuento descuento;
+    private double subtotal;
+    private double total;
 
-    // Pedido Activo
     public Pedido(Mesa mesa, Timestamp fechaHoraApertura, List<Item> items, Descuento descuento) {
         this.mesa = mesa;
         this.fechaHoraApertura = fechaHoraApertura;
         this.items = items != null ? items : new ArrayList<>();
         this.descuento = descuento;
+        calcularSubtotalYTotal();
     }
 
-    // Constructor vacío
     public Pedido() {
         this.mesa = null;
-        this.fechaHoraApertura = null;
+        this.fechaHoraApertura = new Timestamp(System.currentTimeMillis());
         this.fechaHoraCierre = null;
         this.items = new ArrayList<>();
         this.descuento = null;
     }
 
-    // Constructor de Pedido
-    public Pedido(Mesa mesa, Timestamp fechaHoraApertura, Timestamp fechaHoraCierre, List<Item> items, Descuento descuento) {
-        this.mesa = mesa;
-        this.fechaHoraApertura = fechaHoraApertura;
-        this.fechaHoraCierre = fechaHoraCierre;
-        this.items = items != null ? items : new ArrayList<>();
-        this.descuento = descuento;
-    }
-
-    // Constructor de Base de Datos
     public Pedido(int id, Mesa mesa, Timestamp fechaHoraApertura, Timestamp fechaHoraCierre, List<Item> items, Descuento descuento) {
         this.id = id;
         this.mesa = mesa;
@@ -46,25 +37,14 @@ public class Pedido {
         this.fechaHoraCierre = fechaHoraCierre;
         this.items = items != null ? items : new ArrayList<>();
         this.descuento = descuento;
+        calcularSubtotalYTotal();
     }
     
-    // Constructor de Base de Datos Actual
-    public Pedido(int id, Timestamp fechaHoraApertura, Timestamp fechaHoraCierre, Descuento descuento) {
-        this.id = id;
-        this.fechaHoraApertura = fechaHoraApertura;
-        this.fechaHoraCierre = fechaHoraCierre;
-        this.descuento = descuento;
-        this.items = new ArrayList<>();
+    public Pedido(int id, Mesa mesa, Timestamp fechaHoraCierre) {
+        this.mesa = mesa;
+        this.fechaHoraCierre = null;
     }
     
-    // Constructor Momentáneo
-    public Pedido(int id, Timestamp fechaHoraApertura, Timestamp fechaHoraCierre) {
-        this.id = id;
-        this.fechaHoraApertura = fechaHoraApertura;
-        this.fechaHoraCierre = fechaHoraCierre;
-        this.items = new ArrayList<>();
-    }
-
     public int getId() {
         return id;
     }
@@ -97,12 +77,18 @@ public class Pedido {
         this.fechaHoraCierre = fechaHoraCierre;
     }
 
+    public void addItem(Item item) {
+        items.add(item);
+        calcularSubtotalYTotal();
+    }
+        
     public List<Item> getItems() {
         return items;
     }
 
     public void setItems(List<Item> items) {
         this.items = items != null ? items : new ArrayList<>();
+        calcularSubtotalYTotal();
     }
 
     public Descuento getDescuento() {
@@ -111,32 +97,23 @@ public class Pedido {
 
     public void setDescuento(Descuento descuento) {
         this.descuento = descuento;
-    }
-    
-    // Método para agregar un item al pedido
-    public void addItem(Item item) {
-        items.add(item);
+        calcularSubtotalYTotal();
     }
 
-    // Método para eliminar un item del pedido por el id del producto
-    public void deleteItem(int idProducto) {
-        items.removeIf(item -> item.getProducto().getId() == idProducto);
-    }
-    
     public double getSubtotal() {
-        double subtotal = 0.0;
-        for (Item item : items) {
-            subtotal += item.getSubtotal();
-        }
         return subtotal;
     }
 
     public double getTotal() {
-        double subtotal = getSubtotal();
+        return total;
+    }
+
+    private void calcularSubtotalYTotal() {
+        subtotal = items.stream().mapToDouble(Item::getSubtotal).sum();
+        total = subtotal;
+
         if (descuento != null) {
-            return descuento.aplicarDescuento(subtotal);
-        } else {
-            return subtotal;
+            total -= total * (descuento.getPorcentaje() / 100);
         }
     }
 }

@@ -232,31 +232,29 @@ public class VistaMesa extends javax.swing.JPanel {
     }//GEN-LAST:event_btnCrearMesaActionPerformed
 
     private void btnEliminarMesaActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnEliminarMesaActionPerformed
-        int indiceSeleccionado = ListMesa.getSelectedIndex();
+         int indiceSeleccionado = ListMesa.getSelectedIndex();
         if (indiceSeleccionado >= 0) {
-            String nombreMesa = (String) ListMesa.getModel().getElementAt(indiceSeleccionado); // Nombre de la mesa
+            String nombreMesa = (String) ListMesa.getModel().getElementAt(indiceSeleccionado);
 
             try {
                 // Obtener la mesa seleccionada
                 Mesa mesaSeleccionada = controladoraMesa.obtenerMesaPorNombre(nombreMesa);
 
-                // Verificar si la mesa tiene pedidos activos
-                if (controladoraMesa.tienePedidosActivos(mesaSeleccionada)) {
-                    JOptionPane.showMessageDialog(this, "La mesa tiene pedidos activos asociados y no puede ser eliminada.", "Error", JOptionPane.WARNING_MESSAGE);
-                    return; // Salir del método si la mesa tiene pedidos activos
-                }
+                // Verificar si la mesa tiene un pedido activo
+                Pedido pedidoActivo = controladoraPedido.verPedidoActivoDeMesa(mesaSeleccionada);
 
-                // Proceder con la eliminación si no tiene pedidos activos
-                controladoraMesa.eliminarMesa(mesaSeleccionada.getId());
-                DefaultListModel<String> modelo = (DefaultListModel<String>) ListMesa.getModel();
-                modelo.remove(indiceSeleccionado); // Elimina la mesa de la lista
-                JOptionPane.showMessageDialog(this, "Mesa eliminada correctamente.");
-            } catch (SQLException e) {
-                JOptionPane.showMessageDialog(this, "Error al eliminar la mesa: " + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+                if (pedidoActivo != null) {
+                    // La mesa tiene un pedido activo, mostrar mensaje de error
+                    JOptionPane.showMessageDialog(this, "La mesa seleccionada tiene un pedido activo. No se puede eliminar.", "Error", JOptionPane.ERROR_MESSAGE);
+                } 
+            } catch (SQLException ex) {
+                Logger.getLogger(VistaMesa.class.getName()).log(Level.SEVERE, null, ex);
+                JOptionPane.showMessageDialog(this, "Error al eliminar la mesa: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
             }
         } else {
-            JOptionPane.showMessageDialog(this, "Selecciona una mesa de la lista antes de eliminarla.", "Error", JOptionPane.WARNING_MESSAGE);
+            JOptionPane.showMessageDialog(this, "Selecciona una mesa de la lista para eliminar.", "Error", JOptionPane.WARNING_MESSAGE);
         }
+
     }//GEN-LAST:event_btnEliminarMesaActionPerformed
 
     private void btnEliminarPedidoDeMesaActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnEliminarPedidoDeMesaActionPerformed
@@ -338,37 +336,52 @@ public class VistaMesa extends javax.swing.JPanel {
                 // Obtener la mesa seleccionada
                 Mesa mesaSeleccionada = controladoraMesa.obtenerMesaPorNombre(nombreMesa);
 
-                if (mesaSeleccionada != null) {
-                    // Verificar si la mesa tiene un pedido activo usando ControladoraMesa
-                    Pedido pedidoActivo = controladoraMesa.obtenerPedidoActivoEnMesa(mesaSeleccionada);
+                // Verificar si la mesa tiene un pedido activo
+                Pedido pedidoActivo = controladoraPedido.verPedidoActivoDeMesa(mesaSeleccionada);
 
-                    if (pedidoActivo != null) {
-                        // Mostrar información del pedido activo
-                        String mensaje = String.format("La mesa %s tiene un pedido activo.\nID del Pedido: %d\nFecha de Apertura: %s", 
-                                                        nombreMesa, pedidoActivo.getId(), pedidoActivo.getFechaHoraApertura());
-                        JOptionPane.showMessageDialog(this, mensaje, "Pedido Activo", JOptionPane.INFORMATION_MESSAGE);
-
-                        // Aquí puedes agregar más lógica para mostrar detalles adicionales del pedido si es necesario
-                    } else {
-                        JOptionPane.showMessageDialog(this, "La mesa seleccionada no tiene un pedido activo.", "Información", JOptionPane.INFORMATION_MESSAGE);
-                    }
+                if (pedidoActivo != null) {
+                    // La mesa tiene un pedido activo
+                    JOptionPane.showMessageDialog(this, "La mesa seleccionada tiene un pedido activo con ID: " + pedidoActivo.getId(), "Pedido Activo", JOptionPane.INFORMATION_MESSAGE);
                 } else {
-                    JOptionPane.showMessageDialog(this, "No se pudo encontrar la mesa seleccionada.", "Error", JOptionPane.ERROR_MESSAGE);
+                    // La mesa no tiene un pedido activo
+                    JOptionPane.showMessageDialog(this, "La mesa seleccionada no tiene un pedido activo.", "Sin Pedido Activo", JOptionPane.INFORMATION_MESSAGE);
                 }
-            } catch (PedidoNoActivoException e) {
-                JOptionPane.showMessageDialog(this, e.getMessage(), "Información", JOptionPane.INFORMATION_MESSAGE);
-            } catch (SQLException e) {
-                JOptionPane.showMessageDialog(this, "Error al obtener el pedido activo: " + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
-            } catch (Exception e) {
-                JOptionPane.showMessageDialog(this, "Ocurrió un error inesperado: " + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+            } catch (SQLException ex) {
+                Logger.getLogger(VistaMesa.class.getName()).log(Level.SEVERE, null, ex);
+                JOptionPane.showMessageDialog(this, "Error al verificar el estado del pedido: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
             }
         } else {
-            JOptionPane.showMessageDialog(this, "Selecciona una mesa de la lista para verificar el pedido.", "Advertencia", JOptionPane.WARNING_MESSAGE);
+            JOptionPane.showMessageDialog(this, "Selecciona una mesa de la lista para verificar el pedido activo.", "Error", JOptionPane.WARNING_MESSAGE);
         }
     }//GEN-LAST:event_btnVerPedidoActivoActionPerformed
 
     private void btnCerrarPedidoActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnCerrarPedidoActionPerformed
-        // TODO add your handling code here:
+          int indiceSeleccionado = ListMesa.getSelectedIndex();
+        if (indiceSeleccionado >= 0) {
+            String nombreMesa = (String) ListMesa.getModel().getElementAt(indiceSeleccionado);
+
+            try {
+                // Obtener la mesa seleccionada
+                Mesa mesaSeleccionada = controladoraMesa.obtenerMesaPorNombre(nombreMesa);
+
+                // Verificar si la mesa tiene un pedido activo
+                Pedido pedidoActivo = controladoraPedido.verPedidoActivoDeMesa(mesaSeleccionada);
+
+                if (pedidoActivo != null) {
+                    // Cerrar el pedido activo
+                    controladoraPedido.cerrarPedido(pedidoActivo);
+                    JOptionPane.showMessageDialog(this, "El pedido activo de la mesa ha sido cerrado.", "Pedido Cerrado", JOptionPane.INFORMATION_MESSAGE);
+                } else {
+                    // No hay pedido activo
+                    JOptionPane.showMessageDialog(this, "La mesa seleccionada no tiene un pedido activo para cerrar.", "Sin Pedido Activo", JOptionPane.WARNING_MESSAGE);
+                }
+            } catch (SQLException ex) {
+                Logger.getLogger(VistaMesa.class.getName()).log(Level.SEVERE, null, ex);
+                JOptionPane.showMessageDialog(this, "Error al cerrar el pedido: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+            }
+        } else {
+            JOptionPane.showMessageDialog(this, "Selecciona una mesa de la lista para cerrar el pedido activo.", "Error", JOptionPane.WARNING_MESSAGE);
+        }
     }//GEN-LAST:event_btnCerrarPedidoActionPerformed
 
 
