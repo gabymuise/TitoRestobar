@@ -6,7 +6,6 @@ import Programa.Model.Item;
 import Programa.Model.Mesa;
 import Programa.Model.Pedido;
 import Programa.Model.Producto;
-import Resources.PedidoNoActivoException;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -108,64 +107,6 @@ public class DAOMesa {
             }
         }
         return mesa;
-    }
-
-    public Pedido verPedidoActivoEnMesa(Mesa mesa) throws SQLException, PedidoNoActivoException {
-        String consultaPedido = "SELECT (*) " +
-                                "FROM pedidos p " +
-                                "WHERE p.idMesa = ? AND p.fechaHoraCierre IS NULL " +
-                                "ORDER BY p.fechaHoraApertura DESC LIMIT 1";
-
-        Pedido pedido = null;
-
-        try (PreparedStatement psPedido = conexion.prepareStatement(consultaPedido)) {
-            psPedido.setInt(1, mesa.getId());
-            try (ResultSet rsPedido = psPedido.executeQuery()) {
-                if (rsPedido.next()) {
-                    int pedidoId = rsPedido.getInt("id");
-                    Timestamp fechaHoraApertura = rsPedido.getTimestamp("fechaHoraApertura");
-                    float porcentajeDescuento = rsPedido.getFloat("descuento");
-                    Descuento descuento = new Descuento(porcentajeDescuento);
-
-                    List<Item> items = obtenerItemsDelPedido(pedidoId);
-
-                    pedido = new Pedido(mesa, fechaHoraApertura, items, descuento);
-                    pedido.setId(pedidoId);
-                } else {
-                    throw new PedidoNoActivoException("No hay un pedido activo para la mesa seleccionada.");
-                }
-            }
-        }
-        return pedido;
-    }
-
-    private List<Item> obtenerItemsDelPedido(int pedidoId) throws SQLException {
-        List<Item> items = new ArrayList<>();
-        String consultaItems = "SELECT i.*, p.nombre, p.descripcion, p.precio, p.costo, p.elaborado " +
-                               "FROM items i " +
-                               "JOIN productos p ON i.idProducto = p.id " +
-                               "JOIN pedidos pe ON i.idPedido = pe.id" +
-                               "WHERE i.idPedido = ?";
-
-        try (PreparedStatement psItems = conexion.prepareStatement(consultaItems)) {
-            psItems.setInt(1, pedidoId);
-            try (ResultSet rsItems = psItems.executeQuery()) {
-                while (rsItems.next()) {
-                    String nombre = rsItems.getString("nombre");
-                    String descripcion = rsItems.getString("descripcion");
-                    float precio = rsItems.getFloat("precio");
-                    float costo = rsItems.getFloat("costo");
-                    boolean elaborado = rsItems.getBoolean("elaborado");
-
-                    Producto producto = new Producto(nombre, descripcion, precio, costo, elaborado);
-                    int cantidad = rsItems.getInt("cantidad");
-
-                    Item item = new Item(producto, cantidad);
-                    items.add(item);
-                }
-            }
-        }
-        return items;
     }
 
     public void eliminarPedidoDeMesa(Mesa mesa, Pedido pedido) throws SQLException {

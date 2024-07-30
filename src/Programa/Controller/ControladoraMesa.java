@@ -4,7 +4,6 @@ import Programa.DAO.DAOMesa;
 import Programa.Model.Mesa;
 import Programa.Model.Pedido;
 import Programa.Model.Item;
-import Resources.PedidoNoActivoException;
 
 import java.sql.SQLException;
 import java.util.List;
@@ -60,15 +59,6 @@ public class ControladoraMesa {
     // Método para obtener una mesa por su ID
     public Mesa obtenerMesaPorId(int id) throws SQLException {
         return daoMesa.obtenerMesaPorId(id);
-    }
-
-    // Método para obtener el pedido activo en una mesa
-    public Pedido obtenerPedidoActivoEnMesa(Mesa mesa) throws SQLException, PedidoNoActivoException {
-        Pedido pedido = daoMesa.verPedidoActivoEnMesa(mesa);
-        if (pedido == null) {
-            throw new PedidoNoActivoException("No hay un pedido activo en esta mesa.");
-        }
-        return pedido;
     }
 
     // Método para eliminar un pedido de una mesa

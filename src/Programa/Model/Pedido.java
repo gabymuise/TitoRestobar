@@ -41,8 +41,9 @@ public class Pedido {
     }
     
     public Pedido(int id, Mesa mesa, Timestamp fechaHoraCierre) {
+        this.id = id;
         this.mesa = mesa;
-        this.fechaHoraCierre = null;
+        this.fechaHoraCierre = fechaHoraCierre;
     }
     
     public int getId() {
