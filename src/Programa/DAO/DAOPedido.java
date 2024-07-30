@@ -54,6 +54,29 @@ public class DAOPedido {
     }
 }
 
+    public Pedido verPedidoActivoDeMesa(Mesa mesa) throws SQLException {
+      String query = "SELECT p.id, p.fechaHoraApertura, p.fechaHoraCierre " +
+                     "FROM pedidos p " +
+                     "WHERE p.idMesa = ? " +
+                     "AND p.fechaHoraCierre IS NULL";
+
+      try (PreparedStatement statement = conexion.prepareStatement(query)) {
+          statement.setInt(1, mesa.getId());
+          try (ResultSet resultSet = statement.executeQuery()) {
+              if (resultSet.next()) {
+                  int id = resultSet.getInt("id");
+                  Timestamp fechaHoraApertura = resultSet.getTimestamp("fechaHoraApertura");
+                  Timestamp fechaHoraCierre = resultSet.getTimestamp("fechaHoraCierre");
+
+                  return new Pedido(id, mesa, fechaHoraApertura, fechaHoraCierre, null, null);
+              } else {
+                  return null; // No hay pedido activo
+              }
+          }
+      } catch (SQLException ex) {
+          throw new SQLException("Error al obtener el pedido activo de la mesa: " + ex.getMessage(), ex);
+      }
+  }
     public List<Pedido> obtenerTodosLosPedidosActivos() throws SQLException {
         List<Pedido> pedidos = new ArrayList<>();
         String query = "SELECT p.id, p.fechaHoraApertura, p.idMesa, p.descuento AS descuento "
@@ -154,65 +177,34 @@ public class DAOPedido {
         }
     }
 
-    public void eliminarPedido(Pedido pedido) throws SQLException {
+   public void eliminarPedido(Pedido pedido) throws SQLException {
         if (pedido == null) {
             throw new IllegalArgumentException("El objeto Pedido no puede ser null.");
         }
 
-        int idPedido = pedido.getId(); // Obtener el ID del objeto Pedido
+        int idPedido = pedido.getId();
         String sql = "DELETE FROM pedidos WHERE id = ?";
         try (PreparedStatement stmt = conexion.prepareStatement(sql)) {
-            // Verificar si el pedido existe antes de intentar eliminarlo
             if (!pedidoExiste(idPedido)) {
                 throw new SQLException("El pedido con ID " + idPedido + " no existe.");
             }
-
-            // Configurar el PreparedStatement
             stmt.setInt(1, idPedido);
-
-            // Ejecutar la actualización
             int rowsAffected = stmt.executeUpdate();
-
             if (rowsAffected == 0) {
                 throw new SQLException("No se pudo eliminar el pedido con ID " + idPedido + ". Puede que ya haya sido eliminado.");
             }
-        } catch (SQLException e) {
-            throw new SQLException("Error al eliminar el pedido: " + e.getMessage(), e);
+        }
+    }
+   
+    public void eliminarItemsPorPedido(int pedidoId) throws SQLException {
+        String sql = "DELETE FROM items WHERE idPedido = ?";
+        try (PreparedStatement ps = conexion.prepareStatement(sql)) {
+            ps.setInt(1, pedidoId);
+            ps.executeUpdate();
         }
     }
 
-    
-    public Pedido verPedidoActivoDeMesa(Mesa mesa) throws SQLException {
-        String query = "SELECT p.id, p.fechaHoraApertura, p.fechaHoraCierre " +
-                       "FROM pedidos p " +
-                       "WHERE p.idMesa = ? " +
-                       "AND p.fechaHoraCierre IS NULL";
-
-        try (PreparedStatement statement = conexion.prepareStatement(query)) {
-            statement.setInt(1, mesa.getId());
-            try (ResultSet resultSet = statement.executeQuery()) {
-                if (resultSet.next()) {
-                    int id = resultSet.getInt("id");
-                    Timestamp fechaHoraApertura = resultSet.getTimestamp("fechaHoraApertura");
-                    Timestamp fechaHoraCierre = resultSet.getTimestamp("fechaHoraCierre");
-
-                    // Imprimir valores para depuración
-                    System.out.println("ID del Pedido: " + id);
-                    System.out.println("Fecha de Apertura: " + fechaHoraApertura);
-                    System.out.println("Fecha de Cierre: " + fechaHoraCierre);
-
-                    // Crear el objeto Pedido
-                    return new Pedido(id, mesa, fechaHoraCierre);
-                } else {
-                    return null; // No hay pedido activo
-                }
-            }
-        } catch (SQLException ex) {
-            throw new SQLException("Error al obtener el pedido activo de la mesa: " + ex.getMessage(), ex);
-        }
-    }
-
-    // Método auxiliar para verificar si un pedido existe
+ // Método auxiliar para verificar si un pedido existe
     private boolean pedidoExiste(int idPedido) throws SQLException {
         String query = "SELECT 1 FROM pedidos WHERE id = ?";
         try (PreparedStatement stmt = conexion.prepareStatement(query)) {

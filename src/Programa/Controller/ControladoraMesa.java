@@ -3,7 +3,6 @@ package Programa.Controller;
 import Programa.DAO.DAOMesa;
 import Programa.Model.Mesa;
 import Programa.Model.Pedido;
-import Programa.Model.Item;
 
 import java.sql.SQLException;
 import java.util.List;
@@ -35,17 +34,16 @@ public class ControladoraMesa {
     // Método para eliminar una mesa por su ID
     public void eliminarMesa(int id) throws SQLException {
         // Asegurarse de que no hay pedidos activos en la mesa antes de eliminarla
-        if (daoMesa.hasActiveOrders(id)) {
+        if (daoMesa.tienePedidosActivos(id)) {
             throw new SQLException("No se puede eliminar la mesa porque tiene pedidos activos.");
         }
         daoMesa.eliminarMesa(id);
     }
     
     public boolean tienePedidosActivos(Mesa mesa) throws SQLException {
-        return daoMesa.hasActiveOrders(mesa.getId());
+        return daoMesa.tienePedidosActivos(mesa.getId());
     }
     
-
     // Método para modificar el nombre de una mesa
     public void modificarMesa(int id, String nuevoNombre) throws SQLException {
         daoMesa.modificarMesa(id, nuevoNombre);
@@ -60,9 +58,17 @@ public class ControladoraMesa {
     public Mesa obtenerMesaPorId(int id) throws SQLException {
         return daoMesa.obtenerMesaPorId(id);
     }
-
-    // Método para eliminar un pedido de una mesa
+    
     public void eliminarPedidoDeMesa(Mesa mesa, Pedido pedido) throws SQLException {
+        // Primero, elimina todos los items asociados al pedido
+        new ControladoraPedido().eliminarItemsPorPedido(pedido.getId());
+
+        // Luego, elimina el pedido
         new ControladoraPedido().eliminarPedido(pedido);
+    }
+
+    
+    public Pedido obtenerPedidoActivo(int idMesa) throws SQLException{
+       return daoMesa.obtenerPedidoActivo(idMesa);
     }
 }

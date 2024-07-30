@@ -1,20 +1,17 @@
 package Programa.DAO;
 
 import Programa.Model.Conexion;
-import Programa.Model.Descuento;
-import Programa.Model.Item;
 import Programa.Model.Mesa;
 import Programa.Model.Pedido;
+import java.sql.Timestamp;
 import Programa.Model.Producto;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
-
 
 public class DAOMesa {
     private Connection conexion;
@@ -53,7 +50,7 @@ public class DAOMesa {
     }
 
     public void eliminarMesa(int id) throws SQLException {
-        if (hasActiveOrders(id)) {
+        if (tienePedidosActivos(id)) {
             throw new SQLException("No se puede eliminar la mesa porque tiene pedidos activos.");
         }
         String consulta = "DELETE FROM mesas WHERE id = ?";
@@ -108,20 +105,38 @@ public class DAOMesa {
         }
         return mesa;
     }
+    
+    public Pedido obtenerPedidoActivo(int idMesa) throws SQLException {
+        Pedido pedido = null;
+        String query = "SELECT * FROM pedidos WHERE idMesa = ? AND fechaHoraCierre IS NULL";
 
-    public void eliminarPedidoDeMesa(Mesa mesa, Pedido pedido) throws SQLException {
-        DAOPedido daoPedido = new DAOPedido();
-        try {
-            // Eliminar el pedido
-            daoPedido.eliminarPedido(pedido);
-        } catch (SQLException e) {
-            throw new SQLException("Error al eliminar el pedido: " + e.getMessage(), e);
+        try (PreparedStatement stmt = conexion.prepareStatement(query)) {
+            stmt.setInt(1, idMesa);
+            try (ResultSet rs = stmt.executeQuery()) {
+                if (rs.next()) {
+                    int idPedido = rs.getInt("id");
+                    Timestamp fechaHoraApertura = rs.getTimestamp("fechaHoraApertura");
+                    // Asegúrate de que los constructores se ajusten a estos parámetros
+                    pedido = new Pedido(idPedido, obtenerMesaPorId(idMesa), fechaHoraApertura, null, null, null);
+                }
+            }
+        }
+        return pedido;
+    }
+
+    public void eliminarPedidoDeMesa(int idMesa) throws SQLException {
+        Pedido pedidoActivo = obtenerPedidoActivo(idMesa);
+        if (pedidoActivo != null) {
+            DAOPedido daoPedido = new DAOPedido();
+            daoPedido.eliminarPedido(pedidoActivo);
+        } else {
+            throw new SQLException("No hay pedido activo para eliminar en la mesa con ID: " + idMesa);
         }
     }
+
     
-    public boolean hasActiveOrders(int id) throws SQLException {
-        String consulta = "SELECT COUNT(*) FROM pedidos p " +
-                          "WHERE p.idMesa = ? AND p.fechaHoraCierre IS NULL";
+    public boolean tienePedidosActivos(int id) throws SQLException {
+        String consulta = "SELECT COUNT(*) FROM pedidos WHERE idMesa = ? AND fechaHoraCierre IS NULL";
         try (PreparedStatement comando = conexion.prepareStatement(consulta)) {
             comando.setInt(1, id);
             try (ResultSet lectura = comando.executeQuery()) {
