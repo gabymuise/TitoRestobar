@@ -2,6 +2,7 @@ package Programa.View;
 
 import Programa.Controller.ControladoraProducto;
 import Programa.DAO.DAOProducto;
+import Programa.Model.Conexion;
 import Programa.Model.Producto;
 import Programa.Model.Stock;
 import java.util.logging.Level;
@@ -31,27 +32,32 @@ public class VistaProducto extends javax.swing.JPanel {
     }
 
     public void cargarProductos() {
+        Connection conn = null;
+        PreparedStatement statement = null;
+        ResultSet resultSet = null;
+
         try {
-            Connection conn = DriverManager.getConnection("jdbc:mysql://localhost:3306/titorestobar", "root", "123456");
+            // Conectar a la base de datos usando tu clase Conexion
+            conn = Conexion.Conectar();
             String sql = "SELECT * FROM productos";
-            PreparedStatement statement = conn.prepareStatement(sql);
-            ResultSet resultSet = statement.executeQuery();
+            statement = conn.prepareStatement(sql);
+            resultSet = statement.executeQuery();
+
             DefaultTableModel model = (DefaultTableModel) tableProductos.getModel();
-            model.setRowCount(0);
+            model.setRowCount(0); // Limpiar la tabla antes de cargar nuevos datos
 
             while (resultSet.next()) {
-                int id = resultSet.getInt("Id");
-                String nombre = resultSet.getString("Nombre");
-                String descripcion = resultSet.getString("Descripcion");
-                float precio = resultSet.getFloat("Precio");
-                float costo = resultSet.getFloat("Costo");
-                boolean elaboracion = resultSet.getBoolean("elaborado");
-                model.addRow(new Object[]{id, nombre, descripcion, precio, costo, elaboracion});
+                int id = resultSet.getInt("id"); // Asegúrate de que el nombre de la columna coincida con el de la base de datos
+                String nombre = resultSet.getString("nombre");
+                String descripcion = resultSet.getString("descripcion");
+                float precio = resultSet.getFloat("precio");
+                float costo = resultSet.getFloat("costo");
+                boolean elaborado = resultSet.getBoolean("elaborado");
+                model.addRow(new Object[]{id, nombre, descripcion, precio, costo, elaborado});
             }
-            conn.close();
         } catch (SQLException e) {
             e.printStackTrace();
-        }
+        } 
     }
 
     @SuppressWarnings("unchecked")

@@ -23,6 +23,7 @@ public class VistaRestobar extends javax.swing.JFrame {
         content = new javax.swing.JScrollPane();
         btnVistaPedido = new javax.swing.JButton();
         btnVistaStock = new javax.swing.JButton();
+        btnDetallePedido = new javax.swing.JButton();
 
         jMenu1.setText("jMenu1");
 
@@ -56,6 +57,13 @@ public class VistaRestobar extends javax.swing.JFrame {
             }
         });
 
+        btnDetallePedido.setText("DETALLE PEDIDO");
+        btnDetallePedido.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnDetallePedidoActionPerformed(evt);
+            }
+        });
+
         javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
         jPanel1.setLayout(jPanel1Layout);
         jPanel1Layout.setHorizontalGroup(
@@ -69,7 +77,9 @@ public class VistaRestobar extends javax.swing.JFrame {
                 .addComponent(btnVistaPedido, javax.swing.GroupLayout.PREFERRED_SIZE, 142, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addGap(18, 18, 18)
                 .addComponent(btnVistaStock, javax.swing.GroupLayout.PREFERRED_SIZE, 142, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(306, Short.MAX_VALUE))
+                .addGap(18, 18, 18)
+                .addComponent(btnDetallePedido, javax.swing.GroupLayout.PREFERRED_SIZE, 150, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addContainerGap(138, Short.MAX_VALUE))
             .addGroup(jPanel1Layout.createSequentialGroup()
                 .addContainerGap()
                 .addComponent(content)
@@ -84,9 +94,10 @@ public class VistaRestobar extends javax.swing.JFrame {
                         .addComponent(btnVistaProducto, javax.swing.GroupLayout.PREFERRED_SIZE, 62, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addComponent(btnVistaMesa, javax.swing.GroupLayout.PREFERRED_SIZE, 63, javax.swing.GroupLayout.PREFERRED_SIZE))
                     .addComponent(btnVistaPedido, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(btnVistaStock, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                    .addComponent(btnVistaStock, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(btnDetallePedido, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addGap(18, 18, 18)
-                .addComponent(content, javax.swing.GroupLayout.DEFAULT_SIZE, 407, Short.MAX_VALUE)
+                .addComponent(content, javax.swing.GroupLayout.DEFAULT_SIZE, 345, Short.MAX_VALUE)
                 .addContainerGap())
         );
 
@@ -135,6 +146,11 @@ public class VistaRestobar extends javax.swing.JFrame {
         ShowPanel(stock);
     }//GEN-LAST:event_btnVistaStockActionPerformed
 
+    private void btnDetallePedidoActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnDetallePedidoActionPerformed
+        VistaDetallePedido detallePedido = new VistaDetallePedido();
+        ShowPanel(detallePedido);
+    }//GEN-LAST:event_btnDetallePedidoActionPerformed
+
     public void ShowPanel(JPanel p){
         
          p.setSize(content.getSize());
@@ -151,6 +167,7 @@ public class VistaRestobar extends javax.swing.JFrame {
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JButton btnDetallePedido;
     private javax.swing.JButton btnVistaMesa;
     private javax.swing.JButton btnVistaPedido;
     private javax.swing.JButton btnVistaProducto;
