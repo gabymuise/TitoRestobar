@@ -337,8 +337,8 @@ public class VistaProducto extends javax.swing.JPanel {
     }//GEN-LAST:event_btnEliminarProductoActionPerformed
 
     private void btnGuardarProductoActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnGuardarProductoActionPerformed
-               if (btnGuardarProducto.isEnabled()) {
-            try {
+        if (btnGuardarProducto.isEnabled()) {
+        try {
                 if (txtNombreProducto.getText().isEmpty() || txtDescripcionProducto.getText().isEmpty() ||
                         txtCostoProducto.getText().isEmpty() || txtPrecioProducto.getText().isEmpty() ||
                         (!chkElaboracion.isSelected() && txtCantidadProducto.getText().isEmpty())) {
@@ -353,6 +353,13 @@ public class VistaProducto extends javax.swing.JPanel {
                 boolean elaboracion = chkElaboracion.isSelected();
 
                 ControladoraProducto controladoraProducto = new ControladoraProducto();
+
+                // Verificar si el producto ya existe
+                if (controladoraProducto.existeProducto(nombre)) {
+                    JOptionPane.showMessageDialog(this, "El producto ya existe en el sistema.", "Error", JOptionPane.ERROR_MESSAGE);
+                    return;
+                }
+
                 Producto producto = new Producto(nombre, descripcion, precio, costo, elaboracion);
 
                 controladoraProducto.guardar(producto);
@@ -372,6 +379,9 @@ public class VistaProducto extends javax.swing.JPanel {
                 cargarProductos();
             } catch (SQLException ex) {
                 Logger.getLogger(VistaProducto.class.getName()).log(Level.SEVERE, null, ex);
+                JOptionPane.showMessageDialog(this, "Error al guardar el producto: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+            } catch (NumberFormatException ex) {
+                JOptionPane.showMessageDialog(this, "Ingrese un número válido en los campos de precio, costo y cantidad.", "Error", JOptionPane.ERROR_MESSAGE);
             }
         }
     }//GEN-LAST:event_btnGuardarProductoActionPerformed

@@ -168,4 +168,18 @@ public class DAOProducto {
             e.printStackTrace(); 
         }
     }
+
+    public boolean existeProducto(String nombre) throws SQLException {
+        String consulta = "SELECT COUNT(*) FROM productos WHERE nombre = ?";
+        try (Connection conn = Conexion.Conectar();
+             PreparedStatement stmt = conn.prepareStatement(consulta)) {
+            stmt.setString(1, nombre);
+            try (ResultSet rs = stmt.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getInt(1) > 0;
+                }
+            }
+        }
+        return false;
+    }
 }

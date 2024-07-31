@@ -36,6 +36,10 @@ public class ControladoraProducto {
     public boolean eliminarProductoPorNombre(String nombre) throws SQLException {
         return daoProducto.eliminarProductoPorNombre(nombre);
     }
+    
+    public boolean existeProducto(String nombre) throws SQLException {
+        return daoProducto.existeProducto(nombre);
+    }
 
     // Método para guardar la información de stock de un producto
     public void guardarStock(Stock stock) throws SQLException {
