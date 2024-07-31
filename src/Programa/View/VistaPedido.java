@@ -3,6 +3,7 @@ package Programa.View;
 import Programa.Controller.ControladoraMesa;
 import Programa.Controller.ControladoraPedido;
 import Programa.Controller.ControladoraProducto;
+import Programa.DAO.DAOPedido;
 import Programa.DAO.DAOStock;
 import Programa.Model.Conexion;
 import Programa.Model.Descuento;
@@ -418,18 +419,26 @@ public class VistaPedido extends javax.swing.JPanel {
     }//GEN-LAST:event_jButtonAgregarProductoActionPerformed
    
     private void jButtonCrearPedidoActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonCrearPedidoActionPerformed
-    try {
-        // Verificar si jTable1 tiene filas
+ try {
+        
         DefaultTableModel modelo = (DefaultTableModel) jTable1.getModel();
         if (modelo.getRowCount() == 0) {
             JOptionPane.showMessageDialog(this, "Debe agregar productos antes de crear un pedido.", "Error", JOptionPane.ERROR_MESSAGE);
-            return; // Termina la ejecución del método si la tabla está vacía
+            return; 
         }
 
         // Obtener la mesa seleccionada
         Mesa mesaSeleccionada = (Mesa) jComboBoxMesa.getSelectedItem();
         if (mesaSeleccionada == null) {
             JOptionPane.showMessageDialog(this, "Por favor, seleccione una mesa.", "Error", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+
+        // Verificar si la mesa ya tiene un pedido activo
+        DAOPedido daoPedido = new DAOPedido();
+        Pedido pedidoActivo = daoPedido.verPedidoActivoDeMesa(mesaSeleccionada);
+        if (pedidoActivo != null) {
+            JOptionPane.showMessageDialog(this, "La mesa seleccionada ya tiene un pedido activo. No se puede crear otro pedido.", "Error", JOptionPane.ERROR_MESSAGE);
             return;
         }
 
