@@ -59,7 +59,7 @@ public class VistaDetallePedido extends javax.swing.JPanel {
             // Consulta SQL para obtener los pedidos activos con sus detalles
             String sql = "SELECT m.nombre AS Mesa, p.fechaHoraApertura AS FechaHoraApertura, " +
                          "prod.nombre AS Producto, i.cantidad AS Cantidad, p.descuento AS Descuento, " +
-                         "ROUND(p.total, 2) AS Total " +
+                         "ROUND(p.total, 2) AS Total, p.id AS idPedido " + // Nota: Agregamos el id aquí
                          "FROM pedidos p " +
                          "JOIN mesas m ON p.idMesa = m.id " +
                          "JOIN items i ON p.id = i.idPedido " +
@@ -78,8 +78,9 @@ public class VistaDetallePedido extends javax.swing.JPanel {
                 int cantidad = resultSet.getInt("Cantidad");
                 float descuento = resultSet.getFloat("Descuento");
                 float total = resultSet.getFloat("Total");
+                int id = resultSet.getInt("idPedido");
 
-                modelo.addRow(new Object[]{nombreMesa, fechaHoraApertura, producto, cantidad, descuento, total});
+                modelo.addRow(new Object[]{nombreMesa, fechaHoraApertura, producto, cantidad, descuento, total, id});
             }
         } catch (SQLException e) {
             e.printStackTrace();
@@ -88,12 +89,13 @@ public class VistaDetallePedido extends javax.swing.JPanel {
         }
     }
 
+
     private void cargarDatosTablaPedidosCerrados() {
         DefaultTableModel modelo = (DefaultTableModel) jTableDetallePedido.getModel();
         modelo.setRowCount(0); // Limpiar tabla antes de cargar datos
 
         String sql = "SELECT m.nombre AS mesa, p.fechaHoraApertura, p.fechaHoraCierre, " +
-                     "prod.nombre AS producto, i.cantidad, p.descuento, p.total " +
+                     "prod.nombre AS producto, i.cantidad, p.descuento, p.total, p.id AS idPedido " + 
                      "FROM pedidos p " +
                      "JOIN mesas m ON p.idMesa = m.id " +
                      "JOIN items i ON p.id = i.idPedido " +
@@ -114,6 +116,7 @@ public class VistaDetallePedido extends javax.swing.JPanel {
                 int cantidad = rs.getInt("cantidad");
                 float descuento = rs.getFloat("descuento");
                 double total = rs.getDouble("total");
+                int id = rs.getInt("idPedido");
 
                 // Formatear el total a dos decimales
                 String totalFormateado = formatoDecimal.format(total);
@@ -126,13 +129,17 @@ public class VistaDetallePedido extends javax.swing.JPanel {
                     nombreProducto,
                     cantidad,
                     descuento,
-                    totalFormateado
+                    totalFormateado,
+                    id
                 });
             }
         } catch (SQLException e) {
             e.printStackTrace();
+            JOptionPane.showMessageDialog(this, "Error al cargar los datos de los pedidos cerrados: " + 
+                    e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
         }
     }
+
 
 
     @SuppressWarnings("unchecked")
@@ -148,17 +155,17 @@ public class VistaDetallePedido extends javax.swing.JPanel {
 
         jTableDetallePedido.setModel(new javax.swing.table.DefaultTableModel(
             new Object [][] {
-                {null, null, null, null, null, null, null},
-                {null, null, null, null, null, null, null},
-                {null, null, null, null, null, null, null},
-                {null, null, null, null, null, null, null}
+                {null, null, null, null, null, null, null, null},
+                {null, null, null, null, null, null, null, null},
+                {null, null, null, null, null, null, null, null},
+                {null, null, null, null, null, null, null, null}
             },
             new String [] {
-                "Mesa", "FechaHoraA", "FechaHoraC", "Producto", "Cantidad", "Descuento", "Total"
+                "Mesa", "FechaHoraA", "FechaHoraC", "Producto", "Cantidad", "Descuento", "Total", "idPedido"
             }
         ) {
             boolean[] canEdit = new boolean [] {
-                false, false, false, false, false, false, false
+                false, false, false, false, false, false, false, false
             };
 
             public boolean isCellEditable(int rowIndex, int columnIndex) {
@@ -174,22 +181,40 @@ public class VistaDetallePedido extends javax.swing.JPanel {
             jTableDetallePedido.getColumnModel().getColumn(4).setResizable(false);
             jTableDetallePedido.getColumnModel().getColumn(5).setResizable(false);
             jTableDetallePedido.getColumnModel().getColumn(6).setResizable(false);
+            jTableDetallePedido.getColumnModel().getColumn(7).setResizable(false);
         }
 
         lblPedidosActivos.setText("PEDIDOS ACTIVOS");
 
         jTablePedidosActivos.setModel(new javax.swing.table.DefaultTableModel(
             new Object [][] {
-                {null, null, null, null, null, null},
-                {null, null, null, null, null, null},
-                {null, null, null, null, null, null},
-                {null, null, null, null, null, null}
+                {null, null, null, null, null, null, null},
+                {null, null, null, null, null, null, null},
+                {null, null, null, null, null, null, null},
+                {null, null, null, null, null, null, null}
             },
             new String [] {
-                "Mesa", "FechaHoraA", "Producto", "Cantidad", "Descuento", "Total"
+                "Mesa", "FechaHoraA", "Producto", "Cantidad", "Descuento", "Total", "idPedido"
             }
-        ));
+        ) {
+            boolean[] canEdit = new boolean [] {
+                false, false, false, false, false, false, false
+            };
+
+            public boolean isCellEditable(int rowIndex, int columnIndex) {
+                return canEdit [columnIndex];
+            }
+        });
         jScrollPane2.setViewportView(jTablePedidosActivos);
+        if (jTablePedidosActivos.getColumnModel().getColumnCount() > 0) {
+            jTablePedidosActivos.getColumnModel().getColumn(0).setResizable(false);
+            jTablePedidosActivos.getColumnModel().getColumn(1).setResizable(false);
+            jTablePedidosActivos.getColumnModel().getColumn(2).setResizable(false);
+            jTablePedidosActivos.getColumnModel().getColumn(3).setResizable(false);
+            jTablePedidosActivos.getColumnModel().getColumn(4).setResizable(false);
+            jTablePedidosActivos.getColumnModel().getColumn(5).setResizable(false);
+            jTablePedidosActivos.getColumnModel().getColumn(6).setResizable(false);
+        }
 
         lblPedidosCerrados.setText("PEDIDOS CERRADOS");
 
