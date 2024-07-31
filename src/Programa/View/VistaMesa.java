@@ -333,7 +333,7 @@ int indiceSeleccionado = ListMesa.getSelectedIndex();
             if (mesa != null) {
                 Pedido pedidoActivo = controladoraMesa.obtenerPedidoActivo(mesa.getId());
                 if (pedidoActivo != null) {
-                    JOptionPane.showMessageDialog(this, "Pedido activo en la mesa: " + (mesa.getId()));
+                    JOptionPane.showMessageDialog(this, "Pedido activo en la " + (mesa.getNombre()));
                 } else {
                     JOptionPane.showMessageDialog(this, "La mesa no tiene un pedido activo.", "Información", JOptionPane.INFORMATION_MESSAGE);
                 }

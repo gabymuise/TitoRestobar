@@ -505,48 +505,60 @@ public class VistaPedido extends javax.swing.JPanel {
     }//GEN-LAST:event_jComboBoxProductoActionPerformed
 
     private void btnModificarItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnModificarItemActionPerformed
-         DefaultTableModel modelo = (DefaultTableModel) jTable1.getModel();
-    int filaSeleccionada = jTable1.getSelectedRow();
-    
-    if (filaSeleccionada == -1) {
-        JOptionPane.showMessageDialog(this, "Por favor, seleccione una fila para modificar.", "Error", JOptionPane.ERROR_MESSAGE);
-        return;
-    }
-    
-    // Obtener los datos actuales
-    String nombreProductoActual = (String) modelo.getValueAt(filaSeleccionada, 0);
-    int cantidadActual = (int) modelo.getValueAt(filaSeleccionada, 1);
-    
-    // Solicitar nuevos valores
-    String nuevoNombreProducto = JOptionPane.showInputDialog(this, "Ingrese el nuevo nombre del producto:", nombreProductoActual);
-    if (nuevoNombreProducto == null || nuevoNombreProducto.isEmpty()) {
-        return; // Salir si no se proporciona un nombre
-    }
-    
-    String nuevaCantidadStr = JOptionPane.showInputDialog(this, "Ingrese la nueva cantidad:", cantidadActual);
-    if (nuevaCantidadStr == null || nuevaCantidadStr.isEmpty()) {
-        return; // Salir si no se proporciona una cantidad
-    }
-    
-    int nuevaCantidad;
-    try {
-        nuevaCantidad = Integer.parseInt(nuevaCantidadStr);
-        if (nuevaCantidad <= 0) {
-            JOptionPane.showMessageDialog(this, "La cantidad debe ser mayor que 0.", "Error", JOptionPane.ERROR_MESSAGE);
+        DefaultTableModel modelo = (DefaultTableModel) jTable1.getModel();
+        int filaSeleccionada = jTable1.getSelectedRow();
+
+        if (filaSeleccionada == -1) {
+            JOptionPane.showMessageDialog(this, "Por favor, seleccione una fila para modificar.", "Error", JOptionPane.ERROR_MESSAGE);
             return;
         }
-    } catch (NumberFormatException e) {
-        JOptionPane.showMessageDialog(this, "Ingrese un número válido para la cantidad.", "Error", JOptionPane.ERROR_MESSAGE);
-        return;
-    }
-    
-    // Actualizar la tabla
-    modelo.setValueAt(nuevoNombreProducto, filaSeleccionada, 0);
-    modelo.setValueAt(nuevaCantidad, filaSeleccionada, 1);
-    modelo.setValueAt(nuevaCantidad * (double) modelo.getValueAt(filaSeleccionada, 2), filaSeleccionada, 2); // Actualizar el total
-    
-    // Limpiar el campo de cantidad después de la modificación
-    txtCantidad.setText(""); // Limpiar txtCantidad
+
+        // Obtener los datos actuales
+        String nombreProductoActual = (String) modelo.getValueAt(filaSeleccionada, 0);
+        int cantidadActual = (int) modelo.getValueAt(filaSeleccionada, 1);
+        double precioActual = (double) modelo.getValueAt(filaSeleccionada, 2) / cantidadActual; // Calcular el precio por unidad actual
+
+        // Solicitar nuevos valores
+        String nuevoNombreProducto = JOptionPane.showInputDialog(this, "Ingrese el nuevo nombre del producto:", nombreProductoActual);
+        if (nuevoNombreProducto == null || nuevoNombreProducto.isEmpty()) {
+            return; // Salir si no se proporciona un nombre
+        }
+
+        String nuevaCantidadStr = JOptionPane.showInputDialog(this, "Ingrese la nueva cantidad:", cantidadActual);
+        if (nuevaCantidadStr == null || nuevaCantidadStr.isEmpty()) {
+            return; // Salir si no se proporciona una cantidad
+        }
+
+        int nuevaCantidad;
+        try {
+            nuevaCantidad = Integer.parseInt(nuevaCantidadStr);
+            if (nuevaCantidad <= 0) {
+                JOptionPane.showMessageDialog(this, "La cantidad debe ser mayor que 0.", "Error", JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+        } catch (NumberFormatException e) {
+            JOptionPane.showMessageDialog(this, "Ingrese un número válido para la cantidad.", "Error", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+
+        // Obtener el nuevo producto
+        Producto nuevoProducto = obtenerProductoPorNombre(nuevoNombreProducto);
+        if (nuevoProducto == null) {
+            JOptionPane.showMessageDialog(this, "El producto seleccionado no es válido.", "Error", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+
+        // Calcular el nuevo precio por unidad y el nuevo total
+        double nuevoPrecioPorUnidad = nuevoProducto.getPrecio();
+        double nuevoTotal = nuevaCantidad * nuevoPrecioPorUnidad;
+
+        // Actualizar la tabla
+        modelo.setValueAt(nuevoNombreProducto, filaSeleccionada, 0);
+        modelo.setValueAt(nuevaCantidad, filaSeleccionada, 1);
+        modelo.setValueAt(nuevoTotal, filaSeleccionada, 2); // Actualizar el total
+
+        // Limpiar el campo de cantidad después de la modificación
+        txtCantidad.setText(""); // Limpiar txtCantidad
     }//GEN-LAST:event_btnModificarItemActionPerformed
 
     private void btnEliminarItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnEliminarItemActionPerformed
