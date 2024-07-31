@@ -3,6 +3,8 @@ package Programa.Controller;
 import Programa.DAO.DAOMesa;
 import Programa.Model.Mesa;
 import Programa.Model.Pedido;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import java.sql.SQLException;
 import java.util.List;
@@ -60,12 +62,21 @@ public class ControladoraMesa {
     }
     
     public void eliminarPedidoDeMesa(Mesa mesa, Pedido pedido) throws SQLException {
-        // Primero, elimina todos los items asociados al pedido
-        new ControladoraPedido().eliminarItemsPorPedido(pedido.getId());
+    ControladoraPedido controladoraPedido = new ControladoraPedido();
 
-        // Luego, elimina el pedido
-        new ControladoraPedido().eliminarPedido(pedido);
+    try {
+
+        controladoraPedido.devolverProductosAlStock(pedido.getId());
+        
+        controladoraPedido.eliminarItemsPorPedido(pedido.getId());
+
+        controladoraPedido.eliminarPedido(pedido);
+    } catch (SQLException e) {
+        Logger.getLogger(ControladoraMesa.class.getName()).log(Level.SEVERE, null, e);
+        throw e;
     }
+}
+
 
     
     public Pedido obtenerPedidoActivo(int idMesa) throws SQLException{

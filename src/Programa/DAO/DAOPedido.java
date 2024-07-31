@@ -1,11 +1,13 @@
 package Programa.DAO;
 
+import Programa.Controller.ControladoraStock;
 import Programa.Model.Conexion;
 import Programa.Model.Descuento;
 import Programa.Model.Pedido;
 import Programa.Model.Item;
 import Programa.Model.Mesa;
 import Programa.Model.Producto;
+import Programa.Model.Stock;
 import java.sql.Statement;
 import java.sql.Timestamp;
 import java.sql.Connection;
@@ -239,6 +241,27 @@ public class DAOPedido {
         }
     }
     
+   public void devolverProductosAlStock(int pedidoId) throws SQLException {
+    List<Item> items = obtenerItemsPorPedido(pedidoId);
+        DAOStock daoStock = new DAOStock();
+
+        for (Item item : items) {
+            Producto producto = item.getProducto();
+            if (!producto.isElaboracion()) {
+                Stock stock = daoStock.obtenerStockPorProducto(producto.getId());
+                if (stock != null) {
+                    int nuevaCantidad = stock.getCantidad() + item.getCantidad();
+                    stock.setCantidad(nuevaCantidad);
+                    daoStock.actualizarStock(stock);      
+                } else {
+                    Stock nuevoStock = new Stock(0, item.getCantidad(), producto);
+                    daoStock.insertarStock(nuevoStock);
+                }
+            }
+        }
+    }
+
+
     public void cerrarConexion() {
         try {
             if (conexion != null && !conexion.isClosed()) {

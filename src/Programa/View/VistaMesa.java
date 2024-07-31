@@ -260,7 +260,7 @@ public class VistaMesa extends javax.swing.JPanel {
     }//GEN-LAST:event_btnEliminarMesaActionPerformed
 
     private void btnEliminarPedidoDeMesaActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnEliminarPedidoDeMesaActionPerformed
- int indiceSeleccionado = ListMesa.getSelectedIndex();
+     int indiceSeleccionado = ListMesa.getSelectedIndex();
     if (indiceSeleccionado >= 0) {
         String nombreMesa = (String) ListMesa.getModel().getElementAt(indiceSeleccionado);
 
@@ -268,10 +268,10 @@ public class VistaMesa extends javax.swing.JPanel {
             Mesa mesa = controladoraMesa.obtenerMesaPorNombre(nombreMesa);
            
             if (mesa != null) {
-                // Verify if the mesa has an active order
                 Pedido pedidoActivo = controladoraMesa.obtenerPedidoActivo(mesa.getId());
                 if (pedidoActivo != null) {
                     controladoraMesa.eliminarPedidoDeMesa(mesa, pedidoActivo);
+
                     JOptionPane.showMessageDialog(this, "Pedido de la mesa eliminado correctamente.");
                 } else {
                     JOptionPane.showMessageDialog(this, "La mesa no tiene un pedido activo.", "Advertencia", JOptionPane.WARNING_MESSAGE);

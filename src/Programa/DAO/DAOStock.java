@@ -29,7 +29,7 @@ public class DAOStock {
                 }
             }
         } catch (SQLException e) {
-            e.printStackTrace(); // Considerar una mejor gestión de errores aquí
+            e.printStackTrace(); 
         }
         return stock;
     }
@@ -41,9 +41,27 @@ public class DAOStock {
              PreparedStatement ps = con.prepareStatement(sql)) {
             ps.setInt(1, stock.getCantidad());
             ps.setInt(2, stock.getProducto().getId());
+            int rowsAffected = ps.executeUpdate();
+
+            if (rowsAffected == 0) {
+                throw new SQLException("No se actualizó ningún registro de stock.");
+            }
+        } catch (SQLException e) {
+            e.printStackTrace(); 
+        }
+    }
+
+
+   public void insertarStock(Stock stock) {
+        String sql = "INSERT INTO stock (cantidad, id_producto) VALUES (?, ?)";
+
+        try (Connection con = Conexion.Conectar();
+             PreparedStatement ps = con.prepareStatement(sql)) {
+            ps.setInt(1, stock.getCantidad());
+            ps.setInt(2, stock.getProducto().getId());
             ps.executeUpdate();
         } catch (SQLException e) {
-            e.printStackTrace(); // Considerar una mejor gestión de errores aquí
+            e.printStackTrace(); 
         }
     }
 
@@ -57,7 +75,7 @@ public class DAOStock {
             ps.setInt(1, idProducto);
             ps.executeUpdate();
         } catch (SQLException e) {
-            e.printStackTrace(); // Considerar una mejor gestión de errores aquí
+            e.printStackTrace();
         }
     }
 }

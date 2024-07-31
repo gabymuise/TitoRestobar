@@ -51,15 +51,15 @@ public class VistaDetallePedido extends javax.swing.JPanel {
         }
     }
     
-    private void cargarDatosTablaPedidosActivos() {
+   private void cargarDatosTablaPedidosActivos() {
         DefaultTableModel modelo = (DefaultTableModel) jTablePedidosActivos.getModel();
         modelo.setRowCount(0); // Limpiar tabla antes de cargar datos
 
         try {
             // Consulta SQL para obtener los pedidos activos con sus detalles
-            String sql = "SELECT m.nombre AS Mesa, p.fechaHoraApertura AS FechaHoraApertura, " +
-                         "prod.nombre AS Producto, i.cantidad AS Cantidad, p.descuento AS Descuento, " +
-                         "ROUND(p.total, 2) AS Total, p.id AS idPedido " + // Nota: Agregamos el id aquí
+            String sql = "SELECT m.nombre AS Mesa, " +
+                         "prod.nombre AS Producto, i.cantidad AS Cantidad, " +
+                         "p.id AS idPedido " +
                          "FROM pedidos p " +
                          "JOIN mesas m ON p.idMesa = m.id " +
                          "JOIN items i ON p.id = i.idPedido " +
@@ -73,14 +73,11 @@ public class VistaDetallePedido extends javax.swing.JPanel {
             // Itera a través de los resultados y agrega cada registro a la tabla
             while (resultSet.next()) {
                 String nombreMesa = resultSet.getString("Mesa");
-                Timestamp fechaHoraApertura = resultSet.getTimestamp("FechaHoraApertura");
                 String producto = resultSet.getString("Producto");
                 int cantidad = resultSet.getInt("Cantidad");
-                float descuento = resultSet.getFloat("Descuento");
-                float total = resultSet.getFloat("Total");
                 int id = resultSet.getInt("idPedido");
 
-                modelo.addRow(new Object[]{nombreMesa, fechaHoraApertura, producto, cantidad, descuento, total, id});
+                modelo.addRow(new Object[]{nombreMesa, producto, cantidad, id});
             }
         } catch (SQLException e) {
             e.printStackTrace();
@@ -88,7 +85,6 @@ public class VistaDetallePedido extends javax.swing.JPanel {
                     e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
         }
     }
-
 
     private void cargarDatosTablaPedidosCerrados() {
         DefaultTableModel modelo = (DefaultTableModel) jTableDetallePedido.getModel();
@@ -188,17 +184,17 @@ public class VistaDetallePedido extends javax.swing.JPanel {
 
         jTablePedidosActivos.setModel(new javax.swing.table.DefaultTableModel(
             new Object [][] {
-                {null, null, null, null, null, null, null},
-                {null, null, null, null, null, null, null},
-                {null, null, null, null, null, null, null},
-                {null, null, null, null, null, null, null}
+                {null, null, null, null},
+                {null, null, null, null},
+                {null, null, null, null},
+                {null, null, null, null}
             },
             new String [] {
-                "Mesa", "FechaHoraA", "Producto", "Cantidad", "Descuento", "Total", "idPedido"
+                "Mesa", "Producto", "Cantidad", "idPedido"
             }
         ) {
             boolean[] canEdit = new boolean [] {
-                false, false, false, false, false, false, false
+                false, false, false, false
             };
 
             public boolean isCellEditable(int rowIndex, int columnIndex) {
@@ -211,9 +207,6 @@ public class VistaDetallePedido extends javax.swing.JPanel {
             jTablePedidosActivos.getColumnModel().getColumn(1).setResizable(false);
             jTablePedidosActivos.getColumnModel().getColumn(2).setResizable(false);
             jTablePedidosActivos.getColumnModel().getColumn(3).setResizable(false);
-            jTablePedidosActivos.getColumnModel().getColumn(4).setResizable(false);
-            jTablePedidosActivos.getColumnModel().getColumn(5).setResizable(false);
-            jTablePedidosActivos.getColumnModel().getColumn(6).setResizable(false);
         }
 
         lblPedidosCerrados.setText("PEDIDOS CERRADOS");

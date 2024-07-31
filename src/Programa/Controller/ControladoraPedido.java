@@ -44,6 +44,10 @@ public class ControladoraPedido {
     public void eliminarItemsPorPedido(int pedidoId) throws SQLException {
         daoPedido.eliminarItemsPorPedido(pedidoId);
     }
+    
+    public void devolverProductosAlStock(int pedidoId) throws SQLException{
+        daoPedido.devolverProductosAlStock(pedidoId);
+    }
 
     // Método para obtener una mesa por su ID
     public Mesa obtenerMesaPorId(int idMesa) throws SQLException {
