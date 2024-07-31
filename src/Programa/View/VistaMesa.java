@@ -232,20 +232,34 @@ public class VistaMesa extends javax.swing.JPanel {
     }//GEN-LAST:event_btnCrearMesaActionPerformed
 
     private void btnEliminarMesaActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnEliminarMesaActionPerformed
-    int indiceSeleccionado = ListMesa.getSelectedIndex();
+     int indiceSeleccionado = ListMesa.getSelectedIndex();
     if (indiceSeleccionado >= 0) {
         String nombreMesa = (String) ListMesa.getModel().getElementAt(indiceSeleccionado);
 
         try {
             Mesa mesa = controladoraMesa.obtenerMesaPorNombre(nombreMesa);
             if (mesa != null) {
-                // Verify if the mesa has an active order
+                // Verificar si la mesa tiene pedidos activos
                 if (controladoraMesa.tienePedidosActivos(mesa)) {
+                    // Mostrar mensaje de advertencia si hay pedidos activos
                     JOptionPane.showMessageDialog(this, "La mesa tiene un pedido activo. No se puede eliminar.", "Error", JOptionPane.WARNING_MESSAGE);
                 } else {
-                    controladoraMesa.eliminarMesa(mesa.getId());
-                    cargarListaMesa(); // Update the list of tables
-                    JOptionPane.showMessageDialog(this, "Mesa eliminada correctamente.");
+                    // Mostrar mensaje de advertencia si hay pedidos cerrados
+                    int confirm = JOptionPane.showConfirmDialog(this,
+                            "La mesa tiene pedidos cerrados. ¿Estás seguro de que deseas eliminarla?",
+                            "Confirmar Eliminación",
+                            JOptionPane.YES_NO_OPTION,
+                            JOptionPane.WARNING_MESSAGE);
+
+                    if (confirm == JOptionPane.YES_OPTION) {
+                        // La mesa tiene pedidos cerrados y el usuario confirma la eliminación
+                        controladoraMesa.eliminarMesa(mesa.getId());
+                        cargarListaMesa(); // Actualizar la lista de mesas
+                        JOptionPane.showMessageDialog(this, "Mesa eliminada correctamente.");
+                    } else {
+                        // El usuario cancela la eliminación
+                        JOptionPane.showMessageDialog(this, "La eliminación de la mesa ha sido cancelada.", "Cancelado", JOptionPane.INFORMATION_MESSAGE);
+                    }
                 }
             } else {
                 JOptionPane.showMessageDialog(this, "No se pudo encontrar la mesa para eliminarla.", "Error", JOptionPane.ERROR_MESSAGE);
