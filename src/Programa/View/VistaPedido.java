@@ -111,15 +111,6 @@ public class VistaPedido extends javax.swing.JPanel {
         jLabelTotal.setText("Total: $0.00");
     }
 
-    private double obtenerPrecioProducto(String productoNombre) {
-        for (Producto producto : productosDisponibles) {
-            if (producto.getNombre().equals(productoNombre)) {
-                return producto.getPrecio();
-            }
-        }
-        return 0.0;
-    }
-
     private void cargarDatosTabla() {
      try {
          DefaultTableModel modelo = (DefaultTableModel) jTablePedidos.getModel();
@@ -141,8 +132,8 @@ public class VistaPedido extends javax.swing.JPanel {
                  pedido.getId(),
                  pedido.getMesa().getNombre(),
                  pedido.getFechaHoraApertura(),
-                 pedido.getSubtotal(), // Verifica que estos valores son correctos
-                 pedido.getTotal(),    // Verifica que estos valores son correctos
+                 pedido.getSubtotal(), 
+                 pedido.getTotal(),    
                  descuento
              };
              modelo.addRow(fila);
@@ -152,32 +143,6 @@ public class VistaPedido extends javax.swing.JPanel {
          JOptionPane.showMessageDialog(this, "Error al obtener los pedidos: " + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
      }
  }
-
-
-    private List<Item> obtenerItemsDelPedido(int idPedido) throws SQLException {
-        List<Item> items = new ArrayList<>();
-        String query = "SELECT * FROM items WHERE idPedido = ?";
-
-        try (PreparedStatement stmt = conexion.prepareStatement(query)) {
-            stmt.setInt(1, idPedido);
-
-            try (ResultSet rs = stmt.executeQuery()) {
-                while (rs.next()) {
-                    int idProducto = rs.getInt("idProducto");
-                    int cantidad = rs.getInt("cantidad");
-
-                    Producto producto = controladoraProducto.obtenerProductoPorId(idProducto);
-
-                    // Crea un nuevo Item sin subtotal
-                    Item item = new Item(producto, cantidad);
-
-                    // Agrega el Item a la lista
-                    items.add(item);
-                }
-            }
-        }
-        return items;
-    }
     
     private Producto obtenerProductoPorNombre(String nombreProducto) {
     for (Producto producto : productosDisponibles) {
@@ -202,6 +167,8 @@ public class VistaPedido extends javax.swing.JPanel {
         jLabelCantidad = new javax.swing.JLabel();
         txtCantidad = new javax.swing.JTextField();
         jButtonAgregarProducto = new javax.swing.JButton();
+        btnModificarItem = new javax.swing.JButton();
+        btnEliminarItem = new javax.swing.JButton();
         jLabelTotal = new javax.swing.JLabel();
         jScrollPane2 = new javax.swing.JScrollPane();
         jTablePedidos = new javax.swing.JTable();
@@ -263,10 +230,24 @@ public class VistaPedido extends javax.swing.JPanel {
 
         jLabelCantidad.setText("Cantidad:");
 
-        jButtonAgregarProducto.setText("Agregar producto");
+        jButtonAgregarProducto.setText("Agregar Producto");
         jButtonAgregarProducto.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 jButtonAgregarProductoActionPerformed(evt);
+            }
+        });
+
+        btnModificarItem.setText("Modificar Item");
+        btnModificarItem.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnModificarItemActionPerformed(evt);
+            }
+        });
+
+        btnEliminarItem.setText("Eliminar Item");
+        btnEliminarItem.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnEliminarItemActionPerformed(evt);
             }
         });
 
@@ -293,10 +274,14 @@ public class VistaPedido extends javax.swing.JPanel {
                         .addGap(20, 20, 20)
                         .addComponent(txtCantidad, javax.swing.GroupLayout.PREFERRED_SIZE, 91, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addGap(0, 0, Short.MAX_VALUE))))
-            .addGroup(jPanel1Layout.createSequentialGroup()
-                .addGap(53, 53, 53)
-                .addComponent(jButtonAgregarProducto)
-                .addGap(0, 0, Short.MAX_VALUE))
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel1Layout.createSequentialGroup()
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                    .addComponent(jButtonAgregarProducto, javax.swing.GroupLayout.DEFAULT_SIZE, 133, Short.MAX_VALUE)
+                    .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                        .addComponent(btnModificarItem, javax.swing.GroupLayout.DEFAULT_SIZE, 133, Short.MAX_VALUE)
+                        .addComponent(btnEliminarItem, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
+                .addContainerGap())
         );
         jPanel1Layout.setVerticalGroup(
             jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -315,7 +300,11 @@ public class VistaPedido extends javax.swing.JPanel {
                     .addComponent(txtCantidad, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addGap(40, 40, 40)
                 .addComponent(jButtonAgregarProducto)
-                .addContainerGap(249, Short.MAX_VALUE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addComponent(btnModificarItem)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addComponent(btnEliminarItem)
+                .addContainerGap(179, Short.MAX_VALUE))
         );
 
         jTablePedidos.setModel(new javax.swing.table.DefaultTableModel(
@@ -372,52 +361,71 @@ public class VistaPedido extends javax.swing.JPanel {
 
     private void jButtonAgregarProductoActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonAgregarProductoActionPerformed
         String nombreProducto = (String) jComboBoxProducto.getSelectedItem();
-    if (nombreProducto == null || nombreProducto.isEmpty()) {
-        JOptionPane.showMessageDialog(this, "Por favor, seleccione un producto.", "Error", JOptionPane.ERROR_MESSAGE);
-        return;
-    }
-    
-    int cantidad;
-    try {
-        cantidad = Integer.parseInt(txtCantidad.getText());
-        if (cantidad <= 0) {
-            JOptionPane.showMessageDialog(this, "La cantidad debe ser mayor que 0.", "Error", JOptionPane.ERROR_MESSAGE);
+        if (nombreProducto == null || nombreProducto.isEmpty()) {
+            JOptionPane.showMessageDialog(this, "Por favor, seleccione un producto.", "Error", JOptionPane.ERROR_MESSAGE);
             return;
         }
-    } catch (NumberFormatException e) {
-        JOptionPane.showMessageDialog(this, "Ingrese un número válido para la cantidad.", "Error", JOptionPane.ERROR_MESSAGE);
-        return;
-    }
-    
-    // Verificar stock disponible
-    Producto producto = obtenerProductoPorNombre(nombreProducto);
-    if (producto == null) {
-        JOptionPane.showMessageDialog(this, "El producto seleccionado no es válido.", "Error", JOptionPane.ERROR_MESSAGE);
-        return;
-    }
 
-    DAOStock daoStock = new DAOStock();
-    Stock stock = daoStock.obtenerStockPorProducto(producto.getId());
-    if (stock == null) {
-        JOptionPane.showMessageDialog(this, "No se encontró stock para el producto.", "Error", JOptionPane.ERROR_MESSAGE);
-        return;
-    }
+        int cantidad;
+        try {
+            cantidad = Integer.parseInt(txtCantidad.getText());
+            if (cantidad <= 0) {
+                JOptionPane.showMessageDialog(this, "La cantidad debe ser mayor que 0.", "Error", JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+        } catch (NumberFormatException e) {
+            JOptionPane.showMessageDialog(this, "Ingrese un número válido para la cantidad.", "Error", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
 
-    if (cantidad > stock.getCantidad()) {
-        JOptionPane.showMessageDialog(this, "No hay suficiente stock disponible. Solo hay " + stock.getCantidad() + " unidades en stock.", "Error", JOptionPane.ERROR_MESSAGE);
-        return;
-    }
+        // Verificar el producto
+        Producto producto = obtenerProductoPorNombre(nombreProducto);
+        if (producto == null) {
+            JOptionPane.showMessageDialog(this, "El producto seleccionado no es válido.", "Error", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
 
-    double precio = producto.getPrecio(); // Asumo que obtienes el precio del producto directamente
-    DefaultTableModel modelo = (DefaultTableModel) jTable1.getModel();
-    modelo.addRow(new Object[]{nombreProducto, cantidad, precio * cantidad});
-    
-    txtCantidad.setText(""); // Limpiar txtCantidad después de agregar el producto
-    actualizarTotal();
+        if (producto.isElaboracion()) {
+            // Si el producto es elaborado, no se verifica el stock
+            double precio = producto.getPrecio(); // Asumo que obtienes el precio del producto directamente
+            DefaultTableModel modelo = (DefaultTableModel) jTable1.getModel();
+            modelo.addRow(new Object[]{nombreProducto, cantidad, precio * cantidad});
+
+            txtCantidad.setText(""); // Limpiar txtCantidad después de agregar el producto
+            actualizarTotal();
+            return; // Termina el método si el producto es elaborado
+        }
+
+        // Verificar stock disponible solo si el producto no es elaborado
+        DAOStock daoStock = new DAOStock();
+        Stock stock = daoStock.obtenerStockPorProducto(producto.getId());
+        if (stock == null) {
+            JOptionPane.showMessageDialog(this, "No se encontró stock para el producto.", "Error", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+
+        if (cantidad > stock.getCantidad()) {
+            JOptionPane.showMessageDialog(this, "No hay suficiente stock disponible. Solo hay " + stock.getCantidad() + " unidades en stock.", "Error", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+
+        double precio = producto.getPrecio(); // Asumo que obtienes el precio del producto directamente
+        DefaultTableModel modelo = (DefaultTableModel) jTable1.getModel();
+        modelo.addRow(new Object[]{nombreProducto, cantidad, precio * cantidad});
+
+        txtCantidad.setText(""); // Limpiar txtCantidad después de agregar el producto
+        actualizarTotal();
     }//GEN-LAST:event_jButtonAgregarProductoActionPerformed
    
     private void jButtonCrearPedidoActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonCrearPedidoActionPerformed
     try {
+        // Verificar si jTable1 tiene filas
+        DefaultTableModel modelo = (DefaultTableModel) jTable1.getModel();
+        if (modelo.getRowCount() == 0) {
+            JOptionPane.showMessageDialog(this, "Debe agregar productos antes de crear un pedido.", "Error", JOptionPane.ERROR_MESSAGE);
+            return; // Termina la ejecución del método si la tabla está vacía
+        }
+
         // Obtener la mesa seleccionada
         Mesa mesaSeleccionada = (Mesa) jComboBoxMesa.getSelectedItem();
         if (mesaSeleccionada == null) {
@@ -450,7 +458,6 @@ public class VistaPedido extends javax.swing.JPanel {
         nuevoPedido.setMesa(mesaSeleccionada);
         nuevoPedido.setDescuento(new Descuento(porcentajeDescuento));
 
-        DefaultTableModel modelo = (DefaultTableModel) jTable1.getModel();
         for (int i = 0; i < modelo.getRowCount(); i++) {
             String nombreProducto = (String) modelo.getValueAt(i, 0);
             int cantidad = (int) modelo.getValueAt(i, 1);
@@ -488,7 +495,69 @@ public class VistaPedido extends javax.swing.JPanel {
         // TODO add your handling code here:
     }//GEN-LAST:event_jComboBoxProductoActionPerformed
 
+    private void btnModificarItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnModificarItemActionPerformed
+         DefaultTableModel modelo = (DefaultTableModel) jTable1.getModel();
+    int filaSeleccionada = jTable1.getSelectedRow();
+    
+    if (filaSeleccionada == -1) {
+        JOptionPane.showMessageDialog(this, "Por favor, seleccione una fila para modificar.", "Error", JOptionPane.ERROR_MESSAGE);
+        return;
+    }
+    
+    // Obtener los datos actuales
+    String nombreProductoActual = (String) modelo.getValueAt(filaSeleccionada, 0);
+    int cantidadActual = (int) modelo.getValueAt(filaSeleccionada, 1);
+    
+    // Solicitar nuevos valores
+    String nuevoNombreProducto = JOptionPane.showInputDialog(this, "Ingrese el nuevo nombre del producto:", nombreProductoActual);
+    if (nuevoNombreProducto == null || nuevoNombreProducto.isEmpty()) {
+        return; // Salir si no se proporciona un nombre
+    }
+    
+    String nuevaCantidadStr = JOptionPane.showInputDialog(this, "Ingrese la nueva cantidad:", cantidadActual);
+    if (nuevaCantidadStr == null || nuevaCantidadStr.isEmpty()) {
+        return; // Salir si no se proporciona una cantidad
+    }
+    
+    int nuevaCantidad;
+    try {
+        nuevaCantidad = Integer.parseInt(nuevaCantidadStr);
+        if (nuevaCantidad <= 0) {
+            JOptionPane.showMessageDialog(this, "La cantidad debe ser mayor que 0.", "Error", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+    } catch (NumberFormatException e) {
+        JOptionPane.showMessageDialog(this, "Ingrese un número válido para la cantidad.", "Error", JOptionPane.ERROR_MESSAGE);
+        return;
+    }
+    
+    // Actualizar la tabla
+    modelo.setValueAt(nuevoNombreProducto, filaSeleccionada, 0);
+    modelo.setValueAt(nuevaCantidad, filaSeleccionada, 1);
+    modelo.setValueAt(nuevaCantidad * (double) modelo.getValueAt(filaSeleccionada, 2), filaSeleccionada, 2); // Actualizar el total
+    
+    // Limpiar el campo de cantidad después de la modificación
+    txtCantidad.setText(""); // Limpiar txtCantidad
+    }//GEN-LAST:event_btnModificarItemActionPerformed
+
+    private void btnEliminarItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnEliminarItemActionPerformed
+        DefaultTableModel modelo = (DefaultTableModel) jTable1.getModel();
+        int filaSeleccionada = jTable1.getSelectedRow();
+
+        if (filaSeleccionada == -1) {
+            JOptionPane.showMessageDialog(this, "Por favor, seleccione una fila para eliminar.", "Error", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+
+        int confirmacion = JOptionPane.showConfirmDialog(this, "¿Está seguro de que desea eliminar este ítem?", "Confirmación", JOptionPane.YES_NO_OPTION);
+        if (confirmacion == JOptionPane.YES_OPTION) {
+            modelo.removeRow(filaSeleccionada);
+        }
+    }//GEN-LAST:event_btnEliminarItemActionPerformed
+
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JButton btnEliminarItem;
+    private javax.swing.JButton btnModificarItem;
     private javax.swing.JButton jButtonAgregarProducto;
     private javax.swing.JButton jButtonCrearPedido;
     private javax.swing.JComboBox<Mesa> jComboBoxMesa;

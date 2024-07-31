@@ -146,10 +146,16 @@
                       </Group>
                   </Group>
               </Group>
-              <Group type="102" alignment="0" attributes="0">
-                  <EmptySpace min="-2" pref="53" max="-2" attributes="0"/>
-                  <Component id="jButtonAgregarProducto" min="-2" max="-2" attributes="0"/>
-                  <EmptySpace min="0" pref="0" max="32767" attributes="0"/>
+              <Group type="102" alignment="1" attributes="0">
+                  <EmptySpace max="32767" attributes="0"/>
+                  <Group type="103" groupAlignment="0" max="-2" attributes="0">
+                      <Component id="jButtonAgregarProducto" pref="133" max="32767" attributes="0"/>
+                      <Group type="103" groupAlignment="0" max="-2" attributes="0">
+                          <Component id="btnModificarItem" pref="133" max="32767" attributes="0"/>
+                          <Component id="btnEliminarItem" max="32767" attributes="0"/>
+                      </Group>
+                  </Group>
+                  <EmptySpace max="-2" attributes="0"/>
               </Group>
           </Group>
         </DimensionLayout>
@@ -171,7 +177,11 @@
                   </Group>
                   <EmptySpace min="-2" pref="40" max="-2" attributes="0"/>
                   <Component id="jButtonAgregarProducto" min="-2" max="-2" attributes="0"/>
-                  <EmptySpace pref="249" max="32767" attributes="0"/>
+                  <EmptySpace type="unrelated" max="-2" attributes="0"/>
+                  <Component id="btnModificarItem" min="-2" max="-2" attributes="0"/>
+                  <EmptySpace type="unrelated" max="-2" attributes="0"/>
+                  <Component id="btnEliminarItem" min="-2" max="-2" attributes="0"/>
+                  <EmptySpace pref="179" max="32767" attributes="0"/>
               </Group>
           </Group>
         </DimensionLayout>
@@ -228,10 +238,26 @@
         </Component>
         <Component class="javax.swing.JButton" name="jButtonAgregarProducto">
           <Properties>
-            <Property name="text" type="java.lang.String" value="Agregar producto"/>
+            <Property name="text" type="java.lang.String" value="Agregar Producto"/>
           </Properties>
           <Events>
             <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="jButtonAgregarProductoActionPerformed"/>
+          </Events>
+        </Component>
+        <Component class="javax.swing.JButton" name="btnModificarItem">
+          <Properties>
+            <Property name="text" type="java.lang.String" value="Modificar Item"/>
+          </Properties>
+          <Events>
+            <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="btnModificarItemActionPerformed"/>
+          </Events>
+        </Component>
+        <Component class="javax.swing.JButton" name="btnEliminarItem">
+          <Properties>
+            <Property name="text" type="java.lang.String" value="Eliminar Item"/>
+          </Properties>
+          <Events>
+            <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="btnEliminarItemActionPerformed"/>
           </Events>
         </Component>
       </SubComponents>
