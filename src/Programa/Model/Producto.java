@@ -1,14 +1,12 @@
 package Programa.Model;
 
-/**
- * Representa un producto en el sistema.
- */
+
 public class Producto {
     private int id;
     private String nombre;
     private String descripcion;
-    private double precio; // Cambiado a double para mayor precisión
-    private double costo;  // Cambiado a double para mayor precisión
+    private double precio; 
+    private double costo;
     private boolean elaboracion;
 
     // Constructor vacío

@@ -10,7 +10,6 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 
 public class DAOStock {
-    // Obtiene el stock de un producto por su ID
 
     public Stock obtenerStockPorProducto(int idProducto) {
         Stock stock = null;

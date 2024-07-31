@@ -1,6 +1,5 @@
 package Programa.DAO;
 
-import Programa.Controller.ControladoraStock;
 import Programa.Model.Conexion;
 import Programa.Model.Descuento;
 import Programa.Model.Pedido;
@@ -72,7 +71,7 @@ public class DAOPedido {
 
                   return new Pedido(id, mesa, fechaHoraApertura, fechaHoraCierre, null, null);
               } else {
-                  return null; // No hay pedido activo
+                  return null; 
               }
           }
       } catch (SQLException ex) {
@@ -212,7 +211,7 @@ public class DAOPedido {
         try (PreparedStatement stmt = conexion.prepareStatement(query)) {
             stmt.setInt(1, idPedido);
             try (ResultSet rs = stmt.executeQuery()) {
-                return rs.next(); // Retorna true si el pedido existe
+                return rs.next(); 
             }
         } catch (SQLException ex) {
             throw new SQLException("Error al verificar si el pedido existe: " + ex.getMessage(), ex);
@@ -224,13 +223,12 @@ public class DAOPedido {
             throw new IllegalArgumentException("El objeto Pedido no puede ser null.");
         }
 
-        int idPedido = pedido.getId(); // Obtener el ID del objeto Pedido
+        int idPedido = pedido.getId(); 
         String sql = "UPDATE pedidos SET fechaHoraCierre = NOW() WHERE id = ? AND fechaHoraCierre IS NULL";
         try (PreparedStatement stmt = conexion.prepareStatement(sql)) {
-            // Configurar el PreparedStatement
+            
             stmt.setInt(1, idPedido);
 
-            // Ejecutar la actualización
             int rowsAffected = stmt.executeUpdate();
 
             if (rowsAffected == 0) {

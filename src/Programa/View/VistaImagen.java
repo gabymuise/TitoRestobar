@@ -14,17 +14,14 @@ public class VistaImagen extends javax.swing.JPanel {
 
     private void initComponents2() {
         initComponents();
-        // Crear un JLabel para mostrar la imagen
         JLabel imageLabel = new JLabel();
         ImageIcon icon = new ImageIcon(getClass().getResource("/Resources/LogoTito.png"));
         imageLabel.setIcon(icon);
         imageLabel.setHorizontalAlignment(SwingConstants.CENTER);
 
-        // Establecer el diseño del panel
         setLayout(new BorderLayout());
         add(imageLabel, BorderLayout.CENTER);
 
-        // Ajustar el tamaño del panel si es necesario
         setPreferredSize(new Dimension(400, 300));
     }
 

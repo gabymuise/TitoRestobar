@@ -26,10 +26,8 @@ public class VistaStock extends javax.swing.JPanel {
         ResultSet rs = null;
 
         try {
-            // Conectar a la base de datos usando tu clase Conexion
             conn = Conexion.Conectar();
 
-            // Consulta SQL para obtener los datos del stock junto con el nombre del producto
             String sql = "SELECT productos.id, productos.nombre, stock.cantidad " +
                          "FROM stock " +
                          "JOIN productos ON stock.id_producto = productos.id";
@@ -151,7 +149,7 @@ public class VistaStock extends javax.swing.JPanel {
                         pstmt.executeUpdate();
 
                         JOptionPane.showMessageDialog(this, "Cantidad modificada correctamente.", "Modificar Cantidad", JOptionPane.INFORMATION_MESSAGE);
-                        cargarDatosStock(); // Actualizar la tabla después de modificar
+                        cargarDatosStock();
                     }
                 }
             } catch (NumberFormatException e) {

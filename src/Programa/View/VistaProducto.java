@@ -8,7 +8,6 @@ import Programa.Model.Stock;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.sql.Connection;
-import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -37,17 +36,15 @@ public class VistaProducto extends javax.swing.JPanel {
         ResultSet resultSet = null;
 
         try {
-            // Conectar a la base de datos usando tu clase Conexion
             conn = Conexion.Conectar();
             String sql = "SELECT * FROM productos";
             statement = conn.prepareStatement(sql);
             resultSet = statement.executeQuery();
 
             DefaultTableModel model = (DefaultTableModel) tableProductos.getModel();
-            model.setRowCount(0); // Limpiar la tabla antes de cargar nuevos datos
-
+            model.setRowCount(0); 
             while (resultSet.next()) {
-                int id = resultSet.getInt("id"); // Asegúrate de que el nombre de la columna coincida con el de la base de datos
+                int id = resultSet.getInt("id"); 
                 String nombre = resultSet.getString("nombre");
                 String descripcion = resultSet.getString("descripcion");
                 float precio = resultSet.getFloat("precio");
@@ -320,7 +317,7 @@ public class VistaProducto extends javax.swing.JPanel {
             ControladoraProducto controladoraProducto = new ControladoraProducto();
             if (filaSeleccionada >= 0) {
                 try {
-                    String nombreProducto = (String) tableProductos.getValueAt(filaSeleccionada, 1); // Nombre
+                    String nombreProducto = (String) tableProductos.getValueAt(filaSeleccionada, 1);
                     boolean eliminado = controladoraProducto.eliminarProductoPorNombre(nombreProducto);
                     if (eliminado) {
                         DefaultTableModel modelo = (DefaultTableModel) tableProductos.getModel();
@@ -342,12 +339,11 @@ public class VistaProducto extends javax.swing.JPanel {
     private void btnGuardarProductoActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnGuardarProductoActionPerformed
                if (btnGuardarProducto.isEnabled()) {
             try {
-                // Validar que los campos no estén vacíos
                 if (txtNombreProducto.getText().isEmpty() || txtDescripcionProducto.getText().isEmpty() ||
                         txtCostoProducto.getText().isEmpty() || txtPrecioProducto.getText().isEmpty() ||
                         (!chkElaboracion.isSelected() && txtCantidadProducto.getText().isEmpty())) {
                     JOptionPane.showMessageDialog(this, "Por favor, complete todos los campos.", "Error", JOptionPane.ERROR_MESSAGE);
-                    return; // Salir del método si hay campos vacíos
+                    return; 
                 }
 
                 String nombre = txtNombreProducto.getText();
@@ -360,7 +356,6 @@ public class VistaProducto extends javax.swing.JPanel {
                 Producto producto = new Producto(nombre, descripcion, precio, costo, elaboracion);
 
                 controladoraProducto.guardar(producto);
-                // Si el producto no es elaborado, guardarlo en Stock
                 if (!elaboracion) {
                     int cantidad = Integer.parseInt(txtCantidadProducto.getText());
                     Stock stock = new Stock(cantidad, producto);
@@ -396,8 +391,7 @@ public class VistaProducto extends javax.swing.JPanel {
     }//GEN-LAST:event_txtPrecioProductoActionPerformed
 
     private void chkElaboracionActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_chkElaboracionActionPerformed
-// Habilitar o deshabilitar el campo txtCantidadProducto según el estado del checkbox chkElaboracion
-        if (chkElaboracion.isSelected()) {
+       if (chkElaboracion.isSelected()) {
             txtCantidadProducto.setEnabled(false);
         } else {
             txtCantidadProducto.setEnabled(true);
@@ -437,7 +431,7 @@ public class VistaProducto extends javax.swing.JPanel {
                 controladoraProducto.actualizar(producto);
 
                 JOptionPane.showMessageDialog(this, "Producto actualizado correctamente.");
-                cargarProductos(); // Vuelve a cargar los productos en la tabla
+                cargarProductos(); 
             } catch (NumberFormatException e) {
                 JOptionPane.showMessageDialog(this, "Precio o costo deben ser números válidos.", "Error", JOptionPane.ERROR_MESSAGE);
             } catch (Exception e) {

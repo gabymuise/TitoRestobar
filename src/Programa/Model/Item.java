@@ -1,8 +1,5 @@
 package Programa.Model;
 
-/**
- * Representa un artículo en un pedido, que incluye un producto, cantidad y subtotal.
- */
 public class Item {
     private int id;
     private Producto producto;

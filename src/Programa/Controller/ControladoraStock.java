@@ -2,7 +2,6 @@ package Programa.Controller;
 
 import Programa.DAO.DAOStock;
 import Programa.Model.Stock;
-import Programa.Model.Producto;
 
 import java.sql.SQLException;
 

@@ -4,7 +4,6 @@ import Programa.Model.Conexion;
 import Programa.Model.Mesa;
 import Programa.Model.Pedido;
 import java.sql.Timestamp;
-import Programa.Model.Producto;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -20,7 +19,7 @@ public class DAOMesa {
         try {
             conexion = Conexion.Conectar();
         } catch (SQLException e) {
-            e.printStackTrace(); // Considerar una mejor gestión de errores aquí
+            e.printStackTrace();
         }
     }
 
@@ -116,7 +115,6 @@ public class DAOMesa {
                 if (rs.next()) {
                     int idPedido = rs.getInt("id");
                     Timestamp fechaHoraApertura = rs.getTimestamp("fechaHoraApertura");
-                    // Asegúrate de que los constructores se ajusten a estos parámetros
                     pedido = new Pedido(idPedido, obtenerMesaPorId(idMesa), fechaHoraApertura, null, null, null);
                 }
             }

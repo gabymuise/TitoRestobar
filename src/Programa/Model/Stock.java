@@ -1,8 +1,6 @@
 package Programa.Model;
 
-/**
- * Representa el stock de un producto en el sistema.
- */
+
 public class Stock {
     private int id;
     private int cantidad;

@@ -41,10 +41,12 @@ public class ControladoraPedido {
         daoPedido.eliminarPedido(pedido);
     }
     
+    //Método para eliminar items
     public void eliminarItemsPorPedido(int pedidoId) throws SQLException {
         daoPedido.eliminarItemsPorPedido(pedidoId);
     }
     
+    //Método para devolver un producto
     public void devolverProductosAlStock(int pedidoId) throws SQLException{
         daoPedido.devolverProductosAlStock(pedidoId);
     }
@@ -56,7 +58,7 @@ public class ControladoraPedido {
     public Pedido verPedidoActivoDeMesa(Mesa mesa) throws SQLException{
         return daoPedido.verPedidoActivoDeMesa(mesa);
     }
-
+    //Método para cerrar un pedido
     public void cerrarPedido(Pedido pedido) throws SQLException{
         daoPedido.cerrarPedido(pedido);
     }

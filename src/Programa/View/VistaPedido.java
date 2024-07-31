@@ -120,12 +120,10 @@ public class VistaPedido extends javax.swing.JPanel {
          List<Pedido> pedidos = controladoraPedido.obtenerTodosLosPedidosActivos();
 
          for (Pedido pedido : pedidos) {
-             // Asegúrate de que los items se están obteniendo correctamente
              List<Item> items = controladoraPedido.obtenerItemsPorPedido(pedido.getId());
              pedido.setItems(items);
 
-             // Verificar que se calculan bien los subtotales y totales
-             pedido.calcularSubtotalYTotal(); // Esto asegura que los valores están actualizados
+             pedido.calcularSubtotalYTotal(); 
 
              double descuento = pedido.getDescuento() != null ? pedido.getDescuento().getPorcentaje() : 0;
 
@@ -279,9 +277,8 @@ public class VistaPedido extends javax.swing.JPanel {
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
                     .addComponent(jButtonAgregarProducto, javax.swing.GroupLayout.DEFAULT_SIZE, 133, Short.MAX_VALUE)
-                    .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                        .addComponent(btnModificarItem, javax.swing.GroupLayout.DEFAULT_SIZE, 133, Short.MAX_VALUE)
-                        .addComponent(btnEliminarItem, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
+                    .addComponent(btnModificarItem, javax.swing.GroupLayout.DEFAULT_SIZE, 133, Short.MAX_VALUE)
+                    .addComponent(btnEliminarItem, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addContainerGap())
         );
         jPanel1Layout.setVerticalGroup(
@@ -379,7 +376,6 @@ public class VistaPedido extends javax.swing.JPanel {
             return;
         }
 
-        // Verificar el producto
         Producto producto = obtenerProductoPorNombre(nombreProducto);
         if (producto == null) {
             JOptionPane.showMessageDialog(this, "El producto seleccionado no es válido.", "Error", JOptionPane.ERROR_MESSAGE);
@@ -387,17 +383,15 @@ public class VistaPedido extends javax.swing.JPanel {
         }
 
         if (producto.isElaboracion()) {
-            // Si el producto es elaborado, no se verifica el stock
-            double precio = producto.getPrecio(); // Asumo que obtienes el precio del producto directamente
+            double precio = producto.getPrecio(); 
             DefaultTableModel modelo = (DefaultTableModel) jTable1.getModel();
             modelo.addRow(new Object[]{nombreProducto, cantidad, precio * cantidad});
 
-            txtCantidad.setText(""); // Limpiar txtCantidad después de agregar el producto
+            txtCantidad.setText(""); 
             actualizarTotal();
-            return; // Termina el método si el producto es elaborado
+            return; 
         }
 
-        // Verificar stock disponible solo si el producto no es elaborado
         DAOStock daoStock = new DAOStock();
         Stock stock = daoStock.obtenerStockPorProducto(producto.getId());
         if (stock == null) {
@@ -410,11 +404,11 @@ public class VistaPedido extends javax.swing.JPanel {
             return;
         }
 
-        double precio = producto.getPrecio(); // Asumo que obtienes el precio del producto directamente
+        double precio = producto.getPrecio(); 
         DefaultTableModel modelo = (DefaultTableModel) jTable1.getModel();
         modelo.addRow(new Object[]{nombreProducto, cantidad, precio * cantidad});
 
-        txtCantidad.setText(""); // Limpiar txtCantidad después de agregar el producto
+        txtCantidad.setText("");
         actualizarTotal();
     }//GEN-LAST:event_jButtonAgregarProductoActionPerformed
    
@@ -427,14 +421,12 @@ public class VistaPedido extends javax.swing.JPanel {
             return; 
         }
 
-        // Obtener la mesa seleccionada
         Mesa mesaSeleccionada = (Mesa) jComboBoxMesa.getSelectedItem();
         if (mesaSeleccionada == null) {
             JOptionPane.showMessageDialog(this, "Por favor, seleccione una mesa.", "Error", JOptionPane.ERROR_MESSAGE);
             return;
         }
 
-        // Verificar si la mesa ya tiene un pedido activo
         DAOPedido daoPedido = new DAOPedido();
         Pedido pedidoActivo = daoPedido.verPedidoActivoDeMesa(mesaSeleccionada);
         if (pedidoActivo != null) {
@@ -442,7 +434,6 @@ public class VistaPedido extends javax.swing.JPanel {
             return;
         }
 
-        // Preguntar si se desea aplicar un descuento
         int aplicarDescuento = JOptionPane.showConfirmDialog(this, "¿Desea aplicar un descuento?", "Descuento", JOptionPane.YES_NO_OPTION);
         float porcentajeDescuento = 0;
         if (aplicarDescuento == JOptionPane.YES_OPTION) {
@@ -450,19 +441,17 @@ public class VistaPedido extends javax.swing.JPanel {
             if (input != null && !input.isEmpty()) {
                 try {
                     porcentajeDescuento = Float.parseFloat(input);
-                    // Validar que el descuento esté en el rango de 0 a 99
                     if (porcentajeDescuento < 0 || porcentajeDescuento >= 100) {
                         JOptionPane.showMessageDialog(this, "El porcentaje de descuento debe estar entre 0 y 99.", "Error", JOptionPane.ERROR_MESSAGE);
                         return;
                     }
                 } catch (NumberFormatException e) {
                     JOptionPane.showMessageDialog(this, "Porcentaje de descuento no válido. Se aplicará 0% de descuento.", "Error", JOptionPane.ERROR_MESSAGE);
-                    porcentajeDescuento = 0; // Aplicar 0% de descuento en caso de error
+                    porcentajeDescuento = 0; 
                 }
             }
         }
 
-        // Crear el pedido
         Pedido nuevoPedido = new Pedido();
         nuevoPedido.setMesa(mesaSeleccionada);
         nuevoPedido.setDescuento(new Descuento(porcentajeDescuento));
@@ -473,8 +462,7 @@ public class VistaPedido extends javax.swing.JPanel {
             Producto producto = obtenerProductoPorNombre(nombreProducto);
             if (producto != null) {
                 Item item = new Item(producto, cantidad);
-                nuevoPedido.addItem(item); // addItem, agrega item
-                // Actualizar el stock
+                nuevoPedido.addItem(item); 
                 DAOStock daoStock = new DAOStock();
                 Stock stock = daoStock.obtenerStockPorProducto(producto.getId());
                 if (stock != null) {
@@ -505,28 +493,43 @@ public class VistaPedido extends javax.swing.JPanel {
     }//GEN-LAST:event_jComboBoxProductoActionPerformed
 
     private void btnModificarItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnModificarItemActionPerformed
-        DefaultTableModel modelo = (DefaultTableModel) jTable1.getModel();
-        int filaSeleccionada = jTable1.getSelectedRow();
+      DefaultTableModel modelo = (DefaultTableModel) jTable1.getModel();
+    int filaSeleccionada = jTable1.getSelectedRow();
 
-        if (filaSeleccionada == -1) {
-            JOptionPane.showMessageDialog(this, "Por favor, seleccione una fila para modificar.", "Error", JOptionPane.ERROR_MESSAGE);
+    if (filaSeleccionada == -1) {
+        JOptionPane.showMessageDialog(this, "Por favor, seleccione una fila para modificar.", "Error", JOptionPane.ERROR_MESSAGE);
+        return;
+    }
+
+    String nombreProductoActual = (String) modelo.getValueAt(filaSeleccionada, 0);
+    int cantidadActual = (int) modelo.getValueAt(filaSeleccionada, 1);
+    double precioActual = (double) modelo.getValueAt(filaSeleccionada, 2) / cantidadActual; // Calcular el precio por unidad actual
+
+    JComboBox<String> comboBoxProducto = new JComboBox<>();
+    for (Producto producto : productosDisponibles) {
+        comboBoxProducto.addItem(producto.getNombre());
+    }
+
+    comboBoxProducto.setSelectedItem(nombreProductoActual);
+
+    JPanel panel = new JPanel();
+    panel.add(new JLabel("Seleccione el nuevo producto:"));
+    panel.add(comboBoxProducto);
+    JTextField txtCantidad = new JTextField(5);
+    txtCantidad.setText(String.valueOf(cantidadActual));
+    panel.add(new JLabel("Ingrese la nueva cantidad:"));
+    panel.add(txtCantidad);
+
+    int result = JOptionPane.showConfirmDialog(this, panel, "Modificar Item", JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE);
+    if (result == JOptionPane.OK_OPTION) {
+        String nuevoNombreProducto = (String) comboBoxProducto.getSelectedItem();
+        if (nuevoNombreProducto == null || nuevoNombreProducto.isEmpty()) {
             return;
         }
 
-        // Obtener los datos actuales
-        String nombreProductoActual = (String) modelo.getValueAt(filaSeleccionada, 0);
-        int cantidadActual = (int) modelo.getValueAt(filaSeleccionada, 1);
-        double precioActual = (double) modelo.getValueAt(filaSeleccionada, 2) / cantidadActual; // Calcular el precio por unidad actual
-
-        // Solicitar nuevos valores
-        String nuevoNombreProducto = JOptionPane.showInputDialog(this, "Ingrese el nuevo nombre del producto:", nombreProductoActual);
-        if (nuevoNombreProducto == null || nuevoNombreProducto.isEmpty()) {
-            return; // Salir si no se proporciona un nombre
-        }
-
-        String nuevaCantidadStr = JOptionPane.showInputDialog(this, "Ingrese la nueva cantidad:", cantidadActual);
+        String nuevaCantidadStr = txtCantidad.getText();
         if (nuevaCantidadStr == null || nuevaCantidadStr.isEmpty()) {
-            return; // Salir si no se proporciona una cantidad
+            return; 
         }
 
         int nuevaCantidad;
@@ -541,24 +544,20 @@ public class VistaPedido extends javax.swing.JPanel {
             return;
         }
 
-        // Obtener el nuevo producto
         Producto nuevoProducto = obtenerProductoPorNombre(nuevoNombreProducto);
         if (nuevoProducto == null) {
             JOptionPane.showMessageDialog(this, "El producto seleccionado no es válido.", "Error", JOptionPane.ERROR_MESSAGE);
             return;
         }
 
-        // Calcular el nuevo precio por unidad y el nuevo total
         double nuevoPrecioPorUnidad = nuevoProducto.getPrecio();
         double nuevoTotal = nuevaCantidad * nuevoPrecioPorUnidad;
 
         // Actualizar la tabla
         modelo.setValueAt(nuevoNombreProducto, filaSeleccionada, 0);
         modelo.setValueAt(nuevaCantidad, filaSeleccionada, 1);
-        modelo.setValueAt(nuevoTotal, filaSeleccionada, 2); // Actualizar el total
-
-        // Limpiar el campo de cantidad después de la modificación
-        txtCantidad.setText(""); // Limpiar txtCantidad
+        modelo.setValueAt(nuevoTotal, filaSeleccionada, 2); 
+    }
     }//GEN-LAST:event_btnModificarItemActionPerformed
 
     private void btnEliminarItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnEliminarItemActionPerformed

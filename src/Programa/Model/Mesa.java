@@ -1,8 +1,6 @@
 package Programa.Model;
 
-/**
- * Representa una mesa en el sistema.
- */
+
 public class Mesa {
     private int id;
     private String nombre;

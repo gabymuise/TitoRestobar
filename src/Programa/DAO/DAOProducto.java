@@ -19,7 +19,7 @@ public class DAOProducto {
         try {
             conexion = Conexion.Conectar();
         } catch (SQLException e) {
-            e.printStackTrace(); // Considerar una mejor gestión de errores aquí
+            e.printStackTrace();
         }
     }
 
@@ -96,10 +96,8 @@ public class DAOProducto {
                 if (rs.next()) {
                     int idProducto = rs.getInt("id");
 
-                    // Eliminar stock asociado al producto
                     eliminarStockPorIdProducto(idProducto);
 
-                    // Eliminar el producto
                     String deleteProducto = "DELETE FROM productos WHERE id = ?";
                     try (PreparedStatement deleteCommand = conexion.prepareStatement(deleteProducto)) {
                         deleteCommand.setInt(1, idProducto);
@@ -167,7 +165,7 @@ public class DAOProducto {
                 conexion.close();
             }
         } catch (SQLException e) {
-            e.printStackTrace(); // Considerar una mejor gestión de errores aquí
+            e.printStackTrace(); 
         }
     }
 }

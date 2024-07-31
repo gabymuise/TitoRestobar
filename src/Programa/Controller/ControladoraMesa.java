@@ -21,11 +21,13 @@ public class ControladoraMesa {
     public List<Mesa> listarMesas() throws SQLException {
         return daoMesa.listarMesas();
     }
-
+    
+    // Método para decir que la mesa existe
     public boolean existeMesa(String nombre) throws SQLException {
         return daoMesa.obtenerMesaPorNombre(nombre) != null;
     }
-
+    
+     // Método para crear mesa
     public void crearMesa(Mesa mesa) throws SQLException {
         if (existeMesa(mesa.getNombre())) {
             throw new SQLException("La mesa ya existe.");
@@ -35,13 +37,13 @@ public class ControladoraMesa {
 
     // Método para eliminar una mesa por su ID
     public void eliminarMesa(int id) throws SQLException {
-        // Asegurarse de que no hay pedidos activos en la mesa antes de eliminarla
         if (daoMesa.tienePedidosActivos(id)) {
             throw new SQLException("No se puede eliminar la mesa porque tiene pedidos activos.");
         }
         daoMesa.eliminarMesa(id);
     }
     
+    // Método para ver si tiene pedido activo
     public boolean tienePedidosActivos(Mesa mesa) throws SQLException {
         return daoMesa.tienePedidosActivos(mesa.getId());
     }
@@ -61,24 +63,24 @@ public class ControladoraMesa {
         return daoMesa.obtenerMesaPorId(id);
     }
     
+     // Método para devolver producto al stock, eliminar item y eliminar pedido
     public void eliminarPedidoDeMesa(Mesa mesa, Pedido pedido) throws SQLException {
-    ControladoraPedido controladoraPedido = new ControladoraPedido();
+        ControladoraPedido controladoraPedido = new ControladoraPedido();
 
-    try {
+        try {
 
-        controladoraPedido.devolverProductosAlStock(pedido.getId());
-        
-        controladoraPedido.eliminarItemsPorPedido(pedido.getId());
+            controladoraPedido.devolverProductosAlStock(pedido.getId());
 
-        controladoraPedido.eliminarPedido(pedido);
-    } catch (SQLException e) {
-        Logger.getLogger(ControladoraMesa.class.getName()).log(Level.SEVERE, null, e);
-        throw e;
+            controladoraPedido.eliminarItemsPorPedido(pedido.getId());
+
+            controladoraPedido.eliminarPedido(pedido);
+        } catch (SQLException e) {
+            Logger.getLogger(ControladoraMesa.class.getName()).log(Level.SEVERE, null, e);
+            throw e;
+        }
     }
-}
 
-
-    
+     // Método para obtener pedido activo
     public Pedido obtenerPedidoActivo(int idMesa) throws SQLException{
        return daoMesa.obtenerPedidoActivo(idMesa);
     }

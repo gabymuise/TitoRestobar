@@ -23,15 +23,11 @@ public class VistaDetallePedido extends javax.swing.JPanel {
     public VistaDetallePedido() {
         initComponents();
         try {
-            // Establecer conexión a la base de datos
             conexion = Conexion.Conectar();
             
-            // Cargar datos iniciales en la tabla
             cargarDatosTablaPedidosActivos();
             cargarDatosTablaPedidosCerrados();
-            
-            
-            // Inicializar y programar el Timer para actualizaciones periódicas
+
             timer = new Timer(true);
             timer.scheduleAtFixedRate(new TimerTask() {
                 @Override
@@ -39,7 +35,7 @@ public class VistaDetallePedido extends javax.swing.JPanel {
                     SwingUtilities.invokeLater(() -> cargarDatosTablaPedidosActivos());
                     SwingUtilities.invokeLater(()-> cargarDatosTablaPedidosCerrados());
                 }
-            }, 0, 30000); // Actualizar cada 30 segundos
+            }, 0, 30000); 
         } catch (SQLException e) {
             try {
                 JOptionPane.showMessageDialog(this, "Error al conectar a la base de datos: " + 
@@ -53,10 +49,9 @@ public class VistaDetallePedido extends javax.swing.JPanel {
     
    private void cargarDatosTablaPedidosActivos() {
         DefaultTableModel modelo = (DefaultTableModel) jTablePedidosActivos.getModel();
-        modelo.setRowCount(0); // Limpiar tabla antes de cargar datos
+        modelo.setRowCount(0); 
 
         try {
-            // Consulta SQL para obtener los pedidos activos con sus detalles
             String sql = "SELECT m.nombre AS Mesa, " +
                          "prod.nombre AS Producto, i.cantidad AS Cantidad, " +
                          "p.id AS idPedido " +
@@ -66,11 +61,9 @@ public class VistaDetallePedido extends javax.swing.JPanel {
                          "JOIN productos prod ON i.idProducto = prod.id " +
                          "WHERE p.fechaHoraCierre IS NULL";
 
-            // Usar la conexión desde la clase VistaDetallePedido
             PreparedStatement statement = conexion.prepareStatement(sql);
             ResultSet resultSet = statement.executeQuery();
 
-            // Itera a través de los resultados y agrega cada registro a la tabla
             while (resultSet.next()) {
                 String nombreMesa = resultSet.getString("Mesa");
                 String producto = resultSet.getString("Producto");
@@ -88,19 +81,18 @@ public class VistaDetallePedido extends javax.swing.JPanel {
 
     private void cargarDatosTablaPedidosCerrados() {
         DefaultTableModel modelo = (DefaultTableModel) jTableDetallePedido.getModel();
-        modelo.setRowCount(0); // Limpiar tabla antes de cargar datos
-
+        modelo.setRowCount(0); 
         String sql = "SELECT m.nombre AS mesa, p.fechaHoraApertura, p.fechaHoraCierre, " +
                      "prod.nombre AS producto, i.cantidad, p.descuento, p.total, p.id AS idPedido " + 
                      "FROM pedidos p " +
                      "JOIN mesas m ON p.idMesa = m.id " +
                      "JOIN items i ON p.id = i.idPedido " +
                      "JOIN productos prod ON i.idProducto = prod.id " +
-                     "WHERE p.fechaHoraCierre IS NOT NULL"; // Pedidos cerrados
+                     "WHERE p.fechaHoraCierre IS NOT NULL";
 
         DecimalFormat formatoDecimal = new DecimalFormat("#.00");
 
-        try (Connection conn = Conexion.Conectar(); // Usando tu clase de conexión
+        try (Connection conn = Conexion.Conectar();
              PreparedStatement stmt = conn.prepareStatement(sql);
              ResultSet rs = stmt.executeQuery()) {
 
@@ -114,10 +106,8 @@ public class VistaDetallePedido extends javax.swing.JPanel {
                 double total = rs.getDouble("total");
                 int id = rs.getInt("idPedido");
 
-                // Formatear el total a dos decimales
                 String totalFormateado = formatoDecimal.format(total);
 
-                // Añadir una fila a la tabla
                 modelo.addRow(new Object[]{
                     nombreMesa,
                     fechaHoraApertura,
